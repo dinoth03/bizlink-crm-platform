@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink – Sri Lanka's All-in-One CRM Platform</title>
+  <link rel="stylesheet" href="../assets/css/home.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!--NAVBAR-->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Biz<strong>Link</strong></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#crm">What is CRM</a></li>
+      <li><a href="#why-sl">Why Sri Lanka</a></li>
+      <li><a href="#vendors">Vendors</a></li>
+      <li><a href="#customers">Customers</a></li>
+      <li><a href="#roles">Roles</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="index.html" class="btn-ghost">Login</a>
+      <a href="index.html" class="btn-primary">Get Started</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!--HERO SECTION-->
+<section class="hero" id="home">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge animate-in delay-1">
+      <span class="badge-dot"></span>
+      🇱🇰 &nbsp;Designed for Sri Lanka
+    </div>
+    <h1 class="hero-title animate-in delay-2">
+      BizLink<br/>
+      <span class="gradient-text">Sri Lanka's All-in-One</span><br/>
+      CRM & Business<br/>Connection Platform
+    </h1>
+    <p class="hero-sinhala animate-in delay-3">ව්‍යාපාරය ඩිජිටල් කරන්න — එකම තැනකින්</p>
+    <p class="hero-desc animate-in delay-4">
+      BizLink is a web-based CRM platform designed for Sri Lankan businesses to manage customers, sales, vendors, and marketplace interactions in one unified system.
+    </p>
+    <div class="hero-actions animate-in delay-5">
+      <a href="index.html" class="btn-hero-primary">Get Started</a>
+      <a href="index.html" class="btn-hero-secondary">Register as Vendor</a>
+      <a href="index.html" class="btn-hero-outline">Login</a>
+    </div>
+    <div class="hero-stats animate-in delay-6">
+      <div class="stat">
+        <span class="stat-num" data-target="500">0</span><span>+</span>
+        <span class="stat-label">Vendors</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" data-target="12000">0</span><span>+</span>
+        <span class="stat-label">Customers</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" data-target="25">0</span><span>+</span>
+        <span class="stat-label">Industries</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual animate-in delay-3">
+    <!--Dashboard Mockup>
+    <div class="dashboard-mockup">
+      <div class="mock-header">
+        <div class="mock-dots"><span></span><span></span><span></span></div>
+        <div class="mock-title">BizLink Dashboard</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-sidebar">
+          <div class="mock-nav-item active">📊 Dashboard</div>
+          <div class="mock-nav-item">👥 Customers</div>
+          <div class="mock-nav-item">💼 Sales</div>
+          <div class="mock-nav-item">🏪 Marketplace</div>
+          <div class="mock-nav-item">📋 Reports</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-cards-row">
+            <div class="mock-card green">
+              <div class="mock-card-label">Revenue</div>
+              <div class="mock-card-val">Rs. 284K</div>
+              <div class="mock-card-tag">+12%</div>
+            </div>
+            <div class="mock-card navy">
+              <div class="mock-card-label">Customers</div>
+              <div class="mock-card-val">1,284</div>
+              <div class="mock-card-tag">+8%</div>
+            </div>
+            <div class="mock-card orange">
+              <div class="mock-card-label">Orders</div>
+              <div class="mock-card-val">342</div>
+              <div class="mock-card-tag">+5%</div>
+            </div>
+          </div>
+          <div class="mock-chart">
+            <div class="chart-bars">
+              <div class="bar" style="--h:40%"></div>
+              <div class="bar" style="--h:65%"></div>
+              <div class="bar" style="--h:50%"></div>
+              <div class="bar" style="--h:80%"></div>
+              <div class="bar" style="--h:60%"></div>
+              <div class="bar" style="--h:90%"></div>
+              <div class="bar active" style="--h:75%"></div>
+            </div>
+            <div class="chart-label">Monthly Sales Performance</div>
+          </div>
+          <div class="mock-table-mini">
+            <div class="mock-row header"><span>Customer</span><span>Status</span></div>
+            <div class="mock-row"><span>Amara Shops</span><span class="badge-active">Active</span></div>
+            <div class="mock-row"><span>Lanka Textiles</span><span class="badge-pending">Pending</span></div>
+            <div class="mock-row"><span>Tea Export Co.</span><span class="badge-active">Active</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Floating badges -->
+    <div class="float-badge fb-1">
+      <span>✅</span> CRM Active
+    </div>
+    <div class="float-badge fb-2">
+      <span>🔔</span> 3 New Orders
+    </div>
+    <div class="float-badge fb-3">
+      <span>📈</span> Sales +12%
+    </div>
+  </div>
+</section>
+
+<!--WHAT IS CRM-->
+<section class="section crm-section" id="crm">
+  <div class="container">
+    <div class="section-label">EDUCATION</div>
+    <h2 class="section-title">What is <span class="gradient-text">CRM?</span></h2>
+    <p class="section-sub">CRM යනු කුමක්ද?</p>
+    <div class="crm-grid">
+      <div class="crm-text">
+        <p class="crm-definition">
+          <strong>CRM (Customer Relationship Management)</strong> is a system that helps businesses manage customer interactions, track sales, organize leads, and improve business relationships using digital tools.
+        </p>
+        <div class="crm-benefits">
+          <div class="crm-benefit-item" data-delay="0">
+            <div class="crm-icon">📂</div>
+            <div>
+              <strong>Manage Customer Data</strong>
+              <p>Centralized database of all client information</p>
+            </div>
+          </div>
+          <div class="crm-benefit-item" data-delay="100">
+            <div class="crm-icon">📈</div>
+            <div>
+              <strong>Track Sales & Orders</strong>
+              <p>Real-time sales pipeline visibility</p>
+            </div>
+          </div>
+          <div class="crm-benefit-item" data-delay="200">
+            <div class="crm-icon">💬</div>
+            <div>
+              <strong>Improve Communication</strong>
+              <p>Seamless customer & team interaction</p>
+            </div>
+          </div>
+          <div class="crm-benefit-item" data-delay="300">
+            <div class="crm-icon">🔁</div>
+            <div>
+              <strong>Increase Customer Retention</strong>
+              <p>Build long-term loyalty and repeat business</p>
+            </div>
+          </div>
+          <div class="crm-benefit-item" data-delay="400">
+            <div class="crm-icon">🧠</div>
+            <div>
+              <strong>Data-Driven Decisions</strong>
+              <p>Analytics that turn data into growth strategies</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="crm-vs">
+        <div class="vs-card old">
+          <div class="vs-title">❌ Without CRM</div>
+          <div class="vs-subtitle">Sri Lankan SMEs Today</div>
+          <ul>
+            <li>📔 Manual books & ledgers</li>
+            <li>📊 Excel spreadsheets</li>
+            <li>💬 WhatsApp only communication</li>
+            <li>🔍 No proper data tracking</li>
+            <li>😕 Lost customer records</li>
+          </ul>
+        </div>
+        <div class="vs-arrow">VS</div>
+        <div class="vs-card new">
+          <div class="vs-title">✅ With BizLink CRM</div>
+          <div class="vs-subtitle">Modern Business Operations</div>
+          <ul>
+            <li>☁️ Cloud-based data storage</li>
+            <li>📱 Accessible anywhere</li>
+            <li>🤝 Integrated communication</li>
+            <li>📊 Live analytics dashboard</li>
+            <li>🔐 Secure customer records</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--WHY SRI LANKA-->
+<section class="section why-sl-section" id="why-sl">
+  <div class="sl-bg-pattern"></div>
+  <div class="container">
+    <div class="section-label">LOCALIZED</div>
+    <h2 class="section-title">Why Sri Lanka Needs <span class="gradient-text">BizLink</span></h2>
+    <p class="section-sub">ශ්‍රී ලංකාවට BizLink අවශ්‍ය ඇයි?</p>
+
+    <!-- Image Placeholder -->
+    <div class="sl-image-placeholder">
+      <div class="img-placeholder">
+        <div class="img-placeholder-icon">🏙️</div>
+        <div class="img-placeholder-text">Sri Lanka Business Landscape Image</div>
+        <div class="img-placeholder-hint">Replace with your image: <code>src="your-image.jpg"</code></div>
+      </div>
+    </div>
+
+    <div class="problems-solutions">
+      <div class="problems-col">
+        <h3 class="col-title red-title">⚠️ Problems Sri Lankan SMEs Face</h3>
+        <div class="prob-cards">
+          <div class="prob-card">
+            <div class="prob-icon">📉</div>
+            <div class="prob-text">
+              <strong>No Structured CRM</strong>
+              <p>Many small businesses lack proper customer management systems</p>
+            </div>
+          </div>
+          <div class="prob-card">
+            <div class="prob-icon">📁</div>
+            <div class="prob-text">
+              <strong>Poor Record Management</strong>
+              <p>Customer data scattered across books, sheets, and messages</p>
+            </div>
+          </div>
+          <div class="prob-card">
+            <div class="prob-icon">🌐</div>
+            <div class="prob-text">
+              <strong>Limited Digital Presence</strong>
+              <p>Rural areas underserved with minimal digital transformation</p>
+            </div>
+          </div>
+          <div class="prob-card">
+            <div class="prob-icon">📱</div>
+            <div class="prob-text">
+              <strong>Facebook/WhatsApp Dependency</strong>
+              <p>Vendors rely heavily on social media with no proper tracking</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="solutions-col">
+        <h3 class="col-title green-title">✅ How BizLink Solves This</h3>
+        <div class="sol-cards">
+          <div class="sol-card">
+            <div class="sol-icon">🔗</div>
+            <strong>Digitizes SME Operations</strong>
+          </div>
+          <div class="sol-card">
+            <div class="sol-icon">🗃️</div>
+            <strong>Centralizes Customer Data</strong>
+          </div>
+          <div class="sol-card">
+            <div class="sol-icon">🤝</div>
+            <strong>Connects Vendors & Customers</strong>
+          </div>
+          <div class="sol-card">
+            <div class="sol-icon">🌍</div>
+            <strong>Supports Local Industries</strong>
+          </div>
+          <div class="sol-card">
+            <div class="sol-icon">📊</div>
+            <strong>Improves Transparency</strong>
+          </div>
+          <div class="sol-card">
+            <div class="sol-icon">🚀</div>
+            <strong>Drives Digital Transformation</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sl-quote">
+      <blockquote>
+        "BizLink is designed to bridge the digital gap among Sri Lankan SMEs by providing an affordable, easy-to-use CRM platform tailored to local business needs."
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!--VENDORS SECTION-->
+<section class="section vendors-section" id="vendors">
+  <div class="container">
+    <div class="section-label vendor-label">FOR VENDORS</div>
+    <h2 class="section-title">How BizLink Helps <span class="vendor-text">Sri Lankan Vendors</span></h2>
+    <p class="section-sub">විකුණුම්කරුවන් සඳහා</p>
+
+    <div class="vendor-layout">
+      <div class="vendor-features">
+        <div class="vendor-feat" data-delay="0">
+          <div class="feat-icon vendor-icon">👥</div>
+          <div>
+            <strong>Manage Customers in One Place</strong>
+            <p>All customer records centralized and searchable</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="100">
+          <div class="feat-icon vendor-icon">💰</div>
+          <div>
+            <strong>Track Sales & Revenue</strong>
+            <p>Real-time financial tracking and revenue reports</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="200">
+          <div class="feat-icon vendor-icon">🧾</div>
+          <div>
+            <strong>Generate Invoices & Reports</strong>
+            <p>Professional billing and business reporting tools</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="300">
+          <div class="feat-icon vendor-icon">🏪</div>
+          <div>
+            <strong>List Products in Marketplace</strong>
+            <p>Reach more customers through the BizLink marketplace</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="400">
+          <div class="feat-icon vendor-icon">🔔</div>
+          <div>
+            <strong>Track Repeat Customers</strong>
+            <p>Identify loyal customers and reward their loyalty</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="500">
+          <div class="feat-icon vendor-icon">📊</div>
+          <div>
+            <strong>Business Performance Analytics</strong>
+            <p>Insights that drive smarter business decisions</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="600">
+          <div class="feat-icon vendor-icon">📋</div>
+          <div>
+            <strong>Organize Leads & Follow-Ups</strong>
+            <p>Never miss a sales opportunity again</p>
+          </div>
+        </div>
+        <div class="vendor-feat" data-delay="700">
+          <div class="feat-icon vendor-icon">📉</div>
+          <div>
+            <strong>Reduce Manual Paperwork</strong>
+            <p>Go digital and save time & resources</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="vendor-industries">
+        <h3>Industries We Serve</h3>
+        <div class="industry-grid">
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🛒</span>
+              <div class="img-hint">Grocery Image</div>
+            </div>
+            <span>Grocery Stores</span>
+          </div>
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🧵</span>
+              <div class="img-hint">Textile Image</div>
+            </div>
+            <span>Textile Shops</span>
+          </div>
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🍵</span>
+              <div class="img-hint">Tea Export Image</div>
+            </div>
+            <span>Tea Exporters</span>
+          </div>
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🌴</span>
+              <div class="img-hint">Tourism Image</div>
+            </div>
+            <span>Tourism</span>
+          </div>
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🔧</span>
+              <div class="img-hint">Service Image</div>
+            </div>
+            <span>Service Providers</span>
+          </div>
+          <div class="industry-card">
+            <div class="ind-img-placeholder">
+              <span>🌾</span>
+              <div class="img-hint">Agriculture Image</div>
+            </div>
+            <span>Agriculture</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--CUSTOMERS SECTION-->
+<section class="section customers-section" id="customers">
+  <div class="cust-bg"></div>
+  <div class="container">
+    <div class="section-label customer-label">FOR CUSTOMERS</div>
+    <h2 class="section-title">What Customers Gain from <span class="customer-text">BizLink</span></h2>
+    <p class="section-sub">ගනුදෙනුකරුවන් සඳහා</p>
+
+    <div class="customer-benefits-grid">
+      <div class="cust-benefit-card" data-delay="0">
+        <div class="cust-card-top">
+          <div class="cust-icon">🔍</div>
+        </div>
+        <h4>Discover Verified Vendors</h4>
+        <p>Find trusted local businesses easily from one platform</p>
+        <div class="cust-card-glow"></div>
+      </div>
+      <div class="cust-benefit-card" data-delay="100">
+        <div class="cust-card-top">
+          <div class="cust-icon">🛍️</div>
+        </div>
+        <h4>Easy Product Search</h4>
+        <p>Quickly browse products and services across all vendors</p>
+        <div class="cust-card-glow"></div>
+      </div>
+      <div class="cust-benefit-card" data-delay="200">
+        <div class="cust-card-top">
+          <div class="cust-icon">💬</div>
+        </div>
+        <h4>Direct Communication</h4>
+        <p>Chat directly with vendors without third-party platforms</p>
+        <div class="cust-card-glow"></div>
+      </div>
+      <div class="cust-benefit-card" data-delay="300">
+        <div class="cust-card-top">
+          <div class="cust-icon">📦</div>
+        </div>
+        <h4>Order Tracking</h4>
+        <p>Track your orders in real-time from placement to delivery</p>
+        <div class="cust-card-glow"></div>
+      </div>
+      <div class="cust-benefit-card" data-delay="400">
+        <div class="cust-card-top">
+          <div class="cust-icon">💵</div>
+        </div>
+        <h4>Transparent Pricing</h4>
+        <p>Clear, honest pricing with no hidden charges</p>
+        <div class="cust-card-glow"></div>
+      </div>
+      <div class="cust-benefit-card" data-delay="500">
+        <div class="cust-card-top">
+          <div class="cust-icon">⭐</div>
+        </div>
+        <h4>Ratings & Feedback</h4>
+        <p>Make informed decisions through community reviews</p>
+        <div class="cust-card-glow"></div>
+      </div>
+    </div>
+
+    <div class="trust-strip">
+      <div class="trust-item">
+        <span class="trust-icon">🤝</span>
+        <strong>Trust</strong>
+        <p>Verified vendors only</p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">👁️</span>
+        <strong>Transparency</strong>
+        <p>Open pricing & reviews</p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">⚡</span>
+        <strong>Convenience</strong>
+        <p>Shop & connect easily</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--ROLES SECTION-->
+<section class="section roles-section" id="roles">
+  <div class="container">
+    <div class="section-label">PLATFORM ROLES</div>
+    <h2 class="section-title">Built for <span class="gradient-text">Everyone</span></h2>
+    <p class="section-sub">භූමිකා තුනක් — එක් වේදිකාවක්</p>
+
+    <div class="roles-grid">
+      <div class="role-card admin-card">
+        <div class="role-card-header">
+          <div class="role-avatar">👑</div>
+          <div class="role-badge admin-badge">Admin</div>
+        </div>
+        <div class="role-img-placeholder">
+          <span>🖥️</span>
+          <div class="img-hint">Admin Dashboard Image</div>
+        </div>
+        <h3>System Administrator</h3>
+        <p class="role-sinhala">පද්ධති පරිපාලක</p>
+        <ul class="role-perms">
+          <li>✅ Control entire system</li>
+          <li>✅ Monitor all vendors</li>
+          <li>✅ Manage platform reports</li>
+          <li>✅ User access management</li>
+          <li>✅ System configuration</li>
+        </ul>
+        <a href="../admin/panel.html" class="role-cta admin-cta">Admin Portal →</a>
+      </div>
+
+      <div class="role-card vendor-card">
+        <div class="role-card-header">
+          <div class="role-avatar">💼</div>
+          <div class="role-badge vendor-badge">Vendor</div>
+        </div>
+        <div class="role-img-placeholder vendor-img">
+          <span>🏪</span>
+          <div class="img-hint">Vendor Dashboard Image</div>
+        </div>
+        <h3>Business Vendor</h3>
+        <p class="role-sinhala">ව්‍යාපාරිකයා</p>
+        <ul class="role-perms">
+          <li>✅ Manage customers & sales</li>
+          <li>✅ List in marketplace</li>
+          <li>✅ Generate invoices</li>
+          <li>✅ View analytics</li>
+          <li>✅ Handle orders</li>
+        </ul>
+        <a href="vendor/dashboard.html" class="role-cta vendor-cta">Vendor Portal →</a>
+      </div>
+
+      <div class="role-card customer-card">
+        <div class="role-card-header">
+          <div class="role-avatar">🛍️</div>
+          <div class="role-badge customer-badge">Customer</div>
+        </div>
+        <div class="role-img-placeholder customer-img">
+          <span>🤝</span>
+          <div class="img-hint">Customer View Image</div>
+        </div>
+        <h3>Customer</h3>
+        <p class="role-sinhala">ගනුදෙනුකරු</p>
+        <ul class="role-perms">
+          <li>✅ Browse marketplace</li>
+          <li>✅ Place orders easily</li>
+          <li>✅ Track deliveries</li>
+          <li>✅ Rate & review</li>
+          <li>✅ Direct vendor chat</li>
+        </ul>
+        <a href="customer/dashboard.html" class="role-cta customer-cta">Customer Portal →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--WHY BIZLINK FOR SL-->
+<section class="section suitable-section" id="suitable">
+  <div class="container">
+    <div class="section-label">OUR PROMISE</div>
+    <h2 class="section-title">Why BizLink is <span class="gradient-text">Suitable for Sri Lanka</span></h2>
+
+    <div class="suitable-grid">
+      <div class="suitable-left">
+        <div class="suitable-img-placeholder">
+          <span>🏝️</span>
+          <div class="img-hint">Sri Lanka Map / Landscape Image</div>
+        </div>
+        <div class="suitable-quote">
+          <span class="quote-mark">"</span>
+          BizLink is tailored to Sri Lankan business culture, focusing on <strong>simplicity, affordability, and connectivity</strong> across industries.
+          <span class="quote-mark">"</span>
+        </div>
+      </div>
+
+      <div class="suitable-right">
+        <div class="suitable-pill-grid">
+          <div class="s-pill">🏢 SME Focused</div>
+          <div class="s-pill">💡 Simple UI</div>
+          <div class="s-pill">💰 Affordable</div>
+          <div class="s-pill">☁️ Web-Based</div>
+          <div class="s-pill">🌾 Agriculture</div>
+          <div class="s-pill">👗 Apparel</div>
+          <div class="s-pill">🌴 Tourism</div>
+          <div class="s-pill">🛒 Retail</div>
+          <div class="s-pill">💻 IT Services</div>
+          <div class="s-pill">🍵 Tea Export</div>
+          <div class="s-pill">🏘️ Urban & Rural</div>
+          <div class="s-pill">📱 Mobile Ready</div>
+        </div>
+
+        <div class="suitable-features">
+          <div class="sf-item">
+            <div class="sf-icon">🎯</div>
+            <div>
+              <strong>Designed for SMEs</strong>
+              <p>Not just large corporations — every size of business benefits</p>
+            </div>
+          </div>
+          <div class="sf-item">
+            <div class="sf-icon">🌐</div>
+            <div>
+              <strong>Urban & Rural Coverage</strong>
+              <p>Accessible from Colombo to Jaffna and everywhere in between</p>
+            </div>
+          </div>
+          <div class="sf-item">
+            <div class="sf-icon">🔒</div>
+            <div>
+              <strong>Secure & Reliable</strong>
+              <p>Enterprise-grade security for every Sri Lankan business</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--FINAL CTA-->
+<section class="section cta-section" id="cta">
+  <div class="cta-orbs">
+    <div class="cta-orb cta-orb-1"></div>
+    <div class="cta-orb cta-orb-2"></div>
+  </div>
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-flag">🇱🇰</div>
+      <h2 class="cta-title">Start Growing Your Business<br/>with <span class="gradient-text">BizLink</span> Today</h2>
+      <p class="cta-sub">ඔබේ ව්‍යාපාරය අද ඩිජිටල් කරන්න</p>
+      <p class="cta-desc">Join hundreds of Sri Lankan businesses already transforming their operations with BizLink's powerful CRM platform.</p>
+      <div class="cta-buttons">
+        <a href="index.html" class="btn-cta-vendor">💼 Register as Vendor</a>
+        <a href="marketplace.html" class="btn-cta-explore">🛍️ Explore Marketplace</a>
+        <a href="contact.html" class="btn-cta-contact">📞 Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--FOOTER-->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo footer-logo">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">Biz<strong>Link</strong></span>
+        </div>
+        <p>Sri Lanka's All-in-One CRM & Business Connection Platform</p>
+        <p class="footer-sinhala">ශ්‍රී ලංකාවේ ව්‍යාපාර ඩිජිටල් කරන්න</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn">📘 Facebook</a>
+          <a href="#" class="social-btn">📸 Instagram</a>
+          <a href="#" class="social-btn">🐦 Twitter</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="#">What is CRM</a>
+        <a href="#">Features</a>
+        <a href="#">Marketplace</a>
+        <a href="#">Analytics</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h4>For Business</h4>
+        <a href="#">Vendor Registration</a>
+        <a href="#">Admin Access</a>
+        <a href="#">API Integration</a>
+        <a href="#">Case Studies</a>
+        <a href="#">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:info@bizlink.lk">📧 info@bizlink.lk</a>
+        <a href="tel:+94112345678">📞 +94 11 234 5678</a>
+        <a href="#">📍 Colombo, Sri Lanka</a>
+        <a href="#">💬 Live Chat</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 BizLink. All rights reserved. | Designed for 🇱🇰 Sri Lanka</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/home.js"></script>
+</body>
+</html>
