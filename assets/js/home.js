@@ -1,4 +1,4 @@
-//Navbar scroll effect
+// ---- Navbar scroll effect ----
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   if (window.scrollY > 60) {
@@ -8,7 +8,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
-//Hamburger menu
+//  Hamburger menu 
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.querySelector('.nav-links');
 const navCta = document.querySelector('.nav-cta');
@@ -19,7 +19,7 @@ hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('open');
 });
 
-//Scroll Reveal
+//  Scroll Reveal 
 const revealElements = document.querySelectorAll(
   '.crm-benefit-item, .prob-card, .sol-card, .vendor-feat, .cust-benefit-card, .role-card, .s-pill, .sf-item, .vs-card, .industry-card, .trust-item, .prob-cards, .section-title, .section-sub, .section-label'
 );
@@ -44,7 +44,7 @@ const revealObserver = new IntersectionObserver((entries) => {
 
 revealElements.forEach(el => revealObserver.observe(el));
 
-//Counter Animation
+//  Counter Animation
 const counters = document.querySelectorAll('.stat-num');
 
 const counterObserver = new IntersectionObserver((entries) => {
@@ -76,7 +76,7 @@ function animateCounter(el, target) {
   requestAnimationFrame(tick);
 }
 
-//Staggered Reveal for Grid Items
+//  Staggered Reveal for Grid Items 
 const gridSections = [
   { parent: '.crm-benefits', child: '.crm-benefit-item', delay: 80 },
   { parent: '.prob-cards', child: '.prob-card', delay: 100 },
@@ -108,7 +108,7 @@ gridSections.forEach(({ parent, child, delay }) => {
   parentObserver.observe(parentEl);
 });
 
-//Active Nav Link Highlight
+//  Active Nav Link Highlight 
 const sections = document.querySelectorAll('section[id]');
 const navAncors = document.querySelectorAll('.nav-links a');
 
@@ -131,7 +131,7 @@ window.addEventListener('scroll', () => {
   });
 });
 
-//Parallax Orbs on Mouse Move
+//  Parallax Orbs on Mouse Move 
 document.addEventListener('mousemove', (e) => {
   const { innerWidth, innerHeight } = window;
   const xRatio = (e.clientX / innerWidth - 0.5) * 30;
@@ -151,7 +151,7 @@ document.addEventListener('mousemove', (e) => {
   });
 });
 
-//Animate chart bars on load
+// Animate chart bars on load
 window.addEventListener('load', () => {
   const bars = document.querySelectorAll('.bar');
   bars.forEach((bar, i) => {
@@ -161,7 +161,7 @@ window.addEventListener('load', () => {
   });
 });
 
-//Smooth CTA hover ripple
+//Smooth CTA hover ripple 
 document.querySelectorAll('.btn-hero-primary, .btn-cta-vendor, .btn-cta-explore, .btn-cta-contact, .role-cta').forEach(btn => {
   btn.addEventListener('mouseenter', function(e) {
     const ripple = document.createElement('span');
@@ -196,7 +196,7 @@ rippleStyle.textContent = `
 `;
 document.head.appendChild(rippleStyle);
 
-//Typing effect for Hero title
+//  Typing effect for Hero title 
 function setupTypingBadge() {
   const badge = document.querySelector('.hero-badge');
   if (!badge) return;
@@ -223,14 +223,14 @@ function setupTypingBadge() {
 }
 setupTypingBadge();
 
-//Image placeholder hover text
+//  Image placeholder hover text 
 document.querySelectorAll('.img-placeholder, .role-img-placeholder, .suitable-img-placeholder').forEach(el => {
   el.addEventListener('mouseenter', () => {
     el.style.cursor = 'pointer';
   });
 });
 
-//Close mobile nav on link click
+// Close mobile nav on link click 
 document.querySelectorAll('.nav-links a').forEach(link => {
   link.addEventListener('click', () => {
     navLinks.classList.remove('open');
