@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <title>BizLink – Login & Sign Up</title>
+  <link rel="stylesheet" href="../assets/css/index.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ========== BACKGROUND ========== -->
+<div class="bg-layer">
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-navy"></div>
+  <div class="bg-orb orb-green"></div>
+  <div class="bg-orb orb-orange"></div>
+</div>
+
+<!-- ========== MAIN WRAPPER ========== -->
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL – Branding -->
+  <aside class="brand-panel" id="brandPanel">
+    <div class="brand-panel-inner">
+      <a href="home.html" class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Biz<strong>Link</strong></span>
+      </a>
+
+      <div class="brand-tagline">
+        <h1 class="brand-headline">Sri Lanka's<br/><span class="hl-green">Smartest</span><br/>CRM Platform</h1>
+        <p class="brand-sub">ව්‍යාපාරය ඩිජිටල් කරන්න</p>
+      </div>
+
+      <!-- Role Preview Cards -->
+      <div class="role-preview-stack">
+        <div class="rp-card rp-admin" id="rpAdmin">
+          <span class="rp-icon">👑</span>
+          <div>
+            <strong>Admin</strong>
+            <p>Full system control</p>
+          </div>
+          <div class="rp-badge admin-badge-sm">ADMIN</div>
+        </div>
+        <div class="rp-card rp-vendor" id="rpVendor">
+          <span class="rp-icon">💼</span>
+          <div>
+            <strong>Vendor</strong>
+            <p>Manage your business</p>
+          </div>
+          <div class="rp-badge vendor-badge-sm">VENDOR</div>
+        </div>
+        <div class="rp-card rp-customer" id="rpCustomer">
+          <span class="rp-icon">🛍️</span>
+          <div>
+            <strong>Customer</strong>
+            <p>Explore marketplace</p>
+          </div>
+          <div class="rp-badge customer-badge-sm">CUSTOMER</div>
+        </div>
+      </div>
+
+      <div class="brand-footer">
+        <p>🇱🇰 Trusted by 500+ Sri Lankan businesses</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT PANEL – Auth Forms -->
+  <main class="form-panel" id="formPanel">
+
+    <!-- ====== TAB SWITCHER ====== -->
+    <div class="tab-switcher">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- ============================================================
+         LOGIN FORM
+    ============================================================ -->
+    <div class="form-view" id="loginView">
+      <div class="form-header">
+        <h2 class="form-title">Welcome Back</h2>
+        <p class="form-desc">Sign in to your BizLink account</p>
+      </div>
+
+      <!-- Role Selector -->
+      <div class="role-selector" id="loginRoleSelector">
+        <p class="role-selector-label">Select your role to continue</p>
+        <div class="role-cards-row">
+          <div class="role-pill admin-pill" onclick="selectLoginRole('admin', this)">
+            <span>👑</span> Admin
+          </div>
+          <div class="role-pill vendor-pill" onclick="selectLoginRole('vendor', this)">
+            <span>💼</span> Vendor
+          </div>
+          <div class="role-pill customer-pill" onclick="selectLoginRole('customer', this)">
+            <span>🛍️</span> Customer
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Form Fields -->
+      <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="field-group">
+          <label for="loginEmail">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="loginPassword">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+            <button type="button" class="toggle-pass" onclick="togglePassword('loginPassword', this)">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-row-flex">
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="rememberMe"/>
+            <span class="checkbox-custom"></span>
+            Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="submit-btn" id="loginSubmitBtn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-icon">→</span>
+        </button>
+
+        <div class="divider"><span>or continue with</span></div>
+
+        <div class="social-auth-row">
+          <button type="button" class="social-auth-btn">
+            <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="Google"/>
+            Google
+          </button>
+          <button type="button" class="social-auth-btn">
+            <span style="font-size:18px;">📘</span>
+            Facebook
+          </button>
+        </div>
+
+        <p class="switch-hint">Don't have an account? <a onclick="switchTab('signup')">Sign Up</a></p>
+      </form>
+    </div>
+
+    <!-- ============================================================
+         SIGNUP FORM – Multi-step
+    ============================================================ -->
+    <div class="form-view hidden" id="signupView">
+
+      <!-- Step Indicator -->
+      <div class="step-indicator">
+        <div class="step-item active" id="stepDot1">
+          <div class="step-dot"><span>1</span></div>
+          <div class="step-label">Role</div>
+        </div>
+        <div class="step-line" id="stepLine1"></div>
+        <div class="step-item" id="stepDot2">
+          <div class="step-dot"><span>2</span></div>
+          <div class="step-label">Details</div>
+        </div>
+        <div class="step-line" id="stepLine2"></div>
+        <div class="step-item" id="stepDot3">
+          <div class="step-dot"><span>3</span></div>
+          <div class="step-label">Profile</div>
+        </div>
+        <div class="step-line" id="stepLine3"></div>
+        <div class="step-item" id="stepDot4">
+          <div class="step-dot"><span>4</span></div>
+          <div class="step-label">Done</div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 1 – Choose Role ====== -->
+      <div class="signup-step" id="step1">
+        <div class="form-header">
+          <h2 class="form-title">Create Account</h2>
+          <p class="form-desc">Who are you joining as?</p>
+          <p class="form-sinhala">ඔබ කවුරුන් ලෙස එකතු වේද?</p>
+        </div>
+
+        <div class="role-big-cards">
+          <div class="role-big-card admin-big" onclick="selectSignupRole('admin', this)" data-role="admin">
+            <div class="rbc-top">
+              <div class="rbc-icon">👑</div>
+              <div class="rbc-badge admin-badge-sm">ADMIN</div>
+            </div>
+            <h3>Administrator</h3>
+            <p>Full platform control. Manage vendors, customers, reports and system settings.</p>
+            <ul class="rbc-perks">
+              <li>✅ System management</li>
+              <li>✅ User oversight</li>
+              <li>✅ Full analytics</li>
+            </ul>
+            <div class="rbc-select-indicator">Selected ✓</div>
+          </div>
+
+          <div class="role-big-card vendor-big" onclick="selectSignupRole('vendor', this)" data-role="vendor">
+            <div class="rbc-top">
+              <div class="rbc-icon">💼</div>
+              <div class="rbc-badge vendor-badge-sm">VENDOR</div>
+            </div>
+            <h3>Business Vendor</h3>
+            <p>Manage your customers, sales, and grow your business on the marketplace.</p>
+            <ul class="rbc-perks">
+              <li>✅ Customer CRM tools</li>
+              <li>✅ Sales & invoices</li>
+              <li>✅ Marketplace listing</li>
+            </ul>
+            <div class="rbc-select-indicator">Selected ✓</div>
+          </div>
+
+          <div class="role-big-card customer-big" onclick="selectSignupRole('customer', this)" data-role="customer">
+            <div class="rbc-top">
+              <div class="rbc-icon">🛍️</div>
+              <div class="rbc-badge customer-badge-sm">CUSTOMER</div>
+            </div>
+            <h3>Customer</h3>
+            <p>Explore verified vendors, place orders, and track your purchases easily.</p>
+            <ul class="rbc-perks">
+              <li>✅ Browse marketplace</li>
+              <li>✅ Order tracking</li>
+              <li>✅ Direct vendor chat</li>
+            </ul>
+            <div class="rbc-select-indicator">Selected ✓</div>
+          </div>
+        </div>
+
+        <button class="submit-btn" onclick="goStep(2)" id="step1Next" disabled>
+          <span class="btn-text">Continue</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </div>
+
+      <!-- ====== STEP 2 – Account Details ====== -->
+      <div class="signup-step hidden" id="step2">
+        <div class="form-header">
+          <h2 class="form-title">Account Details</h2>
+          <p class="form-desc">Set up your login credentials</p>
+        </div>
+
+        <form class="auth-form" onsubmit="return false">
+          <div class="fields-row">
+            <div class="field-group">
+              <label>First Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="firstName" placeholder="Amara" required />
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Last Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="lastName" placeholder="Perera" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉️</span>
+              <input type="email" id="signupEmail" placeholder="you@example.com" required />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Phone Number</label>
+            <div class="input-wrap">
+              <span class="input-icon">📞</span>
+              <input type="tel" id="phoneNumber" placeholder="+94 77 123 4567" />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="signupPassword" placeholder="Min. 8 characters" required oninput="checkPasswordStrength(this.value)"/>
+              <button type="button" class="toggle-pass" onclick="togglePassword('signupPassword', this)">👁️</button>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar">
+                <div class="strength-fill" id="strengthFill"></div>
+              </div>
+              <span class="strength-label" id="strengthLabel">Enter password</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Confirm Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="confirmPassword" placeholder="Re-enter password" required />
+              <button type="button" class="toggle-pass" onclick="togglePassword('confirmPassword', this)">👁️</button>
+            </div>
+          </div>
+
+          <div class="step-nav-row">
+            <button type="button" class="back-btn" onclick="goStep(1)">← Back</button>
+            <button type="button" class="submit-btn step-next-btn" onclick="goStep(3)">
+              <span class="btn-text">Continue</span>
+              <span class="btn-icon">→</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ====== STEP 3 – Profile Questions (Dynamic by Role) ====== -->
+      <div class="signup-step hidden" id="step3">
+        <div class="form-header">
+          <h2 class="form-title">Tell Us More</h2>
+          <p class="form-desc" id="step3Desc">A few questions to personalize your experience</p>
+        </div>
+
+        <!-- ADMIN QUESTIONS -->
+        <form class="auth-form" id="adminQuestions" onsubmit="return false">
+          <div class="field-group">
+            <label>Admin Access Code</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔑</span>
+              <input type="text" placeholder="Enter admin authorization code" />
+            </div>
+            <p class="field-hint">This code is provided by the platform owner</p>
+          </div>
+          <div class="field-group">
+            <label>Organization / Department</label>
+            <div class="input-wrap">
+              <span class="input-icon">🏢</span>
+              <input type="text" placeholder="e.g. Operations, IT Department" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Your Role Title</label>
+            <div class="input-wrap">
+              <span class="input-icon">👑</span>
+              <input type="text" placeholder="e.g. Platform Manager, System Admin" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Reason for Admin Access</label>
+            <textarea class="auth-textarea" rows="3" placeholder="Briefly describe your reason for admin access..."></textarea>
+          </div>
+        </form>
+
+        <!-- VENDOR QUESTIONS -->
+        <form class="auth-form hidden" id="vendorQuestions" onsubmit="return false">
+          <div class="fields-row">
+            <div class="field-group">
+              <label>Business Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">🏪</span>
+                <input type="text" placeholder="e.g. Lanka Textiles" />
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Business Registration No.</label>
+              <div class="input-wrap">
+                <span class="input-icon">📋</span>
+                <input type="text" placeholder="e.g. PV/00123" />
+              </div>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Industry / Business Type</label>
+            <select class="auth-select">
+              <option value="">— Select your industry —</option>
+              <option>Grocery & Food</option>
+              <option>Textile & Apparel</option>
+              <option>Tea Export</option>
+              <option>Tourism & Hospitality</option>
+              <option>Agriculture</option>
+              <option>IT Services</option>
+              <option>Retail & E-commerce</option>
+              <option>Health & Beauty</option>
+              <option>Electronics</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Business Location</label>
+            <select class="auth-select">
+              <option value="">— Select province —</option>
+              <option>Western Province</option>
+              <option>Central Province</option>
+              <option>Southern Province</option>
+              <option>Northern Province</option>
+              <option>Eastern Province</option>
+              <option>North Western Province</option>
+              <option>North Central Province</option>
+              <option>Uva Province</option>
+              <option>Sabaragamuwa Province</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Number of Employees</label>
+            <div class="options-pill-row">
+              <label class="pill-option"><input type="radio" name="empSize" value="1-5"/><span>1–5</span></label>
+              <label class="pill-option"><input type="radio" name="empSize" value="6-20"/><span>6–20</span></label>
+              <label class="pill-option"><input type="radio" name="empSize" value="21-50"/><span>21–50</span></label>
+              <label class="pill-option"><input type="radio" name="empSize" value="50+"/><span>50+</span></label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>How did you hear about BizLink?</label>
+            <select class="auth-select">
+              <option value="">— Select —</option>
+              <option>Social Media (Facebook / Instagram)</option>
+              <option>Google Search</option>
+              <option>Friend / Colleague</option>
+              <option>Government Program</option>
+              <option>Trade Event / Exhibition</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>What are you hoping to achieve with BizLink?</label>
+            <div class="checkbox-multi-group">
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> Manage my customer data</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> Track sales and revenue</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> List products on marketplace</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> Generate invoices and reports</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> Improve customer communication</label>
+            </div>
+          </div>
+        </form>
+
+        <!-- CUSTOMER QUESTIONS -->
+        <form class="auth-form hidden" id="customerQuestions" onsubmit="return false">
+          <div class="field-group">
+            <label>City / Town</label>
+            <div class="input-wrap">
+              <span class="input-icon">📍</span>
+              <input type="text" placeholder="e.g. Colombo, Kandy, Galle" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label>What are you mainly looking for?</label>
+            <div class="options-pill-row">
+              <label class="pill-option"><input type="radio" name="custLook" value="products"/><span>🛒 Products</span></label>
+              <label class="pill-option"><input type="radio" name="custLook" value="services"/><span>🔧 Services</span></label>
+              <label class="pill-option"><input type="radio" name="custLook" value="both"/><span>⚡ Both</span></label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Categories you're interested in</label>
+            <div class="checkbox-multi-group two-col">
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 🛒 Groceries</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 👗 Fashion & Apparel</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 🍵 Tea & Beverages</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 🌴 Tourism & Travel</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 💻 Electronics & IT</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 🌾 Agriculture</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 🏠 Home & Garden</label>
+              <label class="checkbox-wrap"><input type="checkbox"/><span class="checkbox-custom"></span> 💆 Health & Beauty</label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Preferred language</label>
+            <div class="options-pill-row">
+              <label class="pill-option"><input type="radio" name="lang" value="en"/><span>English</span></label>
+              <label class="pill-option"><input type="radio" name="lang" value="si"/><span>සිංහල</span></label>
+              <label class="pill-option"><input type="radio" name="lang" value="ta"/><span>தமிழ்</span></label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>How did you hear about BizLink?</label>
+            <select class="auth-select">
+              <option value="">— Select —</option>
+              <option>Social Media</option>
+              <option>Friend / Family</option>
+              <option>Google Search</option>
+              <option>Vendor Recommendation</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </form>
+
+        <div class="step-nav-row">
+          <button type="button" class="back-btn" onclick="goStep(2)">← Back</button>
+          <button type="button" class="submit-btn step-next-btn" onclick="goStep(4)">
+            <span class="btn-text">Continue</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====== STEP 4 – Review & Submit ====== -->
+      <div class="signup-step hidden" id="step4">
+        <div class="form-header">
+          <h2 class="form-title">Almost Done!</h2>
+          <p class="form-desc">Review your information before creating your account</p>
+        </div>
+
+        <div class="review-card" id="reviewCard">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="field-group">
+          <label class="checkbox-wrap terms-check">
+            <input type="checkbox" id="agreeTerms" onchange="toggleFinalBtn(this)"/>
+            <span class="checkbox-custom"></span>
+            I agree to BizLink's <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+          </label>
+        </div>
+
+        <div class="field-group">
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="agreeMarketing"/>
+            <span class="checkbox-custom"></span>
+            Send me product updates and business tips (optional)
+          </label>
+        </div>
+
+        <div class="step-nav-row">
+          <button type="button" class="back-btn" onclick="goStep(3)">← Back</button>
+          <button type="button" class="submit-btn final-submit-btn" id="finalSubmitBtn" onclick="handleSignup()" disabled>
+            <span class="btn-text">Create Account</span>
+            <span class="btn-icon">🚀</span>
+          </button>
+        </div>
+
+        <p class="switch-hint">Already have an account? <a onclick="switchTab('login')">Sign In</a></p>
+      </div>
+
+      <!-- ====== SUCCESS STATE ====== -->
+      <div class="signup-step hidden" id="successState">
+        <div class="success-screen">
+          <div class="success-icon">✅</div>
+          <h2 class="success-title">Account Created!</h2>
+          <p class="success-sub" id="successMsg">Welcome to BizLink, !<br/>Your account is ready.</p>
+          <p class="success-sinhala">BizLink වෙත සාදරයෙන් පිළිගනිමු!</p>
+          <div class="success-role-tag" id="successRoleTag"></div>
+          <a href="index.html" class="submit-btn success-btn">
+            <span class="btn-text">Go to Dashboard</span>
+            <span class="btn-icon">→</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+    <!-- / signupView -->
+
+  </main>
+  <!-- / form-panel -->
+
+</div>
+<!-- / auth-wrapper -->
+
+<script src="../assets/js/index.js"></script>
+</body>
+</html>
