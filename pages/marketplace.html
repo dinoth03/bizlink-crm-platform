@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Marketplace – Shop Sri Lanka</title>
+  <link rel="stylesheet" href="../assets/css/marketplace.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Sora:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- ===== BACKGROUND ===== -->
+<div class="mp-bg">
+  <div class="mp-grid"></div>
+  <div class="mp-orb mp-orb-1"></div>
+  <div class="mp-orb mp-orb-2"></div>
+  <div class="mp-orb mp-orb-3"></div>
+  <div class="mp-scanlines"></div>
+</div>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="mp-nav" id="mpNav">
+  <div class="nav-container">
+    <a href="home.html" class="logo">
+      <span class="logo-hex">⬡</span>
+      <span class="logo-word">Biz<strong>Link</strong></span>
+    </a>
+
+    <div class="nav-search-wrap">
+      <span class="ns-icon">🔍</span>
+      <input type="text" class="nav-search" id="globalSearch" placeholder="භාණ්ඩ සොයන්න · Search products, vendors..." oninput="handleSearch(this.value)" />
+      <button class="ns-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+
+    <div class="nav-actions">
+      <button class="nav-icon-btn" onclick="toggleWishlist()" title="Wishlist">
+        <span>🤍</span>
+        <span class="nav-badge" id="wishlistBadge">0</span>
+      </button>
+      <button class="nav-icon-btn cart-btn" onclick="toggleCart()" title="Cart">
+        <span>🛒</span>
+        <span class="nav-badge" id="cartBadge">0</span>
+      </button>
+      <a href="index.html" class="nav-signin">Sign In</a>
+    </div>
+
+    <button class="hamburger-mp" id="hamburgerMp">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO BANNER ===== -->
+<section class="mp-hero">
+  <div class="hero-container">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        🇱🇰 &nbsp;BizLink Marketplace · ශ්‍රී ලංකා
+      </div>
+      <h1 class="hero-title">
+        Sri Lanka's<br/>
+        <span class="hero-hl">Smartest</span><br/>
+        Business Hub
+      </h1>
+      <p class="hero-body">
+        BizLink Marketplace connects <strong>verified Sri Lankan vendors</strong> with customers nationwide — from Colombo to Jaffna. Browse real products, real businesses, real prices. No middlemen.
+      </p>
+      <p class="hero-sin">ශ්‍රී ලංකාවේ හොඳම ව්‍යාපාරවල භාණ්ඩ — එකම තැනකින්</p>
+      <div class="hero-stats-row">
+        <div class="hs">
+          <span class="hs-num" data-target="1240">0</span><span class="hs-unit">+</span>
+          <span class="hs-lbl">Products</span>
+        </div>
+        <div class="hs-div"></div>
+        <div class="hs">
+          <span class="hs-num" data-target="320">0</span><span class="hs-unit">+</span>
+          <span class="hs-lbl">Vendors</span>
+        </div>
+        <div class="hs-div"></div>
+        <div class="hs">
+          <span class="hs-num" data-target="9">0</span><span class="hs-unit"></span>
+          <span class="hs-lbl">Provinces</span>
+        </div>
+      </div>
+      <div class="hero-badges">
+        <span class="hb">✅ Verified Vendors</span>
+        <span class="hb">🔒 Secure Checkout</span>
+        <span class="hb">🚚 Island-Wide Delivery</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-visual-card hvc-main">
+        <div class="hvc-img-slot">
+          <span>🏪</span>
+          <div class="hvc-img-hint">Hero Banner Image</div>
+        </div>
+        <div class="hvc-info">
+          <span class="hvc-tag vendor-tag">FEATURED VENDOR</span>
+          <p class="hvc-name">Lanka Premium Exports</p>
+          <p class="hvc-cat">Tea · Agriculture · Grocery</p>
+        </div>
+      </div>
+      <div class="hero-mini-cards">
+        <div class="hmc">
+          <span class="hmc-icon">📦</span>
+          <div>
+            <strong>Fast Delivery</strong>
+            <p>2–5 days island-wide</p>
+          </div>
+        </div>
+        <div class="hmc">
+          <span class="hmc-icon">⭐</span>
+          <div>
+            <strong>Trusted Reviews</strong>
+            <p>Real customer ratings</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating ticker -->
+  <div class="mp-ticker">
+    <div class="ticker-track">
+      <span>🍵 Ceylon Tea Export &nbsp;·&nbsp;</span>
+      <span>👗 Handloom Textiles &nbsp;·&nbsp;</span>
+      <span>💻 IT Solutions &nbsp;·&nbsp;</span>
+      <span>🌾 Organic Agriculture &nbsp;·&nbsp;</span>
+      <span>🏗️ Construction Materials &nbsp;·&nbsp;</span>
+      <span>📦 Packaging Supplies &nbsp;·&nbsp;</span>
+      <span>🛒 Grocery Wholesale &nbsp;·&nbsp;</span>
+      <span>⚕️ Health Products &nbsp;·&nbsp;</span>
+      <span>🍵 Ceylon Tea Export &nbsp;·&nbsp;</span>
+      <span>👗 Handloom Textiles &nbsp;·&nbsp;</span>
+      <span>💻 IT Solutions &nbsp;·&nbsp;</span>
+      <span>🌾 Organic Agriculture &nbsp;·&nbsp;</span>
+      <span>🏗️ Construction Materials &nbsp;·&nbsp;</span>
+      <span>📦 Packaging Supplies &nbsp;·&nbsp;</span>
+      <span>🛒 Grocery Wholesale &nbsp;·&nbsp;</span>
+      <span>⚕️ Health Products &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WHY MARKETPLACE SECTION ===== -->
+<section class="why-section">
+  <div class="why-container">
+    <div class="why-header">
+      <div class="why-label">BizLink CRM × Marketplace</div>
+      <h2 class="why-title">Why Shop on BizLink?</h2>
+      <p class="why-sin">ඇයි BizLink Marketplace?</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon-wrap green-icon">🔗</div>
+        <h3>Connected to CRM</h3>
+        <p>Every vendor on BizLink uses our CRM system — meaning better inventory management, faster response times, and professional service for you.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap navy-icon">✅</div>
+        <h3>Verified Sri Lankan Businesses</h3>
+        <p>All vendors are verified with business registration numbers. Shop with confidence knowing every seller is a legitimate Sri Lankan business.</p>
+        <p class="why-sin-small">සෑම ව්‍යාපාරිකයෙකුම තහවුරු කළ</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap orange-icon">💰</div>
+        <h3>Direct from Vendor — Better Prices</h3>
+        <p>No middlemen. Buy directly from the source — manufacturers, farmers, and local suppliers across all 9 provinces of Sri Lanka.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap green-icon">📊</div>
+        <h3>Track Your Orders</h3>
+        <p>Every order is tracked through BizLink's CRM system. Know where your package is at every step, with direct vendor communication.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap navy-icon">🌐</div>
+        <h3>All Industries, One Place</h3>
+        <p>From agriculture to IT services, electronics to handloom textiles — BizLink covers every major Sri Lankan industry under one digital roof.</p>
+        <p class="why-sin-small">සියලු කර්මාන්ත — එක් තැනකින්</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap orange-icon">🤝</div>
+        <h3>Support Local Economy</h3>
+        <p>Every purchase supports a Sri Lankan family and business. BizLink is proudly built to grow the local economy, province by province.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAIN MARKETPLACE ===== -->
+<section class="marketplace-section" id="marketplace">
+  <div class="mp-container">
+
+    <!-- Category Sidebar -->
+    <aside class="cat-sidebar" id="catSidebar">
+      <div class="cat-sidebar-header">
+        <span>🗂️</span> Categories
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" onclick="closeSidebar()">✕</button>
+      </div>
+
+      <!-- Quick filter search -->
+      <div class="cat-search-wrap">
+        <input type="text" class="cat-search-input" placeholder="Search categories..." oninput="filterCategories(this.value)" />
+      </div>
+
+      <!-- All -->
+      <button class="cat-item all-cat active" data-cat="all" onclick="selectCategory('all', this)">
+        <span class="cat-emoji">🌐</span>
+        <span class="cat-name">All Products</span>
+        <span class="cat-count">48</span>
+      </button>
+
+      <!-- Products group -->
+      <div class="cat-group">
+        <div class="cat-group-label">🔹 Products</div>
+        <button class="cat-item" data-cat="electronics" onclick="selectCategory('electronics', this)">
+          <span class="cat-emoji">💻</span>
+          <span class="cat-name">Electronics</span>
+          <span class="cat-count">8</span>
+        </button>
+        <button class="cat-item" data-cat="fashion" onclick="selectCategory('fashion', this)">
+          <span class="cat-emoji">👗</span>
+          <span class="cat-name">Fashion</span>
+          <span class="cat-count">7</span>
+        </button>
+        <button class="cat-item" data-cat="home" onclick="selectCategory('home', this)">
+          <span class="cat-emoji">🏠</span>
+          <span class="cat-name">Home</span>
+          <span class="cat-count">5</span>
+        </button>
+        <button class="cat-item" data-cat="grocery" onclick="selectCategory('grocery', this)">
+          <span class="cat-emoji">🛒</span>
+          <span class="cat-name">Grocery</span>
+          <span class="cat-count">6</span>
+        </button>
+        <button class="cat-item" data-cat="agriculture" onclick="selectCategory('agriculture', this)">
+          <span class="cat-emoji">🌾</span>
+          <span class="cat-name">Agriculture</span>
+          <span class="cat-count">5</span>
+        </button>
+        <button class="cat-item" data-cat="construction" onclick="selectCategory('construction', this)">
+          <span class="cat-emoji">🏗️</span>
+          <span class="cat-name">Construction</span>
+          <span class="cat-count">5</span>
+        </button>
+        <button class="cat-item" data-cat="health" onclick="selectCategory('health', this)">
+          <span class="cat-emoji">⚕️</span>
+          <span class="cat-name">Health</span>
+          <span class="cat-count">4</span>
+        </button>
+      </div>
+
+      <!-- Business Supplies group -->
+      <div class="cat-group">
+        <div class="cat-group-label">🔹 Business Supplies</div>
+        <button class="cat-item" data-cat="office" onclick="selectCategory('office', this)">
+          <span class="cat-emoji">🖊️</span>
+          <span class="cat-name">Office Supplies</span>
+          <span class="cat-count">3</span>
+        </button>
+        <button class="cat-item" data-cat="industrial" onclick="selectCategory('industrial', this)">
+          <span class="cat-emoji">⚙️</span>
+          <span class="cat-name">Industrial</span>
+          <span class="cat-count">3</span>
+        </button>
+        <button class="cat-item" data-cat="packaging" onclick="selectCategory('packaging', this)">
+          <span class="cat-emoji">📦</span>
+          <span class="cat-name">Packaging</span>
+          <span class="cat-count">2</span>
+        </button>
+      </div>
+
+      <!-- Services group -->
+      <div class="cat-group">
+        <div class="cat-group-label">🔹 Services</div>
+        <button class="cat-item" data-cat="it" onclick="selectCategory('it', this)">
+          <span class="cat-emoji">💻</span>
+          <span class="cat-name">IT</span>
+          <span class="cat-count">2</span>
+        </button>
+        <button class="cat-item" data-cat="marketing" onclick="selectCategory('marketing', this)">
+          <span class="cat-emoji">📣</span>
+          <span class="cat-name">Marketing</span>
+          <span class="cat-count">2</span>
+        </button>
+        <button class="cat-item" data-cat="accounting" onclick="selectCategory('accounting', this)">
+          <span class="cat-emoji">📊</span>
+          <span class="cat-name">Accounting</span>
+          <span class="cat-count">2</span>
+        </button>
+        <button class="cat-item" data-cat="logistics" onclick="selectCategory('logistics', this)">
+          <span class="cat-emoji">🚚</span>
+          <span class="cat-name">Logistics</span>
+          <span class="cat-count">2</span>
+        </button>
+      </div>
+
+      <!-- Price filter -->
+      <div class="price-filter">
+        <div class="pf-label">Price Range (LKR)</div>
+        <div class="pf-inputs">
+          <input type="number" id="priceMin" placeholder="Min" class="pf-input" oninput="applyPriceFilter()"/>
+          <span class="pf-sep">–</span>
+          <input type="number" id="priceMax" placeholder="Max" class="pf-input" oninput="applyPriceFilter()"/>
+        </div>
+      </div>
+
+      <!-- Rating filter -->
+      <div class="rating-filter">
+        <div class="pf-label">Minimum Rating</div>
+        <div class="stars-filter">
+          <button class="sf-btn active" data-rating="0" onclick="setRatingFilter(0, this)">All</button>
+          <button class="sf-btn" data-rating="3" onclick="setRatingFilter(3, this)">3★+</button>
+          <button class="sf-btn" data-rating="4" onclick="setRatingFilter(4, this)">4★+</button>
+          <button class="sf-btn" data-rating="4.5" onclick="setRatingFilter(4.5, this)">4.5★+</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="mp-main">
+
+      <!-- Top Bar -->
+      <div class="mp-topbar">
+        <div class="mp-topbar-left">
+          <button class="filter-toggle-btn" onclick="toggleSidebar()">
+            ☰ Filters
+          </button>
+          <div class="breadcrumb">
+            <span id="bcRoot">Marketplace</span>
+            <span class="bc-sep">›</span>
+            <span id="bcCat">All Products</span>
+          </div>
+        </div>
+        <div class="mp-topbar-right">
+          <span class="result-count" id="resultCount">48 products found</span>
+          <select class="sort-select" onchange="sortProducts(this.value)">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+            <option value="newest">Newest</option>
+          </select>
+          <div class="view-toggle">
+            <button class="vt-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid View">⊞</button>
+            <button class="vt-btn" id="listViewBtn" onclick="setView('list')" title="List View">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div class="active-filters" id="activeFilters"></div>
+
+      <!-- Horizontal Category Chips (Mobile-friendly quick nav) -->
+      <div class="cat-chips-row" id="catChipsRow">
+        <button class="cat-chip active" data-cat="all" onclick="selectCategory('all', this)">🌐 All</button>
+        <button class="cat-chip" data-cat="electronics" onclick="selectCategory('electronics', this)">💻 Electronics</button>
+        <button class="cat-chip" data-cat="fashion" onclick="selectCategory('fashion', this)">👗 Fashion</button>
+        <button class="cat-chip" data-cat="home" onclick="selectCategory('home', this)">🏠 Home</button>
+        <button class="cat-chip" data-cat="grocery" onclick="selectCategory('grocery', this)">🛒 Grocery</button>
+        <button class="cat-chip" data-cat="agriculture" onclick="selectCategory('agriculture', this)">🌾 Agriculture</button>
+        <button class="cat-chip" data-cat="construction" onclick="selectCategory('construction', this)">🏗️ Construction</button>
+        <button class="cat-chip" data-cat="health" onclick="selectCategory('health', this)">⚕️ Health</button>
+        <button class="cat-chip" data-cat="office" onclick="selectCategory('office', this)">🖊️ Office</button>
+        <button class="cat-chip" data-cat="industrial" onclick="selectCategory('industrial', this)">⚙️ Industrial</button>
+        <button class="cat-chip" data-cat="packaging" onclick="selectCategory('packaging', this)">📦 Packaging</button>
+        <button class="cat-chip" data-cat="it" onclick="selectCategory('it', this)">💻 IT</button>
+        <button class="cat-chip" data-cat="marketing" onclick="selectCategory('marketing', this)">📣 Marketing</button>
+        <button class="cat-chip" data-cat="accounting" onclick="selectCategory('accounting', this)">📊 Accounting</button>
+        <button class="cat-chip" data-cat="logistics" onclick="selectCategory('logistics', this)">🚚 Logistics</button>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-grid" id="productGrid">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon">🔍</div>
+        <h3>No Products Found</h3>
+        <p>Try a different category or search term.</p>
+        <p class="empty-sin">භාණ්ඩ හමු නොවිණි</p>
+        <button class="empty-reset-btn" onclick="selectCategory('all', document.querySelector('.cat-item.all-cat'))">Reset Filters</button>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="product-modal" id="productModal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-inner" id="modalInner">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartOverlay(event)">
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>🛒 Your Cart</h3>
+      <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty" id="cartEmpty">
+        <span>🛒</span>
+        <p>Your cart is empty</p>
+        <p class="sin-small">ඔබේ කූඩය හිස්ය</p>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <strong id="cartTotal">Rs. 0</strong>
+      </div>
+      <button class="checkout-btn">Proceed to Checkout →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===== BACK TO TOP ===== -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ===== FOOTER ===== -->
+<footer class="mp-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo footer-logo">
+        <span class="logo-hex">⬡</span>
+        <span class="logo-word">Biz<strong>Link</strong></span>
+      </div>
+      <p>Sri Lanka's All-in-One CRM & Marketplace</p>
+      <p class="footer-sin">ශ්‍රී ලංකාවේ ව්‍යාපාර ඩිජිටල් කරන්න</p>
+    </div>
+    <div class="footer-col">
+      <h4>Marketplace</h4>
+      <a href="#">All Products</a>
+      <a href="#">Top Vendors</a>
+      <a href="#">New Arrivals</a>
+      <a href="#">Deals</a>
+    </div>
+    <div class="footer-col">
+      <h4>Sellers</h4>
+      <a href="index.html">Register as Vendor</a>
+      <a href="#">Seller Guidelines</a>
+      <a href="#">CRM Dashboard</a>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <a href="#">Contact Us</a>
+      <a href="#">Delivery Info</a>
+      <a href="#">Returns Policy</a>
+      <a href="#">FAQ</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 BizLink. All rights reserved. 🇱🇰 Made for Sri Lanka</p>
+  </div>
+</footer>
+
+<script src="../assets/js/marketplace.js"></script>
+</body>
+</html>
