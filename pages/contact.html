@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink – Contact Us (Admin · Vendor · Customer)</title>
+  <!-- same fonts & design language as home page, with role‑specific colours -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/contact.css">
+  </head>
+<body>
+
+<!-- navbar (same style as home) -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="home.html" class="logo"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn-ghost">Login</a>
+      <a href="#" class="btn-primary">Get Started</a>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- CONTACT PAGE MAIN -->
+<section class="contact-section">
+  <div class="contact-orbs">
+    <div class="orb orb-admin"></div>
+    <div class="orb orb-vendor"></div>
+    <div class="orb orb-customer"></div>
+  </div>
+  <div class="container">
+
+    <!-- header with role colours -->
+    <div class="contact-header">
+      <h1>Get in <span class="gradient-admin">touch</span> with <span class="gradient-vendor">BizLink</span></h1>
+      <p>අප අමතන්න — විකුණුම්කරු, පරිපාලක, ගනුදෙනුකරු</p>
+      <div class="role-badge-group">
+        <span class="role-mini-badge admin">🔷 Admin (navy)</span>
+        <span class="role-mini-badge vendor">🟢 Vendor (green)</span>
+        <span class="role-mini-badge customer">🟠 Customer (orange)</span>
+      </div>
+    </div>
+
+    <!-- three contact cards per role -->
+    <div class="contact-grid">
+      <!-- ADMIN card -->
+      <div class="contact-card card-admin">
+        <div class="card-icon">👑</div>
+        <h3>Admin team</h3>
+        <span class="role-tag admin-role-tag">SYSTEM ADMINISTRATION</span>
+        <div class="contact-detail">📞 <a href="tel:+94112345678">+94 11 234 5678</a></div>
+        <div class="contact-detail">📧 <a href="mailto:admin@bizlink.lk">admin@bizlink.lk</a></div>
+        <div class="contact-action"><a href="#" class="btn-card admin">Message admin</a></div>
+      </div>
+      <!-- VENDOR card -->
+      <div class="contact-card card-vendor">
+        <div class="card-icon">💼</div>
+        <h3>Vendor support</h3>
+        <span class="role-tag vendor-role-tag">BUSINESS & PARTNERS</span>
+        <div class="contact-detail">📞 <a href="tel:+94112345679">+94 11 234 5679</a></div>
+        <div class="contact-detail">📧 <a href="mailto:vendors@bizlink.lk">vendors@bizlink.lk</a></div>
+        <div class="contact-action"><a href="#" class="btn-card vendor">Vendor help</a></div>
+      </div>
+      <!-- CUSTOMER card -->
+      <div class="contact-card card-customer">
+        <div class="card-icon">🛍️</div>
+        <h3>Customer care</h3>
+        <span class="role-tag customer-role-tag">CONSUMER SUPPORT</span>
+        <div class="contact-detail">📞 <a href="tel:+94112345680">+94 11 234 5680</a></div>
+        <div class="contact-detail">📧 <a href="mailto:care@bizlink.lk">care@bizlink.lk</a></div>
+        <div class="contact-action"><a href="#" class="btn-card customer">Get help</a></div>
+      </div>
+    </div>
+
+    <!-- CONTACT FORM + INFO (hybrid) -->
+    <div class="form-row">
+      <!-- left: info with role icons -->
+      <div class="info-col">
+        <h2>Let’s <span class="gradient-customer">connect</span></h2>
+        <div class="info-item"><span class="info-icon" style="color:var(--admin-color);">📌</span> <div class="info-text"><strong>Main office (Admin)</strong><span>No 10, Galle Road, Colombo 03</span></div></div>
+        <div class="info-item"><span class="info-icon" style="color:var(--vendor-color);">🏢</span> <div class="info-text"><strong>Vendor hub</strong><span>2nd floor, Union Place, Colombo 02</span></div></div>
+        <div class="info-item"><span class="info-icon" style="color:var(--customer-color);">🏪</span> <div class="info-text"><strong>Customer service center</strong><span>Kandy Road, Kadawatha</span></div></div>
+        <div class="info-item"><span class="info-icon">⏰</span> <div class="info-text"><strong>Business hours</strong><span>Mon–Fri 8:30am – 6:00pm (SL time)</span></div></div>
+      </div>
+      <!-- right: form (role‑aware) -->
+      <div class="form-col">
+        <h2>Send a <span class="gradient-vendor">message</span></h2>
+        <div class="form-group">
+          <select id="roleSelect" style="background:rgba(0,0,0,0.3); color:var(--text-primary);">
+            <option value="admin">👑 Admin inquiry</option>
+            <option value="vendor">💼 Vendor support</option>
+            <option value="customer" selected>🛍️ Customer care</option>
+          </select>
+        </div>
+        <div class="form-group"><input type="text" placeholder="Your full name" /></div>
+        <div class="form-group"><input type="email" placeholder="Email address" /></div>
+        <div class="form-group"><textarea rows="4" placeholder="How can we help?"></textarea></div>
+        <button class="send-btn" id="sendMsgBtn">Send message (demo)</button>
+        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:12px;">We’ll reply within 24h – 🇱🇰</p>
+      </div>
+    </div>
+
+    <!-- location mini cards with role dots -->
+    <div class="locations-grid">
+      <div class="loc-card"><div class="admin-dot"></div><strong>Admin HQ</strong><br>Colombo 03</div>
+      <div class="loc-card"><div class="vendor-dot"></div><strong>Vendor centre</strong><br>Union Place</div>
+      <div class="loc-card"><div class="customer-dot"></div><strong>Customer point</strong><br>Kadawatha</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER (simple) -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="logo" style="margin-bottom:16px;"><span class="logo-icon">⬡</span><span>Biz<strong>Link</strong></span></div><p style="color:var(--text-muted);">Connecting Sri Lanka — one platform</p></div>
+      <div><h4>Platform</h4><a href="#">Home</a><a href="#">Contact</a></div>
+      <div><h4>Roles</h4><a href="#" style="color:#000080;">Admin</a><a href="#" style="color:#50C878;">Vendor</a><a href="#" style="color:#FF8C00;">Customer</a></div>
+      <div><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2024 BizLink – contact page with role colours</p><div><a href="#">🇱🇰</a></div></div>
+  </div>
+</footer>
+<script src="../assets/js/contact.js"></script>
+</body>
+</html>

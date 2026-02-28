@@ -1,0 +1,239 @@
+/* contact page*/
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #050a1a; color: #f0f4ff;
+      line-height: 1.6; overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    :root {
+      --admin-color: #000080;                /* navy */
+      --admin-dark: #000066;
+      --admin-gradient: linear-gradient(135deg, #000080 0%, #000066 100%);
+
+      --vendor-color: #50C878;               /* emerald green */
+      --vendor-dark: #3d8c5f;
+      --vendor-gradient: linear-gradient(135deg, #50C878 0%, #3d8c5f 100%);
+
+      --customer-color: #FF8C00;              /* orange */
+      --customer-dark: #e6a800;
+      --customer-gradient: linear-gradient(135deg, #FF8C00 0%, #e6a800 100%);
+
+      --bg-dark: #050a1a;
+      --bg-mid: #0c1428;
+      --bg-card: rgba(255,255,255,0.04);
+      --bg-card-hover: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.18);
+      --text-primary: #f0f4ff;
+      --text-secondary: #8fa0c0;
+      --text-muted: #5a6a8a;
+      --font-display: 'Playfair Display', serif;
+      --font-sinhala: 'Noto Sans Sinhala', sans-serif;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+    }
+
+    /*role badge / text utils*/
+    .admin-text { color: var(--admin-color); }
+    .vendor-text { color: var(--vendor-color); }
+    .customer-text { color: var(--customer-color); }
+
+    .gradient-admin {
+      background: var(--admin-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-vendor {
+      background: var(--vendor-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .gradient-customer {
+      background: var(--customer-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* navbar (reuse home style) */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 16px 0; transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    .navbar.scrolled {
+      background: rgba(5,10,26,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); box-shadow: 0 2px 40px rgba(0,0,0,0.4);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; gap: 40px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.5rem; font-family: var(--font-display); font-weight: 700;
+    }
+    .logo-icon { color: var(--vendor-color); font-size: 1.8rem; filter: drop-shadow(0 0 8px #50C878); } /* vendor green for logo, as home */
+    .logo-text strong { color: var(--vendor-color); }
+    .nav-links { display: flex; gap: 8px; margin-left: auto; }
+    .nav-links a {
+      padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 500;
+      color: var(--text-secondary); transition: all 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: white; background: rgba(255,255,255,0.05); }
+    .nav-cta { display: flex; gap: 12px; align-items: center; }
+    .btn-ghost {
+      padding: 9px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 500;
+      color: var(--text-secondary); border: 1px solid var(--border); transition: all 0.3s;
+    }
+    .btn-ghost:hover { color: white; background: var(--bg-card); }
+    .btn-primary {
+      padding: 9px 22px; border-radius: 30px; font-size: 0.9rem; font-weight: 600;
+      background: var(--vendor-gradient); color: #fff; transition: 0.3s;
+      box-shadow: 0 4px 20px rgba(80,200,120,0.3);
+    }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: white; border-radius: 2px; }
+
+    /*  contact page specific  */
+    .contact-section {
+      padding: 140px 0 80px;
+      background: var(--bg-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    /* subtle orbs (like home) */
+    .contact-orbs { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.12;
+      animation: float 12s infinite alternate;
+    }
+    .orb-admin { width: 400px; height: 400px; background: var(--admin-color); top: -100px; left: -50px; }
+    .orb-vendor { width: 350px; height: 350px; background: var(--vendor-color); bottom: 10%; right: 10%; animation-delay: 2s; }
+    .orb-customer { width: 300px; height: 300px; background: var(--customer-color); top: 40%; left: 30%; animation-delay: 4s; }
+    @keyframes float { 0%{ transform: translateY(0) scale(1); } 100%{ transform: translateY(-40px) scale(1.05); } }
+
+    .contact-header {
+      text-align: center; margin-bottom: 60px; position: relative;
+    }
+    .contact-header h1 {
+      font-family: var(--font-display); font-size: clamp(2.5rem,5vw,3.8rem); font-weight: 900;
+    }
+    .contact-header p {
+      font-family: var(--font-sinhala); color: var(--text-muted); font-size: 1rem;
+      margin-top: 12px;
+    }
+    .role-badge-group {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 24px 0 0;
+    }
+    .role-mini-badge {
+      padding: 6px 18px; border-radius: 40px; font-size: 0.75rem; font-weight: 600;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    }
+    .role-mini-badge.admin { border-left: 4px solid var(--admin-color); color: #aaccff; }
+    .role-mini-badge.vendor { border-left: 4px solid var(--vendor-color); color: #b0f0b0; }
+    .role-mini-badge.customer { border-left: 4px solid var(--customer-color); color: #ffbb66; }
+
+    /* contact cards grid */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-bottom: 60px;
+    }
+    .contact-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 36px 24px; text-align: center; transition: all 0.3s; backdrop-filter: blur(8px);
+    }
+    .contact-card:hover { transform: translateY(-6px); }
+    .card-admin:hover { border-color: var(--admin-color); box-shadow: 0 20px 40px rgba(0,0,128,0.25); }
+    .card-vendor:hover { border-color: var(--vendor-color); box-shadow: 0 20px 40px rgba(80,200,120,0.2); }
+    .card-customer:hover { border-color: var(--customer-color); box-shadow: 0 20px 40px rgba(255,140,0,0.2); }
+
+    .card-icon { font-size: 3rem; margin-bottom: 16px; }
+    .contact-card h3 { font-size: 1.5rem; font-family: var(--font-display); margin-bottom: 8px; }
+    .contact-card .role-tag {
+      display: inline-block; padding: 4px 14px; border-radius: 30px; font-size: 0.7rem; font-weight: 700;
+      margin: 12px 0; letter-spacing: 0.5px;
+    }
+    .admin-role-tag { background: var(--admin-gradient); color: white; }
+    .vendor-role-tag { background: var(--vendor-gradient); color: white; }
+    .customer-role-tag { background: var(--customer-gradient); color: white; }
+
+    .contact-detail { margin: 16px 0; font-size: 1rem; }
+    .contact-detail a { color: var(--text-secondary); transition: 0.2s; }
+    .card-admin a:hover { color: var(--admin-color); }
+    .card-vendor a:hover { color: var(--vendor-color); }
+    .card-customer a:hover { color: var(--customer-color); }
+
+    .contact-action { margin-top: 20px; }
+    .btn-card {
+      padding: 10px 26px; border-radius: 40px; font-weight: 600; display: inline-block;
+      border: 1.5px solid; transition: 0.3s;
+    }
+    .btn-card.admin { border-color: var(--admin-color); color: var(--admin-color); }
+    .btn-card.admin:hover { background: var(--admin-color); color: white; }
+    .btn-card.vendor { border-color: var(--vendor-color); color: var(--vendor-color); }
+    .btn-card.vendor:hover { background: var(--vendor-gradient); color: white; }
+    .btn-card.customer { border-color: var(--customer-color); color: var(--customer-color); }
+    .btn-card.customer:hover { background: var(--customer-gradient); color: white; }
+
+    /* contact form + info row */
+    .form-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+      background: var(--bg-mid); border-radius: var(--radius-lg); padding: 48px;
+      border: 1px solid var(--border);
+    }
+    .info-col h2, .form-col h2 {
+      font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 24px;
+    }
+    .info-item { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .info-icon { font-size: 2rem; min-width: 48px; text-align: center; }
+    .info-text strong { display: block; font-size: 1rem; color: var(--text-primary); }
+    .info-text span { color: var(--text-muted); font-size: 0.9rem; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 14px 18px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: white; font-family: inherit; transition: 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--vendor-color); outline: none; box-shadow: 0 0 0 2px rgba(80,200,120,0.1);
+    }
+    .form-group.admin:focus-within input { border-color: var(--admin-color); }
+    .form-group.vendor:focus-within input { border-color: var(--vendor-color); }
+    .form-group.customer:focus-within input { border-color: var(--customer-color); }
+
+    .send-btn {
+      padding: 16px 40px; border: none; border-radius: 40px; font-weight: 700; font-size: 1rem;
+      background: var(--vendor-gradient); color: white; cursor: pointer; transition: 0.3s;
+      box-shadow: 0 8px 20px rgba(80,200,120,0.3); width: 100%;
+    }
+    .send-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 30px #50C878; }
+
+    /* offices / locations */
+    .locations-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin: 60px 0 0;
+    }
+    .loc-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; text-align: center;
+    }
+    .loc-card .admin-dot { width: 10px; height: 10px; background: var(--admin-color); border-radius: 50%; margin: 0 auto 10px; }
+    .loc-card .vendor-dot { background: var(--vendor-color); }
+    .loc-card .customer-dot { background: var(--customer-color); }
+
+    /* footer (same as home) */
+    .footer {
+      background: #030711; border-top: 1px solid var(--border); padding: 60px 0 30px;
+    }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; margin-bottom: 40px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-muted); }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .locations-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
