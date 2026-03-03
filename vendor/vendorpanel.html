@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizLink – Vendor Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/vendorpanel.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- BG GRID (same as home) -->
+<div class="hero-bg-grid"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+    <a href="../pages/home.html" class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Biz<strong>Link</strong></span>
+    </a>
+    <div class="sidebar-role-badge">Vendor</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard" onclick="navigate(event,this,'dashboard')">
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="products" onclick="navigate(event,this,'products')">
+      <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+    </a>
+    <a href="#" class="nav-item" data-page="orders" onclick="navigate(event,this,'orders')">
+      <span class="nav-icon">🛒</span><span class="nav-label">Orders</span>
+      <span class="nav-badge">5</span>
+    </a>
+    <a href="#" class="nav-item" data-page="customers" onclick="navigate(event,this,'customers')">
+      <span class="nav-icon">👥</span><span class="nav-label">Customers</span>
+    </a>
+    <a href="#" class="nav-item" data-page="promotions" onclick="navigate(event,this,'promotions')">
+      <span class="nav-icon">🎟</span><span class="nav-label">Promotions</span>
+    </a>
+    <a href="#" class="nav-item" data-page="analytics" onclick="navigate(event,this,'analytics')">
+      <span class="nav-icon">📈</span><span class="nav-label">Analytics</span>
+    </a>
+    <a href="#" class="nav-item" data-page="payments" onclick="navigate(event,this,'payments')">
+      <span class="nav-icon">💳</span><span class="nav-label">Payments</span>
+    </a>
+    <a href="#" class="nav-item" data-page="reviews" onclick="navigate(event,this,'reviews')">
+      <span class="nav-icon">⭐</span><span class="nav-label">Reviews</span>
+    </a>
+    <a href="#" class="nav-item" data-page="settings" onclick="navigate(event,this,'settings')">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+    </a>
+    <a href="#" class="nav-item" data-page="support" onclick="navigate(event,this,'support')">
+      <span class="nav-icon">🛡</span><span class="nav-label">Support</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-profile">
+    <div class="profile-avatar">AS</div>
+    <div class="profile-info">
+      <div class="profile-name">Ashan Silva</div>
+      <div class="profile-role">Verified Vendor ✅</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search anything…" />
+      </div>
+      <div class="notif-wrap">
+        <button class="notif-bell" onclick="toggleNotif()">
+          🔔<span class="notif-dot"></span>
+        </button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-title">Notifications</div>
+          <div class="notif-item is-new">🛒 New order #LK-00892 received</div>
+          <div class="notif-item is-new">⚠️ Low stock: Ceylon Tea (3 left)</div>
+          <div class="notif-item">✅ Payment of Rs. 12,400 confirmed</div>
+          <div class="notif-item">⭐ New 5-star review from Nimali P.</div>
+        </div>
+      </div>
+      <a href="../pages/home.html" class="btn-ghost-sm">← Home</a>
+    </div>
+  </header>
+
+  <!-- PAGES CONTAINER -->
+  <div class="pages-wrap">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="page active" id="page-dashboard">
+
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <div class="section-label">VENDOR PORTAL</div>
+          <h1 class="welcome-title">Welcome back, <span class="vendor-text">Ashan</span> 👋</h1>
+          <p class="welcome-sub">Tuesday, 24 February 2026 · Colombo, Western Province</p>
+        </div>
+        <div class="welcome-badge-wrap">
+          <span class="badge-dot"></span> 🇱🇰 &nbsp;Sri Lanka Seller
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:var(--vendor-color)">📊</span>
+            <span class="stat-change up">+18% ↑</span>
+          </div>
+          <div class="stat-label">Today's Sales</div>
+          <div class="stat-value" id="s1">Rs. 0</div>
+          <div class="stat-foot">vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:#4f8cff">📦</span>
+            <span class="stat-change up">+24 ↑</span>
+          </div>
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="s2">0</div>
+          <div class="stat-foot">This week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:#FF8C00">🚚</span>
+            <span class="stat-change warn">⚠ Attention</span>
+          </div>
+          <div class="stat-label">Pending Orders</div>
+          <div class="stat-value" id="s3">0</div>
+          <div class="stat-foot">Needs action</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:var(--vendor-color)">💰</span>
+            <span class="stat-change up">+32% ↑</span>
+          </div>
+          <div class="stat-label">Total Earnings</div>
+          <div class="stat-value" id="s4">Rs. 0</div>
+          <div class="stat-foot">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:#FFD700">⭐</span>
+            <span class="stat-change up">Excellent</span>
+          </div>
+          <div class="stat-label">Customer Rating</div>
+          <div class="stat-value">4.8 / 5</div>
+          <div class="stat-stars">★★★★★</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <span class="stat-icon-wrap" style="--c:var(--vendor-color)">📈</span>
+            <span class="stat-change up">Best month</span>
+          </div>
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-value" id="s5">Rs. 0</div>
+          <div class="stat-foot">February 2026</div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="charts-row">
+        <div class="glass-card chart-wide">
+          <div class="card-header">
+            <span class="card-title">Sales Overview — Last 7 Days</span>
+            <div class="chart-tabs">
+              <button class="ctab active">Week</button>
+              <button class="ctab">Month</button>
+            </div>
+          </div>
+          <canvas id="salesChart" height="110"></canvas>
+        </div>
+        <div class="glass-card">
+          <div class="card-header"><span class="card-title">Order Status</span></div>
+          <canvas id="donutChart" height="150"></canvas>
+          <div class="donut-legend">
+            <div class="dl-item"><span class="dl-dot" style="background:var(--vendor-color)"></span>Delivered 62%</div>
+            <div class="dl-item"><span class="dl-dot" style="background:#FF8C00"></span>Pending 18%</div>
+            <div class="dl-item"><span class="dl-dot" style="background:#ff6b6b"></span>Cancelled 8%</div>
+            <div class="dl-item"><span class="dl-dot" style="background:#4f8cff"></span>Processing 12%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ORDERS -->
+      <div class="glass-card">
+        <div class="card-header">
+          <span class="card-title">Recent Orders</span>
+          <button class="btn-ghost-sm" onclick="goToPage('orders')">View All →</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>District</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="recentOrdersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRODUCTS ===== -->
+    <section class="page" id="page-products">
+      <div class="page-header">
+        <div>
+          <div class="section-label">INVENTORY</div>
+          <h2 class="page-h2">Product Management</h2>
+        </div>
+        <button class="btn-vendor" onclick="showModal('addProduct')">+ Add Product</button>
+      </div>
+      <div class="filter-row">
+        <input class="search-input" type="text" placeholder="Search products…" oninput="filterProducts(this.value)" />
+        <select class="filter-select" onchange="filterByStatus(this.value)">
+          <option value="">All Status</option>
+          <option>Active</option><option>Out of Stock</option><option>Draft</option>
+        </select>
+        <button class="btn-outline-vendor">📤 Bulk Upload (CSV)</button>
+      </div>
+      <div class="products-grid" id="productsGrid"></div>
+    </section>
+
+    <!-- ===== ORDERS ===== -->
+    <section class="page" id="page-orders">
+      <div class="page-header">
+        <div>
+          <div class="section-label">FULFILMENT</div>
+          <h2 class="page-h2">Order Management</h2>
+        </div>
+        <button class="btn-outline-vendor">📥 Download Report</button>
+      </div>
+      <div class="otab-row">
+        <button class="otab active" onclick="filterOrders('all',this)">All</button>
+        <button class="otab" onclick="filterOrders('pending',this)">Pending</button>
+        <button class="otab" onclick="filterOrders('processing',this)">Processing</button>
+        <button class="otab" onclick="filterOrders('shipped',this)">Shipped</button>
+        <button class="otab" onclick="filterOrders('delivered',this)">Delivered</button>
+        <button class="otab" onclick="filterOrders('cancelled',this)">Cancelled</button>
+      </div>
+      <div class="glass-card" style="padding:0">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>District</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CUSTOMERS ===== -->
+    <section class="page" id="page-customers">
+      <div class="page-header">
+        <div>
+          <div class="section-label">CRM</div>
+          <h2 class="page-h2">Customer Management</h2>
+        </div>
+        <button class="btn-vendor">+ Add Customer</button>
+      </div>
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">👥</span></div><div class="stat-label">Total Customers</div><div class="stat-value">2,841</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FFD700">👑</span></div><div class="stat-label">VIP Customers</div><div class="stat-value">142</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#4f8cff">🔄</span></div><div class="stat-label">Repeat Buyers</div><div class="stat-value">1,204</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FF8C00">🆕</span></div><div class="stat-label">New This Month</div><div class="stat-value">328</div></div>
+      </div>
+      <div class="filter-row">
+        <input class="search-input" type="text" placeholder="Search customers…" />
+        <select class="filter-select"><option value="">All Tags</option><option>VIP</option><option>Frequent Buyer</option><option>New</option></select>
+        <select class="filter-select"><option value="">All Districts</option><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
+      </div>
+      <div class="customers-grid" id="customersGrid"></div>
+    </section>
+
+    <!-- ===== PROMOTIONS ===== -->
+    <section class="page" id="page-promotions">
+      <div class="page-header">
+        <div>
+          <div class="section-label">MARKETING</div>
+          <h2 class="page-h2">Promotions & Discounts</h2>
+        </div>
+        <button class="btn-vendor" onclick="showModal('addCoupon')">+ Create Coupon</button>
+      </div>
+      <div class="promos-grid">
+        <div class="promo-card promo-active">
+          <div class="promo-badge-tag">FLASH SALE 🔥</div>
+          <div class="promo-code">AVURUDU25</div>
+          <div class="promo-detail">25% off all items · Expires 13 Apr 2026</div>
+          <div class="promo-used">Used: 284 times</div>
+          <div class="promo-actions"><button class="btn-sm-vendor">Edit</button><button class="btn-sm-danger">Delete</button></div>
+        </div>
+        <div class="promo-card">
+          <div class="promo-badge-tag">FLAT DISCOUNT</div>
+          <div class="promo-code">WELCOME100</div>
+          <div class="promo-detail">Rs. 100 off for new customers</div>
+          <div class="promo-used">Used: 1,024 times</div>
+          <div class="promo-actions"><button class="btn-sm-vendor">Edit</button><button class="btn-sm-danger">Delete</button></div>
+        </div>
+        <div class="promo-card promo-add" onclick="showModal('addCoupon')">
+          <div class="promo-add-icon">+</div>
+          <div>Create New Promo</div>
+        </div>
+      </div>
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">🎉 Flash Sale Countdown — Sinhala New Year</span></div>
+        <div class="flash-info">
+          <div class="flash-row"><span class="flash-lbl">Next Sale</span><span>Sinhala New Year Sale — April 13, 2026</span></div>
+          <div class="flash-row"><span class="flash-lbl">Countdown</span><span class="countdown-val" id="countdown">Loading…</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ANALYTICS ===== -->
+    <section class="page" id="page-analytics">
+      <div class="page-header">
+        <div>
+          <div class="section-label">INSIGHTS</div>
+          <h2 class="page-h2">Analytics & Reports</h2>
+        </div>
+        <button class="btn-outline-vendor">📥 Download CSV</button>
+      </div>
+      <div class="charts-row">
+        <div class="glass-card chart-wide">
+          <div class="card-header"><span class="card-title">Monthly Revenue 2026</span></div>
+          <canvas id="monthlyChart" height="110"></canvas>
+        </div>
+        <div class="glass-card">
+          <div class="card-header"><span class="card-title">Sales by District</span></div>
+          <canvas id="districtChart" height="150"></canvas>
+        </div>
+      </div>
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">🏆 Best Selling Products</span></div>
+        <div id="bestSellersList" class="best-sellers-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== PAYMENTS ===== -->
+    <section class="page" id="page-payments">
+      <div class="page-header">
+        <div>
+          <div class="section-label">FINANCE</div>
+          <h2 class="page-h2">Payments & Earnings</h2>
+        </div>
+        <button class="btn-vendor">💵 Request Withdrawal</button>
+      </div>
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">💰</span></div><div class="stat-label">Total Earnings</div><div class="stat-value">Rs. 892,400</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">💵</span></div><div class="stat-label">Withdrawable Balance</div><div class="stat-value">Rs. 124,000</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#ff6b6b">📉</span></div><div class="stat-label">Platform Fee (5%)</div><div class="stat-value">Rs. 44,620</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FF8C00">🏦</span></div><div class="stat-label">Commission Rate</div><div class="stat-value">8%</div></div>
+      </div>
+      <div class="glass-card">
+        <div class="card-header"><span class="card-title">Transaction History</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Txn ID</th><th>Type</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="txnBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="payout-section">
+        <h3 class="payout-title">Payout Methods</h3>
+        <div class="payout-grid">
+          <div class="payout-card payout-active">🏦 Bank Transfer<br><small>Sampath Bank — ****4892</small><span class="payout-default">Default</span></div>
+          <div class="payout-card">📱 eZ Cash<br><small>+94 77 *** 1234</small></div>
+          <div class="payout-card">📱 mCash<br><small>Not linked</small></div>
+          <div class="payout-card payout-add">+ Add Method</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REVIEWS ===== -->
+    <section class="page" id="page-reviews">
+      <div class="page-header">
+        <div>
+          <div class="section-label">REPUTATION</div>
+          <h2 class="page-h2">Reviews & Ratings</h2>
+        </div>
+      </div>
+      <div class="rating-panel glass-card">
+        <div class="rating-big">4.8</div>
+        <div class="rating-stars">★★★★★</div>
+        <div class="rating-count">Based on 1,284 reviews</div>
+        <div class="rating-bars">
+          <div class="rbar"><span>5★</span><div class="rbar-track"><div class="rbar-fill" style="width:72%;background:var(--vendor-color)"></div></div><span>72%</span></div>
+          <div class="rbar"><span>4★</span><div class="rbar-track"><div class="rbar-fill" style="width:18%;background:#4f8cff"></div></div><span>18%</span></div>
+          <div class="rbar"><span>3★</span><div class="rbar-track"><div class="rbar-fill" style="width:6%;background:#FF8C00"></div></div><span>6%</span></div>
+          <div class="rbar"><span>2★</span><div class="rbar-track"><div class="rbar-fill" style="width:3%;background:#ff6b6b"></div></div><span>3%</span></div>
+          <div class="rbar"><span>1★</span><div class="rbar-track"><div class="rbar-fill" style="width:1%;background:#ff4444"></div></div><span>1%</span></div>
+        </div>
+      </div>
+      <div class="reviews-list" id="reviewsList"></div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="page" id="page-settings">
+      <div class="page-header">
+        <div>
+          <div class="section-label">ACCOUNT</div>
+          <h2 class="page-h2">Vendor Settings</h2>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="glass-card settings-col">
+          <h3 class="settings-heading">Business Profile</h3>
+          <div class="form-group"><label>Business Name</label><input type="text" value="Ashan's Ceylon Store" class="form-input" /></div>
+          <div class="form-group"><label>Owner Name</label><input type="text" value="Ashan Silva" class="form-input" /></div>
+          <div class="form-group"><label>Contact Number</label><input type="text" value="+94 77 123 4567" class="form-input" /></div>
+          <div class="form-group"><label>Email</label><input type="email" value="ashan@ceylonstore.lk" class="form-input" /></div>
+          <div class="form-group"><label>Store Address</label><input type="text" value="No. 42, Galle Road, Colombo 03" class="form-input" /></div>
+          <div class="form-group"><label>District</label>
+            <select class="form-input"><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
+          </div>
+          <div class="form-group"><label>Business Reg. No.</label><input type="text" value="BR/2021/001234" class="form-input" /></div>
+          <button class="btn-vendor" style="margin-top:1rem;width:100%">Save Profile</button>
+        </div>
+        <div class="glass-card settings-col">
+          <h3 class="settings-heading">Security</h3>
+          <div class="form-group"><label>Current Password</label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <div class="form-group"><label>New Password</label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <div class="form-group"><label>Confirm Password</label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <button class="btn-vendor" style="width:100%">Change Password</button>
+
+          <div class="toggle-row" style="margin-top:1.5rem"><span>Two-Factor Authentication</span>
+            <label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+
+          <h3 class="settings-heading" style="margin-top:1.5rem">Notifications</h3>
+          <div class="toggle-row"><span>New Orders</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Low Stock Alerts</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Payment Received</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Review Posted</span><label class="toggle-sw"><input type="checkbox" /><span class="toggle-track"></span></label></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SUPPORT ===== -->
+    <section class="page" id="page-support">
+      <div class="page-header">
+        <div>
+          <div class="section-label">HELP CENTER</div>
+          <h2 class="page-h2">Help & Support</h2>
+        </div>
+      </div>
+      <div class="support-grid">
+        <div class="glass-card">
+          <div class="support-hdr" onclick="toggleFaq(this)">❓ Frequently Asked Questions <span class="faq-arrow">›</span></div>
+          <div class="support-body">
+            <div class="faq-item"><strong>How do I add a product?</strong><p>Go to Products → Add Product. Fill in details and click Save.</p></div>
+            <div class="faq-item"><strong>How are payouts processed?</strong><p>Payouts are processed every Monday via Bank Transfer or eZ Cash.</p></div>
+            <div class="faq-item"><strong>What is the platform commission?</strong><p>8% commission + 5% platform fee on each sale.</p></div>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="support-hdr open-hdr">🎫 Raise a Ticket</div>
+          <div class="support-body open-body">
+            <div class="form-group"><label>Subject</label><input type="text" placeholder="Issue subject…" class="form-input" /></div>
+            <div class="form-group"><label>Category</label><select class="form-input"><option>Payment Issue</option><option>Order Problem</option><option>Technical Bug</option><option>Account Issue</option></select></div>
+            <div class="form-group"><label>Description</label><textarea class="form-input" rows="4" placeholder="Describe your issue…"></textarea></div>
+            <button class="btn-vendor">Submit Ticket</button>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="support-hdr open-hdr">💬 Live Chat</div>
+          <div class="support-body open-body">
+            <div class="chat-status"><span class="online-dot"></span> Support Online · Avg reply 2 min</div>
+            <div class="chat-msgs" id="chatMessages">
+              <div class="chat-bubble bot">👋 Hello Ashan! How can we help you today?</div>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" id="chatInput" placeholder="Type your message…" class="form-input" onkeydown="if(event.key==='Enter') sendChat()" />
+              <button class="btn-vendor btn-sm-pad" onclick="sendChat()">Send</button>
+            </div>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="support-hdr open-hdr">📞 Contact Admin</div>
+          <div class="support-body open-body">
+            <div class="contact-row">📧 support@bizlink.lk</div>
+            <div class="contact-row">📞 +94 11 234 5678</div>
+            <div class="contact-row">📱 WhatsApp: +94 77 987 6543</div>
+            <div class="contact-row">🕘 Mon–Sat · 9am–6pm</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /pages-wrap -->
+</main>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <span id="modalTitle">Modal</span>
+      <button onclick="closeModal()" class="modal-close">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="../assets/js/vendorpanel.js"></script>
+</body>
+</html>
