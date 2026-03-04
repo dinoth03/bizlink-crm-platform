@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Admin — Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/panel.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!--SIDEBAR-->
+<aside class="sidebar" id="sidebar">
+
+  <!-- Brand -->
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <span class="sb-hex">⬡</span>
+      <span class="sb-wordmark">Biz<strong>Link</strong></span>
+    </div>
+    <span class="sb-role-chip">ADMIN</span>
+  </div>
+
+  <!-- Search -->
+  <div class="sb-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search anything..." class="sb-search-input"/>
+    <span class="sb-search-kbd">⌘K</span>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sb-nav">
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Overview</span>
+      <a class="sb-nav-item active" data-page="dashboard" onclick="navigate('dashboard',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+        <span class="nav-badge-dot"></span>
+      </a>
+      <a class="sb-nav-item" data-page="analytics" onclick="navigate('analytics',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a class="sb-nav-item" data-page="reports" onclick="navigate('reports',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+        <span class="nav-pill">New</span>
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Management</span>
+      <a class="sb-nav-item" data-page="vendors" onclick="navigate('vendors',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Vendors
+        <span class="nav-count">320</span>
+      </a>
+      <a class="sb-nav-item" data-page="customers" onclick="navigate('customers',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+        <span class="nav-count">12.4k</span>
+      </a>
+      <a class="sb-nav-item" data-page="orders" onclick="navigate('orders',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Orders
+        <span class="nav-count">1,284</span>
+      </a>
+      <a class="sb-nav-item" data-page="marketplace" onclick="navigate('marketplace',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Marketplace
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Finance</span>
+      <a class="sb-nav-item" data-page="revenue" onclick="navigate('revenue',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Revenue
+      </a>
+      <a class="sb-nav-item" data-page="invoices" onclick="navigate('invoices',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Invoices
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">System</span>
+      <a class="sb-nav-item" data-page="users" onclick="navigate('users',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        User Roles
+      </a>
+      <a class="sb-nav-item" data-page="settings" onclick="navigate('settings',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+      <a class="sb-nav-item" data-page="logs" onclick="navigate('logs',this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Activity Logs
+      </a>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">KP</div>
+      <div class="sb-user-info">
+        <span class="sb-user-name">Kasun Perera</span>
+        <span class="sb-user-role">Super Admin</span>
+      </div>
+      <button class="sb-logout" title="Logout" onclick="confirmLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!--MAIN CONTENT-->
+<div class="main-wrap" id="mainWrap">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="tb-breadcrumb">
+        <span class="tb-bc-root">BizLink</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="tb-bc-page" id="bcPage">Dashboard</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-date" id="tbDate"></div>
+      <button class="tb-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="tb-icon-btn notif-btn" id="notifBtn" onclick="toggleNotif()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot">4</span>
+      </button>
+      <div class="tb-avatar-wrap" onclick="toggleUserMenu()">
+        <div class="tb-avatar">KP</div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+
+      <!-- Notification Panel -->
+      <div class="notif-panel" id="notifPanel">
+        <div class="np-header">
+          <span>Notifications</span>
+          <button class="np-clear" onclick="clearNotifs()">Clear all</button>
+        </div>
+        <div class="np-list" id="notifList"></div>
+      </div>
+
+      <!-- User Menu -->
+      <div class="user-menu" id="userMenu">
+        <div class="um-profile">
+          <div class="um-avatar">KP</div>
+          <div>
+            <strong>Kasun Perera</strong>
+            <span>kasun@bizlink.lk</span>
+          </div>
+        </div>
+        <div class="um-divider"></div>
+        <a class="um-item" onclick="navigate('settings',null)">⚙️ Account Settings</a>
+        <a class="um-item" href="#">🔐 Security</a>
+        <a class="um-item" href="#">📋 Audit Trail</a>
+        <div class="um-divider"></div>
+        <a class="um-item um-danger" onclick="confirmLogout()">🚪 Sign Out</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ PAGE CONTENT ═══ -->
+  <main class="page-content" id="pageContent">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page" id="page-dashboard">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Good morning, Kasun 👋</h1>
+          <p class="page-subtitle">Here's what's happening across BizLink today.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-outline" onclick="exportReport()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="btn-primary" onclick="showNewVendorModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Vendor
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" data-trend="up">
+          <div class="kpi-top">
+            <div class="kpi-icon-wrap navy-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="kpi-trend up">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              +12.4%
+            </div>
+          </div>
+          <div class="kpi-value" data-count="4820000">Rs. 0</div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-sublabel">vs. Rs. 4.29M last month</div>
+          <div class="kpi-sparkline" id="spark1"></div>
+        </div>
+
+        <div class="kpi-card" data-trend="up">
+          <div class="kpi-top">
+            <div class="kpi-icon-wrap green-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="kpi-trend up">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              +8.1%
+            </div>
+          </div>
+          <div class="kpi-value" data-count="12480">0</div>
+          <div class="kpi-label">Active Customers</div>
+          <div class="kpi-sublabel">342 new this week</div>
+          <div class="kpi-sparkline" id="spark2"></div>
+        </div>
+
+        <div class="kpi-card" data-trend="up">
+          <div class="kpi-top">
+            <div class="kpi-icon-wrap orange-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </div>
+            <div class="kpi-trend up">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              +5.3%
+            </div>
+          </div>
+          <div class="kpi-value" data-count="3847">0</div>
+          <div class="kpi-label">Total Orders</div>
+          <div class="kpi-sublabel">284 pending fulfillment</div>
+          <div class="kpi-sparkline" id="spark3"></div>
+        </div>
+
+        <div class="kpi-card" data-trend="down">
+          <div class="kpi-top">
+            <div class="kpi-icon-wrap slate-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </div>
+            <div class="kpi-trend down">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+              -2.1%
+            </div>
+          </div>
+          <div class="kpi-value" data-count="320">0</div>
+          <div class="kpi-label">Active Vendors</div>
+          <div class="kpi-sublabel">14 pending approval</div>
+          <div class="kpi-sparkline" id="spark4"></div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <!-- Revenue Chart -->
+        <div class="chart-card wide-chart">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Revenue Overview</h3>
+              <p class="chart-sub">Monthly breakdown — 2024</p>
+            </div>
+            <div class="chart-actions">
+              <button class="chart-period active" onclick="setPeriod(this)">Monthly</button>
+              <button class="chart-period" onclick="setPeriod(this)">Quarterly</button>
+              <button class="chart-period" onclick="setPeriod(this)">Yearly</button>
+            </div>
+          </div>
+          <div class="bar-chart-wrap">
+            <div class="bar-chart" id="revenueChart"></div>
+            <div class="bar-labels" id="revenueLabels"></div>
+          </div>
+        </div>
+
+        <!-- Category Donut -->
+        <div class="chart-card donut-card">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Sales by Category</h3>
+              <p class="chart-sub">This month</p>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 120 120" id="donutSvg"></svg>
+            <div class="donut-center">
+              <span class="donut-total">48</span>
+              <span class="donut-label">Categories</span>
+            </div>
+          </div>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid -->
+      <div class="bottom-grid">
+
+        <!-- Recent Orders Table -->
+        <div class="data-card orders-card">
+          <div class="dc-header">
+            <div>
+              <h3 class="dc-title">Recent Orders</h3>
+              <p class="dc-sub">Last 24 hours</p>
+            </div>
+            <button class="dc-link" onclick="navigate('orders',null)">View all →</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="ordersTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Vendor</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+
+          <!-- Vendor Approval -->
+          <div class="data-card">
+            <div class="dc-header">
+              <div>
+                <h3 class="dc-title">Pending Approvals</h3>
+                <p class="dc-sub">14 vendors awaiting review</p>
+              </div>
+              <button class="dc-link" onclick="navigate('vendors',null)">View all →</button>
+            </div>
+            <div class="approval-list" id="approvalList"></div>
+          </div>
+
+          <!-- System Health -->
+          <div class="data-card">
+            <div class="dc-header">
+              <h3 class="dc-title">System Health</h3>
+            </div>
+            <div class="health-list">
+              <div class="health-item">
+                <div class="hi-info">
+                  <span class="hi-dot green-dot"></span>
+                  <span class="hi-label">API Gateway</span>
+                </div>
+                <div class="hi-bar-wrap">
+                  <div class="hi-bar"><div class="hi-fill" style="width:98%;background:#16a34a"></div></div>
+                  <span class="hi-val">98%</span>
+                </div>
+              </div>
+              <div class="health-item">
+                <div class="hi-info">
+                  <span class="hi-dot green-dot"></span>
+                  <span class="hi-label">Database</span>
+                </div>
+                <div class="hi-bar-wrap">
+                  <div class="hi-bar"><div class="hi-fill" style="width:99%;background:#16a34a"></div></div>
+                  <span class="hi-val">99%</span>
+                </div>
+              </div>
+              <div class="health-item">
+                <div class="hi-info">
+                  <span class="hi-dot amber-dot"></span>
+                  <span class="hi-label">Email Service</span>
+                </div>
+                <div class="hi-bar-wrap">
+                  <div class="hi-bar"><div class="hi-fill" style="width:87%;background:#d97706"></div></div>
+                  <span class="hi-val">87%</span>
+                </div>
+              </div>
+              <div class="health-item">
+                <div class="hi-info">
+                  <span class="hi-dot green-dot"></span>
+                  <span class="hi-label">CDN</span>
+                </div>
+                <div class="hi-bar-wrap">
+                  <div class="hi-bar"><div class="hi-fill" style="width:100%;background:#16a34a"></div></div>
+                  <span class="hi-val">100%</span>
+                </div>
+              </div>
+              <div class="health-item">
+                <div class="hi-info">
+                  <span class="hi-dot green-dot"></span>
+                  <span class="hi-label">Payment Gateway</span>
+                </div>
+                <div class="hi-bar-wrap">
+                  <div class="hi-bar"><div class="hi-fill" style="width:96%;background:#16a34a"></div></div>
+                  <span class="hi-val">96%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Vendors -->
+          <div class="data-card">
+            <div class="dc-header">
+              <div>
+                <h3 class="dc-title">Top Vendors</h3>
+                <p class="dc-sub">By revenue this month</p>
+              </div>
+            </div>
+            <div class="top-vendors" id="topVendors"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Activity Log Strip -->
+      <div class="data-card activity-card">
+        <div class="dc-header">
+          <div>
+            <h3 class="dc-title">Live Activity Feed</h3>
+            <p class="dc-sub">Real-time platform events</p>
+          </div>
+          <div class="live-indicator">
+            <span class="live-dot"></span> Live
+          </div>
+        </div>
+        <div class="activity-feed" id="activityFeed"></div>
+      </div>
+
+    </div><!-- /page-dashboard -->
+
+    <!-- VENDORS PAGE -->
+    <div class="page hidden" id="page-vendors">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Vendor Management</h1>
+          <p class="page-subtitle">Review, approve, and manage all registered vendors.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-outline">Export CSV</button>
+          <button class="btn-primary" onclick="showNewVendorModal()">+ Add Vendor</button>
+        </div>
+      </div>
+      <!-- Vendor Stats -->
+      <div class="mini-stats">
+        <div class="ms-card"><span class="ms-num navy-text">320</span><span class="ms-lbl">Total</span></div>
+        <div class="ms-card"><span class="ms-num green-text">298</span><span class="ms-lbl">Active</span></div>
+        <div class="ms-card"><span class="ms-num amber-text">14</span><span class="ms-lbl">Pending</span></div>
+        <div class="ms-card"><span class="ms-num red-text">8</span><span class="ms-lbl">Suspended</span></div>
+      </div>
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="fb-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search vendors..." class="fb-input" oninput="filterVendorTable(this.value)"/>
+        </div>
+        <select class="fb-select" onchange="filterVendorStatus(this.value)">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="suspended">Suspended</option>
+        </select>
+        <select class="fb-select">
+          <option>All Industries</option>
+          <option>Electronics</option>
+          <option>Fashion</option>
+          <option>Agriculture</option>
+          <option>Grocery</option>
+          <option>IT Services</option>
+        </select>
+      </div>
+      <div class="data-card no-pad">
+        <table class="data-table full-table" id="vendorsTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="cb-all" onchange="selectAll(this)"/></th>
+              <th>Vendor</th>
+              <th>Industry</th>
+              <th>Province</th>
+              <th>Revenue (MTD)</th>
+              <th>Orders</th>
+              <th>Rating</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vendorsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page hidden" id="page-analytics">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Analytics</h1>
+          <p class="page-subtitle">Detailed platform-wide metrics and insights.</p>
+        </div>
+        <button class="btn-primary">Generate Report</button>
+      </div>
+      <div class="analytics-grid">
+        <div class="data-card">
+          <div class="dc-header"><h3 class="dc-title">Conversion Rate</h3></div>
+          <div class="big-metric"><span class="bm-num">3.84%</span><span class="kpi-trend up">+0.42%</span></div>
+          <p class="bm-desc">Visitors converting to customers</p>
+          <div class="progress-bar-full"><div class="pbf-fill" style="width:38.4%"></div></div>
+        </div>
+        <div class="data-card">
+          <div class="dc-header"><h3 class="dc-title">Avg. Order Value</h3></div>
+          <div class="big-metric"><span class="bm-num">Rs. 3,742</span><span class="kpi-trend up">+Rs. 280</span></div>
+          <p class="bm-desc">Per transaction this month</p>
+          <div class="progress-bar-full"><div class="pbf-fill" style="width:62%"></div></div>
+        </div>
+        <div class="data-card">
+          <div class="dc-header"><h3 class="dc-title">Customer Retention</h3></div>
+          <div class="big-metric"><span class="bm-num">68.2%</span><span class="kpi-trend up">+3.1%</span></div>
+          <p class="bm-desc">Returning customers this month</p>
+          <div class="progress-bar-full"><div class="pbf-fill" style="width:68.2%"></div></div>
+        </div>
+        <div class="data-card">
+          <div class="dc-header"><h3 class="dc-title">Vendor Fill Rate</h3></div>
+          <div class="big-metric"><span class="bm-num">91.7%</span><span class="kpi-trend down">-1.2%</span></div>
+          <p class="bm-desc">Orders fulfilled on time</p>
+          <div class="progress-bar-full"><div class="pbf-fill" style="width:91.7%"></div></div>
+        </div>
+      </div>
+
+      <div class="charts-row" style="margin-top:24px;">
+        <div class="chart-card wide-chart">
+          <div class="chart-header">
+            <div><h3 class="chart-title">Customer Growth</h3><p class="chart-sub">New registrations per month</p></div>
+          </div>
+          <div class="bar-chart-wrap">
+            <div class="bar-chart" id="customerGrowthChart"></div>
+            <div class="bar-labels" id="customerGrowthLabels"></div>
+          </div>
+        </div>
+        <div class="chart-card donut-card">
+          <div class="chart-header"><div><h3 class="chart-title">Traffic by Province</h3><p class="chart-sub">User distribution</p></div></div>
+          <div class="province-list" id="provinceList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!--ORDERS PAGE -->
+    <div class="page hidden" id="page-orders">
+      <div class="page-header">
+        <div><h1 class="page-title">Order Management</h1><p class="page-subtitle">Track and manage all marketplace orders.</p></div>
+        <button class="btn-outline">Export Orders</button>
+      </div>
+      <div class="mini-stats">
+        <div class="ms-card"><span class="ms-num navy-text">3,847</span><span class="ms-lbl">Total Orders</span></div>
+        <div class="ms-card"><span class="ms-num green-text">3,219</span><span class="ms-lbl">Completed</span></div>
+        <div class="ms-card"><span class="ms-num amber-text">284</span><span class="ms-lbl">Processing</span></div>
+        <div class="ms-card"><span class="ms-num red-text">344</span><span class="ms-lbl">Cancelled</span></div>
+      </div>
+      <div class="filter-bar">
+        <div class="fb-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search orders..." class="fb-input"/>
+        </div>
+        <select class="fb-select">
+          <option>All Status</option>
+          <option>Completed</option>
+          <option>Processing</option>
+          <option>Cancelled</option>
+        </select>
+        <select class="fb-select">
+          <option>All Categories</option>
+          <option>Electronics</option>
+          <option>Fashion</option>
+          <option>Grocery</option>
+        </select>
+      </div>
+      <div class="data-card no-pad">
+        <table class="data-table full-table" id="ordersFullTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox"/></th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Vendor</th>
+              <th>Amount</th>
+              <th>Province</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersFullBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page hidden" id="page-settings">
+      <div class="page-header">
+        <div><h1 class="page-title">Settings</h1><p class="page-subtitle">Configure platform preferences and admin access.</p></div>
+      </div>
+      <div class="settings-grid">
+        <div class="data-card">
+          <h3 class="dc-title" style="margin-bottom:20px">Profile Information</h3>
+          <div class="settings-form">
+            <div class="sf-group">
+              <label>Full Name</label>
+              <input type="text" value="Kasun Perera" class="sf-input"/>
+            </div>
+            <div class="sf-group">
+              <label>Email</label>
+              <input type="email" value="kasun@bizlink.lk" class="sf-input"/>
+            </div>
+            <div class="sf-group">
+              <label>Phone</label>
+              <input type="tel" value="+94 77 123 4567" class="sf-input"/>
+            </div>
+            <div class="sf-group">
+              <label>Role</label>
+              <input type="text" value="Super Administrator" class="sf-input" readonly/>
+            </div>
+            <button class="btn-primary" style="margin-top:8px">Save Changes</button>
+          </div>
+        </div>
+        <div class="data-card">
+          <h3 class="dc-title" style="margin-bottom:20px">Platform Settings</h3>
+          <div class="settings-toggles">
+            <div class="st-item">
+              <div><strong>Email Notifications</strong><p>Receive alerts for new vendor registrations</p></div>
+              <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="st-item">
+              <div><strong>Auto-approve Vendors</strong><p>Skip manual review for verified businesses</p></div>
+              <div class="toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="st-item">
+              <div><strong>Two-Factor Authentication</strong><p>Require 2FA for all admin logins</p></div>
+              <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="st-item">
+              <div><strong>Maintenance Mode</strong><p>Take platform offline for updates</p></div>
+              <div class="toggle" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="st-item">
+              <div><strong>Live Activity Feed</strong><p>Show real-time events on dashboard</p></div>
+              <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+            </div>
+          </div>
+        </div>
+        <div class="data-card">
+          <h3 class="dc-title" style="margin-bottom:20px">Security</h3>
+          <div class="settings-form">
+            <div class="sf-group">
+              <label>Current Password</label>
+              <input type="password" placeholder="••••••••" class="sf-input"/>
+            </div>
+            <div class="sf-group">
+              <label>New Password</label>
+              <input type="password" placeholder="••••••••" class="sf-input"/>
+            </div>
+            <div class="sf-group">
+              <label>Session Timeout</label>
+              <select class="sf-input sf-select">
+                <option>30 minutes</option>
+                <option>1 hour</option>
+                <option>4 hours</option>
+                <option>Never</option>
+              </select>
+            </div>
+            <button class="btn-primary" style="margin-top:8px">Update Security</button>
+          </div>
+        </div>
+        <div class="data-card">
+          <h3 class="dc-title" style="margin-bottom:20px">Danger Zone</h3>
+          <p style="font-size:0.84rem;color:var(--t2);margin-bottom:20px;">These actions are irreversible. Proceed with extreme caution.</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <button class="btn-danger-outline">Reset Platform Data</button>
+            <button class="btn-danger-outline">Purge All Sessions</button>
+            <button class="btn-danger">Delete All Inactive Vendors</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other pages rendered generically -->
+    <div class="page hidden" id="page-reports">
+      <div class="page-header"><div><h1 class="page-title">Reports</h1><p class="page-subtitle">Generate and download platform-wide business reports.</p></div><button class="btn-primary">New Report</button></div>
+      <div class="reports-grid" id="reportsGrid"></div>
+    </div>
+    <div class="page hidden" id="page-customers">
+      <div class="page-header"><div><h1 class="page-title">Customer Management</h1><p class="page-subtitle">View and manage all registered customers.</p></div></div>
+      <div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">12,480</span><span class="ms-lbl">Total</span></div><div class="ms-card"><span class="ms-num green-text">9,840</span><span class="ms-lbl">Active</span></div><div class="ms-card"><span class="ms-num amber-text">342</span><span class="ms-lbl">New This Week</span></div><div class="ms-card"><span class="ms-num red-text">124</span><span class="ms-lbl">Flagged</span></div></div>
+      <div class="data-card no-pad" style="margin-top:20px"><table class="data-table full-table"><thead><tr><th><input type="checkbox"/></th><th>Customer</th><th>Email</th><th>Province</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Status</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+    </div>
+    <div class="page hidden" id="page-marketplace"><div class="page-header"><div><h1 class="page-title">Marketplace Overview</h1><p class="page-subtitle">Monitor product listings and category performance.</p></div></div><div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">1,284</span><span class="ms-lbl">Listings</span></div><div class="ms-card"><span class="ms-num green-text">48</span><span class="ms-lbl">Categories</span></div><div class="ms-card"><span class="ms-num amber-text">76</span><span class="ms-lbl">Pending Review</span></div><div class="ms-card"><span class="ms-num red-text">12</span><span class="ms-lbl">Flagged</span></div></div></div>
+    <div class="page hidden" id="page-revenue"><div class="page-header"><div><h1 class="page-title">Revenue & Finance</h1><p class="page-subtitle">Financial overview and commission tracking.</p></div></div><div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">Rs. 4.82M</span><span class="ms-lbl">Gross Revenue</span></div><div class="ms-card"><span class="ms-num green-text">Rs. 241K</span><span class="ms-lbl">Platform Commission</span></div><div class="ms-card"><span class="ms-num amber-text">Rs. 48K</span><span class="ms-lbl">Pending Payouts</span></div><div class="ms-card"><span class="ms-num navy-text">5%</span><span class="ms-lbl">Commission Rate</span></div></div></div>
+    <div class="page hidden" id="page-invoices"><div class="page-header"><div><h1 class="page-title">Invoices</h1><p class="page-subtitle">Track all generated invoices and payment statuses.</p></div><button class="btn-primary">Generate Invoice</button></div></div>
+    <div class="page hidden" id="page-users"><div class="page-header"><div><h1 class="page-title">User Roles</h1><p class="page-subtitle">Manage admin roles and permission levels.</p></div><button class="btn-primary">Add Admin User</button></div></div>
+    <div class="page hidden" id="page-logs"><div class="page-header"><div><h1 class="page-title">Activity Logs</h1><p class="page-subtitle">Complete audit trail of all admin actions.</p></div></div></div>
+
+  </main>
+</div>
+
+<!-- ═══ VENDOR MODAL ═══ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header">
+      <h3 id="modalTitle">Add New Vendor</h3>
+      <button class="modal-close-btn" onclick="closeModalDirect()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toastStack"></div>
+
+<!-- ═══ LOGOUT CONFIRM ═══ -->
+<div class="modal-backdrop" id="logoutBackdrop" style="display:none" onclick="cancelLogout(event)">
+  <div class="modal-box confirm-box">
+    <div class="confirm-icon">🚪</div>
+    <h3>Sign Out?</h3>
+    <p>You'll be returned to the login screen.</p>
+    <div class="confirm-actions">
+      <button class="btn-outline" onclick="cancelLogout()">Cancel</button>
+      <button class="btn-primary" onclick="window.location.href='../pages/index.html'">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/panel.js"></script>
+</body>
+</html>
