@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Customer – Dashboard</title>
+  <!-- same fonts & base styles as home page, plus customer orange accent -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/customerdashboard.css">
+  </head>
+<body>
+  <!-- Shared Navbar (customer orange) -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="../pages/home.html" class="logo"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="#">Orders</a></li>
+        <li><a href="#">Marketplace</a></li>
+        <li><a href="#">Support</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#" class="btn-ghost">🇱🇰</a>
+        <a href="userprofile.html" class="btn-customer">Profile</a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT: DASHBOARD (dashboard.html) -->
+  <section class="dashboard-section" id="dashboard-view">
+    <div class="container">
+      <div class="dashboard-header">
+        <div class="welcome">
+          <h1>Welcome back, <span class="gradient-text-customer">Dilini</span> 👋</h1>
+          <p><span class="sinhala-greeting">ඔයාට සාදරයෙන් පිළිගනිමි</span> • Your personal customer dashboard</p>
+        </div>
+        <div class="date-badge" id="currentDate"></div>
+      </div>
+
+      <!-- Stats cards -->
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-title">Total Orders</div><div class="stat-number" data-target="24">0</div><div class="stat-detail">Last 30 days: 8</div></div>
+        <div class="stat-card"><div class="stat-title">In Progress</div><div class="stat-number" data-target="3">0</div><div class="stat-detail">Awaiting delivery</div></div>
+        <div class="stat-card"><div class="stat-title">Wishlist</div><div class="stat-number" data-target="12">0</div><div class="stat-detail">items saved</div></div>
+        <div class="stat-card"><div class="stat-title">Vendors Followed</div><div class="stat-number" data-target="8">0</div><div class="stat-detail">4 active now</div></div>
+      </div>
+
+      <!-- Recent orders & recommended vendors -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">📦 Recent orders <span style="font-size:0.8rem; color:var(--customer);">track live</span></div>
+          <div class="order-item"><span><strong>#BL2821</strong> – Fresh Groceries</span> <span class="order-status">Delivered Dec 02</span></div>
+          <div class="order-item"><span><strong>#BL2914</strong> – Textile set</span> <span class="order-status">Shipped</span></div>
+          <div class="order-item"><span><strong>#BL3005</strong> – Tea gift pack</span> <span class="order-status">Processing</span></div>
+          <div class="order-item"><span><strong>#BL3117</strong> – Handicraft</span> <span class="order-status">Out for delivery</span></div>
+          <a href="#" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🛍️ Recommended vendors</div>
+          <div class="marketplace-grid">
+            <div class="vendor-mini"><span style="font-size:1.2rem;">🍵</span> TeaLanka <span style="color:var(--customer);">4.8★</span></div>
+            <div class="vendor-mini"><span style="font-size:1.2rem;">🥥</span> Coco Goods</div>
+            <div class="vendor-mini"><span style="font-size:1.2rem;">👗</span> Tharushi Fashion</div>
+            <div class="vendor-mini"><span style="font-size:1.2rem;">📚</span> Sarasavi Books</div>
+          </div>
+          <div class="chart-container" style="margin-top:28px;">
+            <div style="display:flex; justify-content:space-between;"><span>Monthly spending</span><span style="color:var(--customer);">+12%</span></div>
+            <div class="chart-bars">
+              <div class="bar" style="--h:0.5"></div><div class="bar" style="--h:0.7"></div><div class="bar" style="--h:0.4"></div>
+              <div class="bar" style="--h:0.9"></div><div class="bar" style="--h:0.6"></div><div class="bar" style="--h:0.8"></div>
+            </div>
+            <div class="bar-label">Aug – Jan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- quick actions + trust strip (customer style) -->
+      <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content: space-between; align-items:center; background:var(--bg-card); border-radius:var(--radius); padding:20px; border:1px solid var(--border);">
+        <span style="font-weight:600;">🔔 2 vendors replied to your chat</span>
+        <span style="display:flex; gap:12px;">
+          <a href="#" class="btn-customer" style="padding:10px 28px;">Message Center</a>
+          <a href="#" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Browse marketplace</a>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE PAGE (hidden by default, shown when userprofile.html loads) -->
+  <section class="dashboard-section" id="profile-view" style="display:none;">
+    <div class="container">
+      <div class="dashboard-header">
+        <h1 class="gradient-text-customer">My Profile</h1>
+        <p>Manage your BizLink customer account</p>
+      </div>
+
+      <div class="profile-grid">
+        <div class="profile-sidebar">
+          <div class="avatar-large">👩🏽‍💼</div>
+          <h2>Dilani Perera</h2>
+          <p style="color:var(--customer);">dilani.p@example.lk</p>
+          <button class="edit-profile-btn">Edit profile</button>
+          <div class="info-row"><span>📍 Colombo</span> <span>🇱🇰</span></div>
+          <div class="info-row"><span>📱 +94 77 123 4567</span></div>
+          <div class="info-row"><span>🎂 15 May</span></div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:24px;">
+          <div class="card">
+            <h3 style="margin-bottom:16px;">⚙️ Account settings</h3>
+            <div class="info-row"><span>Full name</span> <strong>Dilani Perera</strong></div>
+            <div class="info-row"><span>Email</span> <strong>dilani.p@bizlink.lk</strong></div>
+            <div class="info-row"><span>Phone</span> <strong>077 123 4567</strong></div>
+            <div class="info-row"><span>Preferred language</span> <strong>Sinhala / English</strong></div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-bottom:16px;">🔔 Notifications & preferences</h3>
+            <div class="pref-toggle"><span>📧 Email order updates</span> <div class="toggle-switch active" id="toggle1"></div></div>
+            <div class="pref-toggle"><span>📱 SMS promotions</span> <div class="toggle-switch" id="toggle2"></div></div>
+            <div class="pref-toggle"><span>💬 Chat notifications</span> <div class="toggle-switch active"></div></div>
+          </div>
+
+          <div class="card">
+            <h3>🏪 Vendor boards I follow</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+              <span style="background:rgba(255,140,0,0.1); padding:6px 16px; border-radius:30px;">🍵 TeaLanka</span>
+              <span style="background:rgba(255,140,0,0.1); padding:6px 16px; border-radius:30px;">🥥 Coco Products</span>
+              <span style="background:rgba(255,140,0,0.1); padding:6px 16px; border-radius:30px;">👗 FashionLK</span>
+              <span style="background:rgba(255,140,0,0.1); padding:6px 16px; border-radius:30px;">📚 Bookshop</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER (shared) -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:50px; margin-bottom:40px;">
+        <div><div class="logo" style="margin-bottom:16px;"><span class="logo-icon">⬡</span><span>Biz<strong>Link</strong></span></div><p style="color:var(--text-muted);">Serving Sri Lankan customers since 2024</p></div>
+        <div><h4>Customer</h4><a href="#">My orders</a><a href="#">Wishlist</a><a href="#">Chat</a></div>
+        <div><h4>Vendors</h4><a href="#">Marketplace</a><a href="#">Top rated</a></div>
+        <div><h4>Support</h4><a href="#">Help center</a><a href="#">Contact</a></div>
+      </div>
+      <div class="footer-bottom" style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:24px; color:var(--text-muted);">
+        <p>© 2024 BizLink – Customer Portal</p>
+        <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/customerdashboard.js"></script>
+</body>
+</html>
