@@ -1,0 +1,232 @@
+/* BizLink Admin - Order Management Styles */
+
+/* Order Detail Modal */
+.order-detail-modal {
+  max-width: 800px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: none;
+}
+
+.order-detail-modal.open {
+  display: block;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 50%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.order-detail-header {
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Modal Body */
+.order-detail-body {
+  padding: 24px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Detail Grid Layout */
+.order-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Detail Section Cards */
+.detail-section {
+  padding: 16px;
+  background: #f4f5f7;
+  border-radius: 8px;
+}
+
+.detail-section h4 {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #000080;
+}
+
+/* Detail Row Items */
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row strong {
+  color: #0f172a;
+}
+
+/* Status Timeline */
+.status-timeline {
+  margin-top: 20px;
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline-item {
+  padding: 12px 0;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: #16a34a;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #16a34a;
+}
+
+.timeline-item.pending::before {
+  background: #d97706;
+  box-shadow: 0 0 0 2px #d97706;
+}
+
+.timeline-item.cancelled::before {
+  background: #dc2626;
+  box-shadow: 0 0 0 2px #dc2626;
+}
+
+.timeline-date {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Order Actions */
+.order-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.order-actions button {
+  flex: 1;
+}
+
+/* Filter Controls */
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-filter {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-filter.active {
+  background: #000080;
+  color: white;
+  border-color: #000080;
+}
+
+.btn-filter:hover {
+  border-color: #000080;
+}
+
+/* Date Range Input */
+.date-range-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.date-range-input input {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* ═══ Dark Mode Support ═══ */
+body.dark .order-detail-modal {
+  background: #161b22;
+  color: #e6edf3;
+}
+
+body.dark .order-detail-header,
+body.dark .detail-section {
+  border-color: #30363d;
+  background: #0d1117;
+}
+
+body.dark .detail-section {
+  background: #161b22;
+}
+
+body.dark .detail-row {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ═══ Responsive Design ═══ */
+@media (max-width: 768px) {
+  .order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-detail-modal {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  .order-detail-body {
+    max-height: 70vh;
+  }
+}
+
+@media (max-width: 540px) {
+  .order-actions {
+    flex-direction: column;
+  }
+
+  .date-range-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-range-input input {
+    width: 100%;
+  }
+}

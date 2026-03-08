@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Admin — Order Management</title>
+  <link rel="stylesheet" href="../assets/css/panel.css"/>
+  <link rel="stylesheet" href="../assets/css/orders.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!--SIDEBAR-->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <span class="sb-hex">⬡</span>
+      <span class="sb-wordmark">Biz<strong>Link</strong></span>
+    </div>
+    <span class="sb-role-chip">ADMIN</span>
+  </div>
+
+  <div class="sb-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search anything..." class="sb-search-input"/>
+    <span class="sb-search-kbd">⌘K</span>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Overview</span>
+      <a class="sb-nav-item" href="dashboard.html">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="sb-nav-item" href="dashboard.html?page=analytics">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a class="sb-nav-item" href="dashboard.html?page=reports">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Management</span>
+      <a class="sb-nav-item" href="dashboard.html?page=vendors">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Vendors
+      </a>
+      <a class="sb-nav-item" href="dashboard.html?page=customers">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a class="sb-nav-item active" href="orders.html">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Orders
+        <span class="nav-count">1,284</span>
+      </a>
+      <a class="sb-nav-item" href="dashboard.html?page=marketplace">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Marketplace
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">Finance</span>
+      <a class="sb-nav-item" href="dashboard.html?page=revenue">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Revenue
+      </a>
+      <a class="sb-nav-item" href="admin-invoices.html">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Invoices
+      </a>
+    </div>
+
+    <div class="sb-nav-group">
+      <span class="sb-nav-label">System</span>
+      <a class="sb-nav-item" href="admin-users.html">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        User Roles
+      </a>
+      <a class="sb-nav-item" href="dashboard.html?page=settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+      <a class="sb-nav-item" href="admin-logs.html">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Activity Logs
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">KP</div>
+      <div class="sb-user-info">
+        <span class="sb-user-name">Kasun Perera</span>
+        <span class="sb-user-role">Super Admin</span>
+      </div>
+      <button class="sb-logout" title="Logout" onclick="confirmLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!--MAIN CONTENT-->
+<div class="main-wrap" id="mainWrap">
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="tb-breadcrumb">
+        <span class="tb-bc-root">BizLink</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="tb-bc-page">Order Management</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-date" id="tbDate"></div>
+      <button class="tb-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="tb-icon-btn notif-btn" id="notifBtn" onclick="toggleNotif()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot">2</span>
+      </button>
+      <div class="tb-avatar-wrap" onclick="toggleUserMenu()">
+        <div class="tb-avatar">KP</div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+
+      <div class="notif-panel" id="notifPanel">
+        <div class="np-header">
+          <span>Notifications</span>
+          <button class="np-clear" onclick="clearNotifs()">Clear all</button>
+        </div>
+        <div class="np-list" id="notifList"></div>
+      </div>
+
+      <div class="user-menu" id="userMenu">
+        <div class="um-profile">
+          <div class="um-avatar">KP</div>
+          <div>
+            <strong>Kasun Perera</strong>
+            <span>kasun@bizlink.lk</span>
+          </div>
+        </div>
+        <div class="um-divider"></div>
+        <a class="um-item" href="dashboard.html?page=settings">⚙️ Account Settings</a>
+        <a class="um-item" href="#">🔐 Security</a>
+        <a class="um-item" href="#">📋 Audit Trail</a>
+        <div class="um-divider"></div>
+        <a class="um-item um-danger" onclick="confirmLogout()">🚪 Sign Out</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Order Management</h1>
+        <p class="page-subtitle">Track, monitor, and manage all marketplace orders</p>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-outline" onclick="exportOrders()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+      <div class="kpi-card" data-trend="up">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap navy-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <div class="kpi-trend up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg> +3.2%</div>
+        </div>
+        <div class="kpi-value">3,847</div>
+        <div class="kpi-label">Total Orders</div>
+        <div class="kpi-sublabel">This month</div>
+      </div>
+
+      <div class="kpi-card" data-trend="up">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap green-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div class="kpi-trend up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg> +1.8%</div>
+        </div>
+        <div class="kpi-value">3,219</div>
+        <div class="kpi-label">Completed</div>
+        <div class="kpi-sublabel">83.7% completion rate</div>
+      </div>
+
+      <div class="kpi-card" data-trend="up">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap amber-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 8v.01M8 12h.01M12 16v.01M16 12h.01"/></svg>
+          </div>
+          <div class="kpi-trend up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg> +0.5%</div>
+        </div>
+        <div class="kpi-value">284</div>
+        <div class="kpi-label">Processing</div>
+        <div class="kpi-sublabel">In fulfillment</div>
+      </div>
+
+      <div class="kpi-card" data-trend="down">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap red-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <div class="kpi-trend down"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg> -0.9%</div>
+        </div>
+        <div class="kpi-value">344</div>
+        <div class="kpi-label">Cancelled</div>
+        <div class="kpi-sublabel">8.9% cancellation rate</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="data-card" style="margin-bottom: 20px; padding: 16px;">
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+        <div class="fb-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search by Order ID, Customer, or Vendor..." class="fb-input" oninput="filterOrders()"/>
+        </div>
+        
+        <select class="fb-select" onchange="filterOrders()" id="statusFilter">
+          <option value="">All Status</option>
+          <option value="completed">✓ Completed</option>
+          <option value="processing">⏳ Processing</option>
+          <option value="pending">⋯ Pending</option>
+          <option value="cancelled">✕ Cancelled</option>
+        </select>
+
+        <select class="fb-select" onchange="filterOrders()" id="categoryFilter">
+          <option value="">All Categories</option>
+          <option value="electronics">Electronics</option>
+          <option value="fashion">Fashion</option>
+          <option value="grocery">Grocery</option>
+          <option value="agriculture">Agriculture</option>
+        </select>
+
+        <div class="date-range-input">
+          <input type="date" id="dateFrom" onchange="filterOrders()"/>
+          <span>to</span>
+          <input type="date" id="dateTo" onchange="filterOrders()"/>
+        </div>
+
+        <button class="btn-outline" onclick="resetFilters()" style="padding: 8px 16px; font-size: 0.9rem;">Reset</button>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="data-card no-pad">
+      <table class="data-table full-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" class="cb-all" onchange="selectAll(this)"/></th>
+            <th onclick="sortTable('orderId')" style="cursor:pointer;">Order ID ↕</th>
+            <th onclick="sortTable('customer')" style="cursor:pointer;">Customer ↕</th>
+            <th onclick="sortTable('product')" style="cursor:pointer;">Product ↕</th>
+            <th onclick="sortTable('vendor')" style="cursor:pointer;">Vendor ↕</th>
+            <th onclick="sortTable('amount')" style="cursor:pointer;">Amount ↕</th>
+            <th>Province</th>
+            <th onclick="sortTable('status')" style="cursor:pointer;">Status ↕</th>
+            <th onclick="sortTable('date')" style="cursor:pointer;">Date ↕</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-backdrop" id="orderModal" onclick="closeOrderModal(event)">
+  <div class="order-detail-modal" id="orderDetailBox">
+    <div class="order-detail-header">
+      <div>
+        <h3 id="modalOrderId"></h3>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 4px;" id="modalOrderDate"></p>
+      </div>
+      <button onclick="closeOrderModal()" style="border: none; background: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+    </div>
+    <div class="order-detail-body">
+      <div class="order-detail-grid">
+        <div class="detail-section">
+          <h4>Customer Information</h4>
+          <div class="detail-row"><span>Name:</span> <strong id="detailCustomer">-</strong></div>
+          <div class="detail-row"><span>Email:</span> <strong id="detailEmail">-</strong></div>
+          <div class="detail-row"><span>Phone:</span> <strong id="detailPhone">-</strong></div>
+          <div class="detail-row"><span>Province:</span> <strong id="detailProvince">-</strong></div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Order Details</h4>
+          <div class="detail-row"><span>Product:</span> <strong id="detailProduct">-</strong></div>
+          <div class="detail-row"><span>Quantity:</span> <strong id="detailQty">-</strong></div>
+          <div class="detail-row"><span>Price:</span> <strong id="detailPrice">-</strong></div>
+          <div class="detail-row"><span>Total:</span> <strong id="detailTotal">-</strong></div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Vendor Information</h4>
+          <div class="detail-row"><span>Name:</span> <strong id="detailVendor">-</strong></div>
+          <div class="detail-row"><span>Category:</span> <strong id="detailVendorCat">-</strong></div>
+          <div class="detail-row"><span>Rating:</span> <strong id="detailRating">-</strong></div>
+          <div class="detail-row"><span>Contact:</span> <strong id="detailVendorEmail">-</strong></div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Delivery Details</h4>
+          <div class="detail-row"><span>Shipping:</span> <strong id="detailShipping">-</strong></div>
+          <div class="detail-row"><span>Tracking:</span> <strong id="detailTracking">-</strong></div>
+          <div class="detail-row"><span>Est. Delivery:</span> <strong id="detailDelivery">-</strong></div>
+          <div class="detail-row"><span>Address:</span> <strong id="detailAddress">-</strong></div>
+        </div>
+      </div>
+
+      <div style="background: #f4f5f7; padding: 16px; border-radius: 8px; margin-top: 20px;">
+        <h4 style="margin-bottom: 12px; color: #000080;">Order Status Timeline</h4>
+        <div class="status-timeline">
+          <div class="timeline-item" id="timeline1">
+            <strong>Order Placed</strong>
+            <div class="timeline-date" id="timelineDate1"></div>
+          </div>
+          <div class="timeline-item" id="timeline2" style="opacity: 0.5;">
+            <strong>Payment Confirmed</strong>
+            <div class="timeline-date" id="timelineDate2"></div>
+          </div>
+          <div class="timeline-item" id="timeline3" style="opacity: 0.5;">
+            <strong>Vendor Processing</strong>
+            <div class="timeline-date" id="timelineDate3"></div>
+          </div>
+          <div class="timeline-item" id="timeline4" style="opacity: 0.5;">
+            <strong>Shipped</strong>
+            <div class="timeline-date" id="timelineDate4"></div>
+          </div>
+          <div class="timeline-item" id="timeline5" style="opacity: 0.5;">
+            <strong>Delivered</strong>
+            <div class="timeline-date" id="timelineDate5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-actions">
+      <button class="btn-outline" onclick="closeOrderModal()">Close</button>
+      <button class="btn-outline" id="updateStatusBtn" onclick="updateOrderStatus()">Update Status</button>
+      <button class="btn-primary" onclick="downloadInvoice()">📥 Download Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toastStack"></div>
+
+<!-- Logout Confirmation -->
+<div class="modal-backdrop" id="logoutBackdrop" style="display:none" onclick="cancelLogout(event)">
+  <div class="modal-box confirm-box">
+    <div class="confirm-icon">🚪</div>
+    <h3>Sign Out?</h3>
+    <p>You'll be returned to the login screen.</p>
+    <div class="confirm-actions">
+      <button class="btn-outline" onclick="cancelLogout()">Cancel</button>
+      <button class="btn-primary" onclick="window.location.href='../pages/index.html'">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/orders.js"></script>
+</body>
+</html>
+
