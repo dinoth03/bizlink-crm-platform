@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Customer – My Profile</title>
+  <!-- same fonts & design system as home page, customer #FF8C00 accent -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/customerprofile.css">
+  </head>
+<body>
+
+<!-- ===== NAVBAR (customer orange) ===== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="../pages/home.html" class="logo"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="userprofile.html" class="active">Profile</a></li>
+      <li><a href="#">Orders</a></li>
+      <li><a href="#">Marketplace</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn-ghost">🇱🇰</a>
+      <a href="userprofile.html" class="btn-customer">My Account</a>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ===== MAIN PROFILE CONTENT ===== -->
+<main class="profile-main">
+  <div class="container">
+
+    <!-- header with sinhala greeting -->
+    <div class="profile-header">
+      <div>
+        <h1>My <span class="gradient-text-customer">Profile</span></h1>
+        <p class="sinhala-tag">ඔබගේ ගිණුම් සැකසුම් සහ මනාප</p>
+      </div>
+      <div class="date-badge" style="background:var(--bg-card); padding:8px 22px; border-radius:40px; border:1px solid var(--border);">
+        <span>🇱🇰</span> අද දිනය: <span id="currentDate"></span>
+      </div>
+    </div>
+
+    <!-- profile grid: left card + right panels -->
+    <div class="profile-grid">
+
+      <!-- LEFT CARD (user info + avatar + quick stats) -->
+      <div class="profile-card">
+        <div class="avatar-large">👩🏾‍💼</div>
+        <h2 class="profile-name">Dilani Perera</h2>
+        <div style="text-align: center; margin-bottom: 10px;"><span class="profile-badge">VERIFIED CUSTOMER</span></div>
+        <p style="text-align:center; color:var(--customer);">dilani.perera@bizlink.lk</p>
+        <div style="margin: 24px 0;">
+          <div class="info-row"><span class="info-label">📍 Location</span><span class="info-value">Colombo 05</span></div>
+          <div class="info-row"><span class="info-label">📱 Mobile</span><span class="info-value">+94 77 234 5678</span></div>
+          <div class="info-row"><span class="info-label">🎂 Birth date</span><span class="info-value">15 May 1992</span></div>
+          <div class="info-row"><span class="info-label">📝 Language</span><span class="info-value">Sinhala, English</span></div>
+          <div class="info-row"><span class="info-label">🤝 Member since</span><span class="info-value">Jan 2024</span></div>
+        </div>
+        <button class="edit-profile-btn" id="editProfileBtn">✎ Edit profile</button>
+        <!-- quick stats mini -->
+        <div style="display:flex; justify-content:space-around; margin-top:28px; background:rgba(255,140,0,0.05); border-radius:var(--radius); padding:14px;">
+          <div style="text-align:center;"><span style="color:var(--customer); font-weight:700; font-size:1.1rem;">24</span><br><span style="font-size:0.7rem;">orders</span></div>
+          <div style="text-align:center;"><span style="color:var(--customer); font-weight:700; font-size:1.1rem;">8</span><br><span style="font-size:0.7rem;">vendors</span></div>
+          <div style="text-align:center;"><span style="color:var(--customer); font-weight:700; font-size:1.1rem;">12</span><br><span style="font-size:0.7rem;">reviews</span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN (multiple panels) -->
+      <div>
+
+        <!-- ACCOUNT SETTINGS panel -->
+        <div class="settings-panel">
+          <div class="panel-title"><span>⚙️</span> Account settings</div>
+          <div class="info-row"><span class="info-label">Full name</span><span class="info-value">Dilani Perera <span style="color:var(--customer); font-size:0.7rem; border:1px solid var(--customer); padding:2px 6px; border-radius:12px;">edit</span></span></div>
+          <div class="info-row"><span class="info-label">Email address</span><span class="info-value">dilani.p@bizlink.lk</span></div>
+          <div class="info-row"><span class="info-label">Phone number</span><span class="info-value">+94 77 234 5678</span></div>
+          <div class="info-row"><span class="info-label">Password</span><span class="info-value">•••••••• <span style="color:var(--customer);">change</span></span></div>
+          <div style="margin-top:16px;"><a href="#" class="btn-outline-customer" style="margin-right:12px;">🔗 Link social</a><a href="#" class="btn-outline-customer">📧 Verify email</a></div>
+        </div>
+
+        <!-- NOTIFICATIONS & PREFERENCES panel with toggles -->
+        <div class="settings-panel">
+          <div class="panel-title"><span>🔔</span> Notifications & preferences</div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">📧</span> Email order updates</span> <div class="toggle-switch active" id="toggleEmail"></div></div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">📱</span> SMS promotions</span> <div class="toggle-switch" id="toggleSMS"></div></div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">💬</span> Chat notifications</span> <div class="toggle-switch active" id="toggleChat"></div></div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">📰</span> Weekly newsletter</span> <div class="toggle-switch" id="toggleNews"></div></div>
+          <div style="margin-top:20px; background:rgba(255,140,0,0.02); border-radius:var(--radius-sm); padding:12px;">
+            <label style="color:var(--text-muted);">Preferred language:</label>
+            <select style="background:transparent; border:1px solid var(--border); color:white; padding:6px 12px; border-radius:30px; margin-left:12px;">
+              <option>Sinhala</option><option>English</option><option>Tamil</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- VENDOR BOARDS I FOLLOW (customer's vendor board) -->
+        <div class="settings-panel">
+          <div class="panel-title"><span>🏪</span> My vendor boards</div>
+          <p style="color:var(--text-muted); margin-bottom:16px;">You follow these businesses – get updates, exclusive deals</p>
+          <div class="board-grid">
+            <span class="board-chip">🍵 TeaLanka <span class="follow-count">· 4 new</span></span>
+            <span class="board-chip">🥥 CocoLanka</span>
+            <span class="board-chip">👗 Tharu Fashion <span class="follow-count">· 1 new</span></span>
+            <span class="board-chip">📚 Sarasavi Bookshop</span>
+            <span class="board-chip">🌶️ Spice Island</span>
+            <span class="board-chip">🛒 EcoMart</span>
+          </div>
+          <a href="#" style="color:var(--customer); display:inline-block; margin-top:10px;">➕ Browse more vendors</a>
+
+          <!-- recent activity on boards -->
+          <div style="margin-top:24px;">
+            <h4 style="font-size:1rem; display:flex; gap:4px; align-items:center;"><span>🕒</span> Recent board activity</h4>
+            <div class="activity-item"><span class="activity-dot"></span><span class="activity-text">TeaLanka posted a new offer</span><span class="activity-time">2h ago</span></div>
+            <div class="activity-item"><span class="activity-dot"></span><span class="activity-text">Tharu Fashion restocked</span><span class="activity-time">yesterday</span></div>
+            <div class="activity-item"><span class="activity-dot"></span><span class="activity-text">CocoLanka replied to your question</span><span class="activity-time">2d ago</span></div>
+          </div>
+        </div>
+
+        <!-- ADDRESS BOOK panel (extra) -->
+        <div class="settings-panel">
+          <div class="panel-title"><span>📍</span> Saved addresses</div>
+          <div style="display:flex; flex-wrap:wrap; gap:14px;">
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px; flex:1;">
+              <strong>🏠 Home</strong> <span style="color:var(--text-muted);">No 15, Galle Road, Colombo 05</span>
+            </div>
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px; flex:1;">
+              <strong>🏢 Office</strong> <span style="color:var(--text-muted);">Union Place, Colombo 02</span>
+            </div>
+          </div>
+          <a href="#" style="color:var(--customer); margin-top:16px; display:inline-block;">➕ Add new address</a>
+        </div>
+
+      </div> <!-- end right column -->
+    </div> <!-- end profile-grid -->
+  </div> <!-- end container -->
+</main>
+
+<!-- ===== FOOTER (identical to home page, customer twist) ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:16px;"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></div>
+        <p style="color:var(--text-muted);">Sri Lanka's All-in-One CRM & Business Connection Platform – Customer Hub</p>
+        <p class="sinhala-tag" style="margin-top:8px;">ගනුදෙනුකරුවන් සඳහා</p>
+      </div>
+      <div><h4 style="margin-bottom:12px;">Customer</h4><a href="#">My orders</a><a href="#">Wishlist</a><a href="#">Chat</a></div>
+      <div><h4 style="margin-bottom:12px;">Vendors</h4><a href="#">Marketplace</a><a href="#">Top rated</a></div>
+      <div><h4 style="margin-bottom:12px;">Support</h4><a href="#">Help center</a><a href="#">Contact</a></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 BizLink – Customer profile page</p>
+      <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+  </div>
+</footer>
+  <script src="../assets/js/customerprofile.js"></script>
+</body>
+</html>
