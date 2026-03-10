@@ -264,7 +264,7 @@ function handleLogin(e) {
     
     // Redirect to dashboard based on role (paths are relative to pages/index.html)
     const dashboardMap = {
-      admin:    '../admin/panel.html',
+      admin:    '../admin/dashboard.html',
       vendor:   '../vendor/vendorpanel.html',
       customer: '../customer/dashboard.html'
     };
@@ -391,7 +391,7 @@ function scrollToTop() {
 
 function getDashboardLink(role) {
   const dashboardMap = {
-    admin:    '../admin/panel.html',
+    admin:    '../admin/dashboard.html',
     vendor:   '../vendor/vendorpanel.html',
     customer: '../customer/dashboard.html'
   };
