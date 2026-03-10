@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Platform — Advertisements</title>
+  <link rel="stylesheet" href="../assets/css/advertisement page.css">
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!--  NAVBAR  -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="home.html" class="nav-brand">
+        <div class="crm-logo bizlink-logo">
+          <span class="biz-logo-icon">⬡</span>
+          <span class="biz-logo-text">Biz<strong>Link</strong></span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#" class="nav-link active">Home</a></li>
+        <li><a href="#products" class="nav-link">Products</a></li>
+        <li><a href="#vendors" class="nav-link">Vendors</a></li>
+        <li><a href="#services" class="nav-link">Services</a></li>
+        <li><a href="#support" class="nav-link">Support</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <button class="nav-icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Messages</span>
+        </button>
+        <button class="nav-icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span>Cart</span>
+        </button>
+
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+          <div class="toggle-track">
+            <span class="t-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+            <span class="t-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+            <div class="toggle-thumb"></div>
+          </div>
+        </button>
+
+        <div class="nav-user">
+          <div class="user-av">D</div>
+          <span>Hi, Dineth</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!--  HERO  -->
+  <section class="hero">
+    <div class="hero-blobs">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-pill reveal" style="--d:.0s">✦ &nbsp;Live Marketplace — 480+ Vendors</div>
+      <h1 class="hero-h1 reveal" style="--d:.08s">
+        Discover, Connect<br/><em>& Grow Together</em>
+      </h1>
+      <p class="hero-p reveal" style="--d:.16s">Promoted listings, exclusive deals &amp; premium services<br/>from our verified vendor network across Sri Lanka.</p>
+      <div class="hero-counters reveal" style="--d:.24s">
+        <div class="hc"><span class="hc-n" data-target="480">0</span><span class="hc-l">Vendors</span></div>
+        <div class="hc-sep"></div>
+        <div class="hc"><span class="hc-n" data-target="12000">0</span><span class="hc-l">Products</span></div>
+        <div class="hc-sep"></div>
+        <div class="hc"><span class="hc-n" data-target="98">0</span><span class="hc-l">% Satisfaction</span></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main">
+
+    <!--  FEATURED VENDORS  -->
+    <section class="section" id="vendors">
+      <div class="sh reveal">
+        <span class="stag">Handpicked For You</span>
+        <h2>Featured Vendors</h2>
+        <p>Top-rated stores trusted by thousands of customers across Sri Lanka</p>
+      </div>
+      <div class="grid g4">
+
+        <div class="ad-card" data-vendor="TechZone Electronics" data-cat="Electronic Store" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-desc="Leading electronics retailer offering the latest laptops, smartphones, accessories and gadgets at the most competitive prices across Sri Lanka. Authorized dealer for HP, Samsung and Apple.">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80" alt="TechZone"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card" data-vendor="FreshGro Mart" data-cat="Produce Store" data-loc="Kandy, Sri Lanka" data-rating="4.6" data-prods="500+" data-since="2015" data-color="#22c55e" data-init="FG" data-desc="Fresh farm-to-table vegetables, fruits and organic produce sourced directly from local farmers every morning. Guaranteed freshness with same-day island-wide delivery.">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80" alt="FreshGro"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card" data-vendor="Fashion Hub" data-cat="Clothing Store" data-loc="Galle, Sri Lanka" data-rating="4.7" data-prods="800+" data-since="2019" data-color="#f59e0b" data-init="FH" data-desc="Trendy fashion for men, women and kids featuring curated collections from local designers and international brands. New arrivals every week — always fashionable, always affordable.">
+          <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&q=80" alt="Fashion Hub"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card" data-vendor="HomeStyle Decor" data-cat="Home Decor" data-loc="Negombo, Sri Lanka" data-rating="4.9" data-prods="1200+" data-since="2016" data-color="#8b5cf6" data-init="HD" data-desc="Elegant home furnishings, décor pieces and interior accessories to transform living spaces into beautiful, comfortable homes. Premium quality delivered to your door.">
+          <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" alt="HomeStyle"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!--  BANNER  -->
+    <section class="section banner-sec">
+      <div class="ad-card banner-card reveal" style="--d:0s" data-vendor="TechZone Electronics" data-cat="Electronics & Gadgets" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-desc="Big Summer Sale — Up to 50% OFF on Electronics & Gadgets including laptops, cameras, headphones and smartwatches. Limited time offer — ends this Sunday!">
+        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1400&q=80" alt="Summer Sale"/>
+        <div class="banner-overlay">
+          <p class="banner-eye">Limited Time Offer</p>
+          <h3 class="banner-hl">Big Summer Sale!</h3>
+          <p class="banner-bd">Up to <strong>50% OFF</strong> on Electronics &amp; Gadgets</p>
+        </div>
+        <div class="card-shim"></div><div class="hint">Click for details</div>
+      </div>
+    </section>
+
+    <!--  SPONSORED  -->
+    <section class="section" id="products">
+      <div class="sh reveal">
+        <span class="stag">Paid Promotion</span>
+        <h2>Sponsored Products</h2>
+        <p>Handpicked products from our trusted advertising partners</p>
+      </div>
+      <div class="grid g4 products-grid" id="productsGrid">
+
+        <div class="ad-card product-card" data-vendor="TechZone Electronics" data-cat="Laptops" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-price="LKR 85,000" data-desc="HP Laptop — Intel i5 processor, 8GB RAM and 512GB SSD. Ideal for students, professionals and creative work. 1-year local warranty included.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80" alt="HP Laptop"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="FreshGro Mart" data-cat="Groceries" data-loc="Kandy, Sri Lanka" data-rating="4.6" data-prods="500+" data-since="2015" data-color="#22c55e" data-init="FG" data-price="LKR 320/kg" data-desc="Premium Organic Rice — 100% pesticide-free basmati from certified organic farms. Nutritious, aromatic and perfect for everyday meals. Available in 1kg, 5kg and 10kg bags.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&q=80" alt="Organic Rice"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Fashion Hub" data-cat="Accessories" data-loc="Galle, Sri Lanka" data-rating="4.7" data-prods="800+" data-since="2019" data-color="#f59e0b" data-init="FH" data-price="LKR 4,500" data-desc="Designer Handbag — Genuine leather structured handbag with gold hardware. Perfect for office and formal occasions. Available in black, brown and camel. Ships islandwide.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80" alt="Handbag"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="TechZone Electronics" data-cat="Wearables" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-price="LKR 12,000" data-desc="Smartwatch — Health monitoring, GPS, 7-day battery and IP68 water resistance. Compatible with iOS & Android. 3 colours with interchangeable bands.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80" alt="Smartwatch"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="HomeStyle Decor" data-cat="Furniture" data-loc="Negombo, Sri Lanka" data-rating="4.9" data-prods="1200+" data-since="2016" data-color="#8b5cf6" data-init="HD" data-price="LKR 28,000" data-desc="Modern Office Chair — Ergonomic mesh design with lumbar support and adjustable armrests. 360-degree mobility with height and recline adjustment. Perfect for long work sessions.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=500&q=80" alt="Office Chair"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Mobile Hub" data-cat="Smartphones" data-loc="Colombo 04, Sri Lanka" data-rating="4.7" data-prods="450+" data-since="2014" data-color="#f59e0b" data-init="MH" data-price="LKR 68,500" data-desc="Samsung Galaxy A52 — 64MP camera, 120Hz display and 25W fast charging. 5G capable with massive battery life. Ships with complete warranty coverage.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80" alt="Galaxy A52"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="EcoMart Organics" data-cat="Health & Beauty" data-loc="Colombo 07, Sri Lanka" data-rating="4.9" data-prods="240+" data-since="2017" data-color="#22c55e" data-init="EO" data-price="LKR 1,850" data-desc="Organic Skincare Set — 100% natural ingredients with ayurvedic herbs. Perfect for sensitive skin types. Cruelty-free, eco-friendly packaging included.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=500&q=80" alt="Skincare Set"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Fashion Hub" data-cat="Footwear" data-loc="Galle, Sri Lanka" data-rating="4.7" data-prods="800+" data-since="2019" data-color="#f59e0b" data-init="FH" data-price="LKR 6,500" data-desc="Premium Running Shoes — Lightweight cushioning with superior grip. Available for men, women and kids. Free shipping on orders above LKR 5,000.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=500&q=80" alt="Running Shoes"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="TechZone Electronics" data-cat="Cameras" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-price="LKR 125,000" data-desc="Canon EOS M50 Mirrorless Camera — 24MP APS-C sensor with 4K video recording. Perfect for vlogging, photography and content creation. Includes 15-45mm lens.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=500&q=80" alt="Canon Camera"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="HomeStyle Decor" data-cat="Lighting" data-loc="Negombo, Sri Lanka" data-rating="4.9" data-prods="1200+" data-since="2016" data-color="#8b5cf6" data-init="HD" data-price="LKR 8,900" data-desc="Smart LED Pendant Lights — App-controlled RGB colors with 16 million color options. Voice control compatible with Alexa. Energy efficient with 25-year lifespan.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1565636192335-14207c6c8d0b?w=500&q=80" alt="Pendant Lights"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="FreshGro Mart" data-cat="Beverages" data-loc="Kandy, Sri Lanka" data-rating="4.6" data-prods="500+" data-since="2015" data-color="#22c55e" data-init="FG" data-price="LKR 850/bottle" data-desc="Cold Press Organic Juice — Fresh-squeezed from locally sourced fruits. No additives or preservatives. Perfect for daily nutrition and detox. Available in 500ml bottles.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1600788148184-7523f187b912?w=500&q=80" alt="Organic Juice"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Mobile Hub" data-cat="Accessories" data-loc="Colombo 04, Sri Lanka" data-rating="4.7" data-prods="450+" data-since="2014" data-color="#f59e0b" data-init="MH" data-price="LKR 2,500" data-desc="Wireless Earbuds Pro — Active noise cancellation with 30-hour battery life. Dual-mic system for crystal clear calls. Sweat-resistant and touch controls included.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" alt="Wireless Earbuds"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Style Boutique" data-cat="Fashion" data-loc="Galle, Sri Lanka" data-rating="4.8" data-prods="650+" data-since="2020" data-color="#ec4899" data-init="SB" data-price="LKR 5,200" data-desc="Premium Cotton T-shirt — Available in 15+ colors and all sizes. High-quality fabric that lasts for years. Perfect fit for casual wear and gym sessions.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80" alt="Cotton T-shirt"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="EcoMart Organics" data-cat="Home & Living" data-loc="Colombo 07, Sri Lanka" data-rating="4.9" data-prods="240+" data-since="2017" data-color="#22c55e" data-init="EO" data-price="LKR 3,500" data-desc="Bamboo Kitchen Storage Set — Eco-friendly containers with airtight lids. Perfect for organizing pantry items. Sustainable and plastic-free alternatives.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&q=80" alt="Bamboo Storage"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="TechZone Electronics" data-cat="Audio" data-loc="Colombo 03, Sri Lanka" data-rating="4.8" data-prods="320+" data-since="2018" data-color="#4f7cff" data-init="TZ" data-price="LKR 15,000" data-desc="Portable Bluetooth Speaker — 360-degree sound with deep bass. 20-hour battery life and waterproof design. Perfect for outdoor adventures and parties.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&q=80" alt="BT Speaker"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="Fashion Hub" data-cat="Jewelry" data-loc="Galle, Sri Lanka" data-rating="4.7" data-prods="800+" data-since="2019" data-color="#f59e0b" data-init="FH" data-price="LKR 8,500" data-desc="Sterling Silver Bracelet — 925 genuine silver with elegant design. Perfect gift for all occasions. Comes with luxury packaging and authenticity certificate.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80" alt="Silver Bracelet"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="ad-card product-card" data-vendor="HomeStyle Decor" data-cat="Textiles" data-loc="Negombo, Sri Lanka" data-rating="4.9" data-prods="1200+" data-since="2016" data-color="#8b5cf6" data-init="HD" data-price="LKR 6,800" data-desc="Premium Bed Sheet Set — 600 thread count Egyptian cotton. Ultra-soft and breathable for perfect sleep. Available in queen and king sizes with Free pillows.">
+          <div class="sp-badge">Sponsored</div>
+          <img src="https://images.unsplash.com/photo-1629874918121-5b4e8f86c18f?w=500&q=80" alt="Bed Sheets"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+      </div>
+      <div class="load-more-container">
+        <button class="load-more-btn" id="loadMoreProducts">Load More Products</button>
+      </div>
+    </section>
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <span>Grow Your Business</span><span class="mdot">✦</span>
+        <span>Connect With Buyers</span><span class="mdot">✦</span>
+        <span>Trusted Vendors Only</span><span class="mdot">✦</span>
+        <span>Island-Wide Delivery</span><span class="mdot">✦</span>
+        <span>Premium Quality</span><span class="mdot">✦</span>
+        <span>Verified Sellers</span><span class="mdot">✦</span>
+        <span>Best Prices Guaranteed</span><span class="mdot">✦</span>
+        <span>Grow Your Business</span><span class="mdot">✦</span>
+        <span>Connect With Buyers</span><span class="mdot">✦</span>
+        <span>Trusted Vendors Only</span><span class="mdot">✦</span>
+        <span>Island-Wide Delivery</span><span class="mdot">✦</span>
+        <span>Premium Quality</span><span class="mdot">✦</span>
+        <span>Verified Sellers</span><span class="mdot">✦</span>
+        <span>Best Prices Guaranteed</span><span class="mdot">✦</span>
+      </div>
+    </div>
+
+    <!--  SPECIAL DEALS  -->
+    <section class="section">
+      <div class="sh reveal">
+        <span class="stag">Exclusive Savings</span>
+        <h2>Special Deals</h2>
+        <p>Time-limited offers you won't want to miss</p>
+      </div>
+      <div class="grid g2">
+        <div class="ad-card deal-card" data-vendor="FreshGro Mart" data-cat="Groceries & Produce" data-loc="Kandy, Sri Lanka" data-rating="4.6" data-prods="500+" data-since="2015" data-color="#22c55e" data-init="FG" data-desc="Supermarket Mega Sale — 30% OFF on all groceries this weekend. Stock up on fresh vegetables, fruits, dairy and pantry essentials at unbeatable prices.">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80" alt="Mega Sale"/>
+          <div class="deal-text"><h3>Supermarket Mega Sale</h3><p style="color:#4ade80">30% OFF on Groceries</p></div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+        <div class="ad-card deal-card" data-vendor="HomeStyle Decor" data-cat="Furniture & Decor" data-loc="Negombo, Sri Lanka" data-rating="4.9" data-prods="1200+" data-since="2016" data-color="#8b5cf6" data-init="HD" data-desc="Furniture Clearance Sale — Up to 40% OFF on all furniture including sofas, beds, dining sets and storage. Very limited stock — this clearance won't last long!">
+          <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Furniture Sale"/>
+          <div class="deal-text"><h3>Furniture Clearance Sale</h3><p style="color:#c4b5fd">Up to <strong>40% OFF</strong></p></div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+      </div>
+    </section>
+
+    <!--  SERVICES — 20 ITEMS  -->
+    <section class="section services-sec" id="services">
+      <div class="sh reveal">
+        <span class="stag">What We Offer</span>
+        <h2>Our Services</h2>
+        <p>Everything your business needs — from digital tools to on-ground support</p>
+      </div>
+
+      <div class="services-grid" id="servicesGrid">
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Analytics & Reports" data-loc="Colombo, Sri Lanka" data-rating="4.9" data-prods="50+ Reports" data-since="2018" data-color="#4f7cff" data-init="CR" data-desc="Advanced analytics dashboard giving real-time insights on vendor performance, sales trends, customer behaviour and revenue metrics. Export to PDF, Excel or share with your team instantly.">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80" alt="Analytics"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#4f7cff,#7c3aed)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <h3>Analytics & Reports</h3><p>Real-time business intelligence</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Vendor Management" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="Unlimited Vendors" data-since="2018" data-color="#22c55e" data-init="VM" data-desc="Complete vendor onboarding, profile management, performance tracking and compliance tools. Manage contracts, communication history and payment records all in one streamlined dashboard.">
+          <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=500&q=80" alt="Vendors"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#22c55e,#16a34a)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3>Vendor Management</h3><p>Centralise all vendor relations</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Marketing Tools" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="15+ Channels" data-since="2018" data-color="#f59e0b" data-init="MT" data-desc="Create, schedule and automate marketing campaigns across email, SMS, push notifications and social media. A/B testing, conversion tracking and audience segmentation built right in.">
+          <img src="https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=500&q=80" alt="Marketing"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+            <h3>Marketing Tools</h3><p>Multi-channel campaign automation</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Payment Gateway" data-loc="Colombo, Sri Lanka" data-rating="4.9" data-prods="8+ Methods" data-since="2018" data-color="#ec4899" data-init="PG" data-desc="Secure, fast payment processing with support for credit/debit cards, bank transfers, mobile wallets and cash-on-delivery. Real-time transaction monitoring and automatic reconciliation.">
+          <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&q=80" alt="Payments"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#ec4899,#be185d)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <h3>Payment Gateway</h3><p>Secure multi-method payments</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Logistics & Delivery" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="25 Districts" data-since="2018" data-color="#14b8a6" data-init="LD" data-desc="End-to-end logistics management including order tracking, courier partner integration, delivery scheduling and returns processing. Same-day delivery available in Western Province.">
+          <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=500&q=80" alt="Logistics"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#14b8a6,#0d9488)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+            <h3>Logistics & Delivery</h3><p>Island-wide fast delivery</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Customer Support" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="24/7 Support" data-since="2018" data-color="#8b5cf6" data-init="CS" data-desc="24/7 multilingual customer support via live chat, phone and email. AI-powered ticketing system, satisfaction tracking and automated responses keep your customers happy round the clock.">
+          <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=500&q=80" alt="Support"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <h3>Customer Support</h3><p>24/7 multilingual helpdesk</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Inventory Management" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="Unlimited SKUs" data-since="2018" data-color="#f97316" data-init="IM" data-desc="Smart inventory tracking with low-stock alerts, barcode scanning, supplier management and automated reorder triggers. Sync across multiple warehouses and sales channels effortlessly.">
+          <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=500&q=80" alt="Inventory"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#f97316,#ea580c)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <h3>Inventory Management</h3><p>Smart stock control system</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="SEO & Visibility" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="Full Audit Tools" data-since="2018" data-color="#0ea5e9" data-init="SE" data-desc="Boost your store's visibility with built-in SEO tools including keyword optimisation, sitemap generation, meta management and search ranking reports. Get found faster on Google.">
+          <img src="https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=500&q=80" alt="SEO"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+            <h3>SEO & Visibility</h3><p>Rank higher, sell more</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Cloud Storage" data-loc="Colombo, Sri Lanka" data-rating="4.9" data-prods="Unlimited Storage" data-since="2018" data-color="#6366f1" data-init="CL" data-desc="Secure cloud storage for product images, documents, invoices and media. Automatic backups, CDN-powered fast loading and granular team access controls keep your data safe.">
+          <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500&q=80" alt="Cloud"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 17 21 12 16 7"/><polyline points="8 7 3 12 8 17"/><line x1="21" y1="12" x2="3" y2="12"/></svg></div>
+            <h3>Cloud Storage</h3><p>Unlimited secure file storage</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Order Management" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="All Channels" data-since="2018" data-color="#10b981" data-init="OM" data-desc="Unified order management system processing orders from all sales channels in one place. Automated fulfilment workflows, status updates, notifications and return management included.">
+          <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&q=80" alt="Orders"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#10b981,#059669)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <h3>Order Management</h3><p>Unified omnichannel fulfilment</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="API Integration" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="100+ Integrations" data-since="2018" data-color="#f43f5e" data-init="AI" data-desc="Connect your CRM with 100+ popular tools: QuickBooks, Shopify, WooCommerce, Slack and more. RESTful API with full documentation, webhooks and sandbox environment.">
+          <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&q=80" alt="API"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#f43f5e,#e11d48)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 17 21 12 16 7"/><polyline points="8 7 3 12 8 17"/></svg></div>
+            <h3>API Integration</h3><p>Connect any tool instantly</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Email Campaigns" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="Unlimited Emails" data-since="2018" data-color="#a855f7" data-init="EC" data-desc="Design beautiful email campaigns with drag-and-drop builder. Smart segmentation, personalisation, delivery scheduling and detailed open/click analytics. GDPR compliant.">
+          <img src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=500&q=80" alt="Email"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#a855f7,#9333ea)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <h3>Email Campaigns</h3><p>Design, send &amp; track emails</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Sales Pipeline" data-loc="Colombo, Sri Lanka" data-rating="4.9" data-prods="Visual Pipeline" data-since="2018" data-color="#fb923c" data-init="SP" data-desc="Visual drag-and-drop sales pipeline to manage leads, track deal stages and forecast revenue. Automated follow-up reminders, activity logging and team collaboration built in.">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80" alt="Pipeline"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#fb923c,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+            <h3>Sales Pipeline</h3><p>Track deals from lead to close</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Mobile App" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="iOS & Android" data-since="2018" data-color="#38bdf8" data-init="MA" data-desc="Manage your entire business from your phone. The CRM mobile app gives you real-time notifications, order management, chat support and analytics — free on iOS and Android.">
+          <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&q=80" alt="Mobile"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#38bdf8,#0284c7)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+            <h3>Mobile App</h3><p>Manage on the go, anywhere</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Reviews & Ratings" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="Verified Reviews" data-since="2018" data-color="#fbbf24" data-init="RR" data-desc="Build trust with authentic, verified customer reviews. Automated review request emails, reply tools, sentiment analysis and public reputation score help convert more visitors into buyers.">
+          <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=500&q=80" alt="Reviews"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#fbbf24,#d97706)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <h3>Reviews & Ratings</h3><p>Build trust with social proof</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Security & Compliance" data-loc="Colombo, Sri Lanka" data-rating="5.0" data-prods="Enterprise Grade" data-since="2018" data-color="#64748b" data-init="SC" data-desc="Enterprise-grade security with 256-bit SSL encryption, two-factor authentication, role-based access control and automated compliance reporting. Regular third-party audits included.">
+          <img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=500&q=80" alt="Security"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#64748b,#475569)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h3>Security & Compliance</h3><p>Enterprise-grade protection</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Training & Onboarding" data-loc="Colombo, Sri Lanka" data-rating="4.8" data-prods="200+ Lessons" data-since="2018" data-color="#d946ef" data-init="TO" data-desc="Get up and running fast with structured onboarding, video tutorials, live webinars and a dedicated success manager. Our learning hub has 200+ lessons to turn your team into experts.">
+          <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=500&q=80" alt="Training"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#d946ef,#a21caf)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+            <h3>Training & Onboarding</h3><p>Expert-led learning hub</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Subscription Billing" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="All Plan Types" data-since="2018" data-color="#84cc16" data-init="SB" data-desc="Automate recurring billing, subscription upgrades/downgrades, proration and dunning management. Supports monthly, quarterly and annual plans with flexible trial period options.">
+          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&q=80" alt="Billing"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#84cc16,#65a30d)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>Subscription Billing</h3><p>Automated recurring payments</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="Social Commerce" data-loc="Colombo, Sri Lanka" data-rating="4.7" data-prods="5 Platforms" data-since="2018" data-color="#06b6d4" data-init="SC2" data-desc="Sell directly through Instagram, Facebook, TikTok, WhatsApp and Pinterest. Sync product catalogues, manage DM orders and run social-exclusive promotions from one unified dashboard.">
+          <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500&q=80" alt="Social"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+            <h3>Social Commerce</h3><p>Sell across social platforms</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+        <div class="svc-card ad-card" data-vendor="CRM Platform" data-cat="AI Assistant" data-loc="Colombo, Sri Lanka" data-rating="4.9" data-prods="Smart Automation" data-since="2018" data-color="#7c3aed" data-init="AI" data-desc="Let AI handle repetitive tasks — auto-generate product descriptions, respond to customer queries, suggest optimal pricing, forecast demand and surface your best upsell opportunities daily.">
+          <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=500&q=80" alt="AI"/>
+          <div class="svc-info">
+            <div class="svc-ico" style="background:linear-gradient(135deg,#7c3aed,#4f7cff)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="white"/></svg></div>
+            <h3>AI Assistant</h3><p>Automate with artificial intelligence</p>
+          </div>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+
+      </div>
+      <div class="load-more-container">
+        <button class="load-more-btn" id="loadMoreServices">Load More Services</button>
+      </div>
+    </section>
+    <section class="section">
+      <div class="sh reveal">
+        <span class="stag">Rising Stars</span>
+        <h2>Trending Vendors</h2>
+        <p>The fastest growing stores on our platform right now</p>
+      </div>
+      <div class="grid g3">
+        <div class="ad-card" data-vendor="EcoMart Organics" data-cat="Organic & Natural" data-loc="Colombo 07, Sri Lanka" data-rating="4.9" data-prods="240+" data-since="2017" data-color="#22c55e" data-init="EO" data-desc="Sri Lanka's top-rated organic store. Certified organic products including fresh produce, pantry staples and wellness items. Trusted by thousands of health-conscious customers.">
+          <img src="https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=600&q=80" alt="EcoMart"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+        <div class="ad-card" data-vendor="Mobile Hub" data-cat="Electronics" data-loc="Colombo 04, Sri Lanka" data-rating="4.7" data-prods="450+" data-since="2014" data-color="#f59e0b" data-init="MH" data-desc="Your one-stop destination for mobile phones, accessories and tech gadgets. Authorised reseller for all major brands with full warranty and excellent after-sales support.">
+          <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80" alt="Mobile Hub"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+        <div class="ad-card" data-vendor="Style Boutique" data-cat="Fashion & Apparel" data-loc="Galle, Sri Lanka" data-rating="4.8" data-prods="650+" data-since="2020" data-color="#ec4899" data-init="SB" data-desc="Curated fashion boutique showcasing the finest local and international designers. From casual wear to formal attire — always dressed for every occasion.">
+          <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80" alt="Style Boutique"/>
+          <div class="card-shim"></div><div class="hint">Click for details</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL  -->
+  <div class="modal-bd" id="modalBd">
+    <div class="modal" id="modal">
+      <button class="modal-x" id="modalX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="modal-img-wrap">
+        <img class="modal-img" id="mImg" src="" alt=""/>
+        <div class="modal-img-fade"></div>
+      </div>
+      <div class="modal-body">
+        <div class="m-header">
+          <div class="m-logo" id="mLogo"></div>
+          <div class="m-title">
+            <div class="m-name" id="mName"></div>
+            <div class="m-cat" id="mCat"></div>
+          </div>
+          <div class="m-stars"><svg viewBox="0 0 24 24" fill="#fbbf24" width="15"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="mRating"></span></div>
+        </div>
+        <p class="m-desc" id="mDesc"></p>
+        <div class="m-chips">
+          <span class="m-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="mLoc"></span></span>
+          <span class="m-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span id="mProds"></span> Products</span>
+          <span class="m-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Since <span id="mSince"></span></span>
+        </div>
+        <div class="m-price-row" id="mPriceRow" style="display:none"><span>Price</span><span class="m-price" id="mPrice"></span></div>
+        <div class="m-actions">
+          <button class="m-btn-p" id="mVisit">Visit Store</button>
+          <button class="m-btn-s">Contact Vendor</button>
+          <button class="m-btn-icon" id="mSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--  FOOTER  -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="f-brand">
+        <div class="crm-logo bizlink-logo">
+          <span class="biz-logo-icon">⬡</span>
+          <span class="biz-logo-text">Biz<strong>Link</strong></span>
+        </div>
+        <p>Empowering vendors across Sri Lanka</p>
+      </div>
+      <div class="f-copy">© 2025 CRM Platform &nbsp;·&nbsp; Advertisements &nbsp;·&nbsp; Privacy &nbsp;·&nbsp; Terms</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/advertisement page.js"></script>
+</body>
+</html>
