@@ -145,7 +145,39 @@ function cancelLogout(event) {
 }
 
 /* DASHBOARD RENDERING */
-function renderDashboard() {
+async function renderDashboard() {
+  // Fetch real stats from database
+  try {
+    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_dashboard_stats.php');
+    const json = await res.json();
+    if (json.success) {
+      const s = json.data;
+      // Update KPI card values and data-count attributes with real data
+      const kpiCards = document.querySelectorAll('.kpi-card');
+      const kpiData = [
+        { value: s.total_revenue, format: 'currency' },
+        { value: s.active_customers, format: 'number' },
+        { value: s.total_orders, format: 'number' },
+        { value: s.active_vendors, format: 'number' }
+      ];
+      kpiCards.forEach((card, i) => {
+        if (kpiData[i]) {
+          const el = card.querySelector('.kpi-value');
+          if (el) {
+            el.setAttribute('data-count', kpiData[i].value);
+          }
+          // Update sublabel for pending orders
+          if (i === 2) {
+            const sub = card.querySelector('.kpi-sublabel');
+            if (sub) sub.textContent = s.pending_orders + ' pending fulfillment';
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Could not fetch dashboard stats, using defaults:', e);
+  }
+
   // Animate KPI values
   animateCounters();
   
@@ -282,28 +314,46 @@ function renderDonutChart() {
 }
 
 /* TABLES */
-function renderRecentOrders() {
+async function renderRecentOrders() {
   const tbody = document.getElementById('ordersBody');
   if (!tbody) return;
   
-  const orders = [
-    { id: 'ORD#2847', customer: 'Amara Perera', vendor: 'TechZone Lanka', amount: 'Rs. 45,200', status: 'Completed', time: '2 hours ago' },
-    { id: 'ORD#2846', customer: 'Kasun Silva', vendor: 'Fashion Plus', amount: 'Rs. 8,950', status: 'Processing', time: '4 hours ago' },
-    { id: 'ORD#2845', customer: 'Nirmala K', vendor: 'Grocery Mart', amount: 'Rs. 3,200', status: 'Completed', time: '6 hours ago' },
-    { id: 'ORD#2844', customer: 'Roshan W', vendor: 'Agriculture Pro', amount: 'Rs. 12,400', status: 'Completed', time: '1 day ago' },
-    { id: 'ORD#2843', customer: 'Lakshmi D', vendor: 'Export Tea Co', amount: 'Rs. 67,800', status: 'Cancelled', time: '2 days ago' }
-  ];
+  try {
+    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_orders.php');
+    const json = await res.json();
+    if (json.success && json.data.length > 0) {
+      tbody.innerHTML = json.data.slice(0, 5).map(o => {
+        const timeAgo = getTimeAgo(o.created_at);
+        const status = o.order_status.charAt(0).toUpperCase() + o.order_status.slice(1);
+        return `
+          <tr>
+            <td>${o.order_number}</td>
+            <td>${o.customer_name || 'N/A'}</td>
+            <td>${o.email || 'N/A'}</td>
+            <td>Rs. ${Number(o.total_amount).toLocaleString()}</td>
+            <td><span class="status-badge badge-${o.order_status}">${status}</span></td>
+            <td>${timeAgo}</td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not fetch orders from API:', e);
+  }
   
-  tbody.innerHTML = orders.map(o => `
-    <tr>
-      <td>${o.id}</td>
-      <td>${o.customer}</td>
-      <td>${o.vendor}</td>
-      <td>${o.amount}</td>
-      <td><span class="status-badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
-      <td>${o.time}</td>
-    </tr>
-  `).join('');
+  // Fallback if API fails
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No orders found in database</td></tr>';
+}
+
+function getTimeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + ' min ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + ' hours ago';
+  const days = Math.floor(hrs / 24);
+  return days + ' days ago';
 }
 
 function renderApprovalList() {
@@ -357,34 +407,41 @@ function renderTopVendors() {
 }
 
 /* VENDORS TABLE */
-function renderVendorsTable() {
+async function renderVendorsTable() {
   const tbody = document.getElementById('vendorsBody');
   if (!tbody) return;
   
-  const vendors = [
-    { vendor: 'TechZone Lanka', industry: 'Electronics', province: 'Western', revenue: 'Rs. 1.2M', orders: 284, rating: 4.8, status: 'Active' },
-    { vendor: 'Fashion Plus', industry: 'Fashion', province: 'Western', revenue: 'Rs. 840K', orders: 156, rating: 4.6, status: 'Active' },
-    { vendor: 'Grocery Mart', industry: 'Grocery', province: 'Central', revenue: 'Rs. 620K', orders: 342, rating: 4.4, status: 'Active' },
-    { vendor: 'PowerIT Lanka', industry: 'IT Services', province: 'Western', revenue: 'Rs. 450K', orders: 98, rating: 4.9, status: 'Pending' },
-    { vendor: 'Agriculture Pro', industry: 'Agriculture', province: 'North Central', revenue: 'Rs. 380K', orders: 127, rating: 4.3, status: 'Active' }
-  ];
+  try {
+    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_vendors.php');
+    const json = await res.json();
+    if (json.success && json.data.length > 0) {
+      tbody.innerHTML = json.data.map(v => {
+        const status = v.vendor_status === 'verified' ? 'Active' : v.vendor_status.charAt(0).toUpperCase() + v.vendor_status.slice(1);
+        const statusClass = v.vendor_status === 'verified' ? 'active' : v.vendor_status;
+        return `
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td><strong>${v.shop_name}</strong></td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>${v.total_products}</td>
+            <td>—</td>
+            <td><span class="status-badge badge-${statusClass}">${status}</span></td>
+            <td>
+              <button class="tbl-action view" onclick="viewVendor('${v.shop_name}')">View</button>
+              ${v.vendor_status === 'pending' ? '<button class="tbl-action approve" onclick="approveVendor(\'' + v.shop_name + '\')">Approve</button>' : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not fetch vendors from API:', e);
+  }
   
-  tbody.innerHTML = vendors.map(v => `
-    <tr>
-      <td><input type="checkbox"/></td>
-      <td><strong>${v.vendor}</strong></td>
-      <td>${v.industry}</td>
-      <td>${v.province}</td>
-      <td>${v.revenue}</td>
-      <td>${v.orders}</td>
-      <td>⭐ ${v.rating}</td>
-      <td><span class="status-badge badge-${v.status.toLowerCase()}">${v.status}</span></td>
-      <td>
-        <button class="tbl-action view" onclick="viewVendor('${v.vendor}')">View</button>
-        ${v.status === 'Pending' ? '<button class="tbl-action approve" onclick="approveVendor(\'' + v.vendor + '\')">Approve</button>' : ''}
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No vendors found in database</td></tr>';
 }
 
 function filterVendorTable(query) {
@@ -403,54 +460,72 @@ function filterVendorStatus(status) {
 }
 
 /* CUSTOMERS TABLE */
-function renderCustomersTable() {
+async function renderCustomersTable() {
   const tbody = document.getElementById('customersBody');
   if (!tbody) return;
   
-  const customers = [
-    { name: 'Amara Perera', email: 'amara@example.com', province: 'Western', orders: 12, spent: 'Rs. 48,200', joined: 'Dec 2023', status: 'Active' },
-    { name: 'Kasun Silva', email: 'kasun@example.com', province: 'Central', orders: 8, spent: 'Rs. 32,100', joined: 'Jan 2024', status: 'Active' },
-    { name: 'Nirmala K', email: 'nirmala@example.com', province: 'Southern', orders: 5, spent: 'Rs. 18,900', joined: 'Feb 2024', status: 'Active' }
-  ];
+  try {
+    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_customers.php');
+    const json = await res.json();
+    if (json.success && json.data.length > 0) {
+      tbody.innerHTML = json.data.map(c => {
+        const status = c.customer_status === 'active' ? 'Active' : (c.customer_status || 'N/A');
+        const joined = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—';
+        return `
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td><strong>${c.full_name || 'N/A'}</strong></td>
+            <td>${c.email || '—'}</td>
+            <td>${c.city || '—'}</td>
+            <td>${c.total_orders || 0}</td>
+            <td>Rs. ${Number(c.total_spent || 0).toLocaleString()}</td>
+            <td>${joined}</td>
+            <td><span class="status-badge badge-active">${status}</span></td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not fetch customers from API:', e);
+  }
   
-  tbody.innerHTML = customers.map(c => `
-    <tr>
-      <td><input type="checkbox"/></td>
-      <td><strong>${c.name}</strong></td>
-      <td>${c.email}</td>
-      <td>${c.province}</td>
-      <td>${c.orders}</td>
-      <td>${c.spent}</td>
-      <td>${c.joined}</td>
-      <td><span class="status-badge badge-active">${c.status}</span></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#888;">No customers found in database</td></tr>';
 }
 
 /* ORDERS TABLE */
-function renderOrdersTable() {
+async function renderOrdersTable() {
   const tbody = document.getElementById('ordersFullBody');
   if (!tbody) return;
   
-  const orders = [
-    { id: 'ORD#2847', customer: 'Amara Perera', product: 'Laptop 15"', vendor: 'TechZone', amount: 'Rs. 189K', province: 'Western', status: 'Completed', date: '23 Feb 2024' },
-    { id: 'ORD#2846', customer: 'Kasun Silva', product: 'Cotton Saree', vendor: 'Fashion Plus', amount: 'Rs. 8.9K', province: 'Central', status: 'Processing', date: '23 Feb 2024' },
-    { id: 'ORD#2845', customer: 'Nirmala K', product: 'Tea (1kg)', vendor: 'Grocery Mart', amount: 'Rs. 3.2K', province: 'Southern', status: 'Completed', date: '22 Feb 2024' }
-  ];
+  try {
+    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_orders.php');
+    const json = await res.json();
+    if (json.success && json.data.length > 0) {
+      tbody.innerHTML = json.data.map(o => {
+        const status = o.order_status.charAt(0).toUpperCase() + o.order_status.slice(1);
+        const date = new Date(o.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        return `
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td><strong>${o.order_number}</strong></td>
+            <td>${o.customer_name || 'N/A'}</td>
+            <td>—</td>
+            <td>${o.email || '—'}</td>
+            <td>Rs. ${Number(o.total_amount).toLocaleString()}</td>
+            <td>—</td>
+            <td><span class="status-badge badge-${o.order_status}">${status}</span></td>
+            <td>${date}</td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not fetch orders from API:', e);
+  }
   
-  tbody.innerHTML = orders.map(o => `
-    <tr>
-      <td><input type="checkbox"/></td>
-      <td><strong>${o.id}</strong></td>
-      <td>${o.customer}</td>
-      <td>${o.product}</td>
-      <td>${o.vendor}</td>
-      <td>${o.amount}</td>
-      <td>${o.province}</td>
-      <td><span class="status-badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
-      <td>${o.date}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No orders found in database</td></tr>';
 }
 
 /* ANALYTICS */
