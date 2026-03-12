@@ -51,11 +51,11 @@ jobs:
         id: deploy_check
         shell: bash
         env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_HOST: ${{ secrets['DEPLOY_HOST'] }}
+          DEPLOY_USER: ${{ secrets['DEPLOY_USER'] }}
+          DEPLOY_KEY: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
+          DEPLOY_PORT: ${{ secrets['DEPLOY_PORT'] }}
+          DEPLOY_PATH: ${{ secrets['DEPLOY_PATH'] }}
         run: |
           set -e
           missing=0
@@ -74,14 +74,15 @@ jobs:
 
       - name: Deploy files over SSH
         if: steps.deploy_check.outputs.ready == 'true'
-        uses: easingthemes/ssh-deploy@v5.1.0
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
-          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_PORT }}
-          TARGET: ${{ secrets.DEPLOY_PATH }}
-          ARGS: "-rlgoDzvc -i --delete --exclude=.git --exclude=.github --exclude=.vscode"
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='.vscode'
+          path: ./
+          remote_path: ${{ secrets['DEPLOY_PATH'] }}
+          remote_host: ${{ secrets['DEPLOY_HOST'] }}
+          remote_user: ${{ secrets['DEPLOY_USER'] }}
+          remote_key: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
+          remote_port: ${{ secrets['DEPLOY_PORT'] }}
 
       - name: Skip deploy when secrets are missing
         if: steps.deploy_check.outputs.ready != 'true'
