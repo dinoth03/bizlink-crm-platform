@@ -722,6 +722,34 @@
   </div>
 </footer>
 
+<!--FLOATING CHAT POPUP-->
+<div class="chat-fab-widget" id="chatFabWidget">
+  <button class="chat-fab-trigger" id="chatFabTrigger" aria-label="Open BizLink chat popup" type="button">
+    <span class="chat-fab-icon">💬</span>
+  </button>
+
+  <div class="chat-popup-card" id="chatPopupCard" aria-hidden="true">
+    <button class="chat-popup-close" id="chatPopupClose" aria-label="Close chat popup" type="button">×</button>
+
+    <div class="chat-popup-header">
+      <div class="chat-popup-avatar">⬡</div>
+      <div class="chat-popup-title-wrap">
+        <strong>BizLink Assistant</strong>
+        <span>Online now</span>
+      </div>
+    </div>
+
+    <p class="chat-popup-message">
+      Want to chat about BizLink? We can help you connect with Admin, Vendor, and Customer conversations quickly.
+    </p>
+
+    <div class="chat-popup-actions">
+      <a href="Chat.html" class="chat-popup-btn chat-popup-btn-primary">Open Chat</a>
+      <a href="Chat.html?role=customers" class="chat-popup-btn chat-popup-btn-ghost">Support</a>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/home.js"></script>
 </body>
 </html>

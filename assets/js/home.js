@@ -247,3 +247,41 @@ window.addEventListener('load', () => {
 
 console.log('%c BizLink CRM Platform 🇱🇰 ', 'background: #50C878; color: white; font-size: 14px; padding: 8px 16px; border-radius: 4px;');
 console.log('%c Built for Sri Lankan SMEs ', 'color: #FF8C00; font-size: 12px;');
+
+// Floating chat popup
+const chatFabWidget = document.getElementById('chatFabWidget');
+const chatFabTrigger = document.getElementById('chatFabTrigger');
+const chatPopupCard = document.getElementById('chatPopupCard');
+const chatPopupClose = document.getElementById('chatPopupClose');
+
+if (chatFabWidget && chatFabTrigger && chatPopupCard) {
+  const setPopupOpen = (isOpen) => {
+    chatPopupCard.classList.toggle('open', isOpen);
+    chatPopupCard.setAttribute('aria-hidden', String(!isOpen));
+  };
+
+  chatFabTrigger.addEventListener('click', () => {
+    const currentlyOpen = chatPopupCard.classList.contains('open');
+    setPopupOpen(!currentlyOpen);
+  });
+
+  if (chatPopupClose) {
+    chatPopupClose.addEventListener('click', () => setPopupOpen(false));
+  }
+
+  document.addEventListener('click', (event) => {
+    const clickedInsideWidget = chatFabWidget.contains(event.target);
+    if (!clickedInsideWidget) setPopupOpen(false);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setPopupOpen(false);
+  });
+
+  // Show a gentle nudge once after load.
+  window.setTimeout(() => {
+    if (!chatPopupCard.classList.contains('open')) {
+      setPopupOpen(true);
+    }
+  }, 1800);
+}
