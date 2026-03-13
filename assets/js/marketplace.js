@@ -94,8 +94,139 @@ let state = {
   itemsPerPage: 12,
 };
 
+const CATEGORY_ALIASES = {
+  electronics: 'electronics',
+  fashion: 'fashion',
+  home: 'home',
+  grocery: 'grocery',
+  agriculture: 'agriculture',
+  construction: 'construction',
+  health: 'health',
+  office: 'office',
+  industrial: 'industrial',
+  packaging: 'packaging',
+  it: 'it',
+  marketing: 'marketing',
+  accounting: 'accounting',
+  logistics: 'logistics'
+};
+
+function toCategorySlug(value) {
+  const cleaned = (value || '').toString().trim().toLowerCase();
+  if (!cleaned) return 'other';
+  if (CATEGORY_ALIASES[cleaned]) return CATEGORY_ALIASES[cleaned];
+  if (cleaned.includes('elect')) return 'electronics';
+  if (cleaned.includes('fashion') || cleaned.includes('cloth')) return 'fashion';
+  if (cleaned.includes('grocery') || cleaned.includes('food')) return 'grocery';
+  if (cleaned.includes('agri') || cleaned.includes('farm')) return 'agriculture';
+  if (cleaned.includes('const') || cleaned.includes('build')) return 'construction';
+  if (cleaned.includes('health') || cleaned.includes('medical')) return 'health';
+  if (cleaned.includes('office') || cleaned.includes('station')) return 'office';
+  if (cleaned.includes('indus') || cleaned.includes('tool')) return 'industrial';
+  if (cleaned.includes('pack')) return 'packaging';
+  if (cleaned === 'it' || cleaned.includes('tech') || cleaned.includes('software')) return 'it';
+  if (cleaned.includes('market')) return 'marketing';
+  if (cleaned.includes('account') || cleaned.includes('finance')) return 'accounting';
+  if (cleaned.includes('logist') || cleaned.includes('courier') || cleaned.includes('delivery')) return 'logistics';
+  return cleaned.replace(/\s+/g, '-');
+}
+
+function pickEmoji(categorySlug) {
+  const emojiMap = {
+    electronics: '💻',
+    fashion: '👗',
+    home: '🏠',
+    grocery: '🛒',
+    agriculture: '🌾',
+    construction: '🏗️',
+    health: '⚕️',
+    office: '🖊️',
+    industrial: '⚙️',
+    packaging: '📦',
+    it: '💻',
+    marketing: '📣',
+    accounting: '📊',
+    logistics: '🚚'
+  };
+  return emojiMap[categorySlug] || '📦';
+}
+
+function mapApiProduct(product, index) {
+  const category = toCategorySlug(product.category);
+  const price = Number(product.base_price || 0);
+  const stock = Number(product.stock_quantity || 0);
+  const rating = Math.max(3.8, Math.min(5, 4 + ((index % 10) / 10)));
+  const reviews = 12 + (index * 7);
+  const isNew = index < 6;
+
+  return {
+    id: Number(product.product_id),
+    name: product.product_name,
+    cat: category,
+    emoji: pickEmoji(category),
+    company: product.shop_name || 'BizLink Vendor',
+    price,
+    oldPrice: null,
+    rating: Number(rating.toFixed(1)),
+    reviews,
+    badge: isNew ? 'new' : '',
+    isNew,
+    tags: [category, stock > 0 ? 'In Stock' : 'Pre-order'],
+    desc: `${product.product_name} by ${product.shop_name || 'a verified vendor'} on BizLink Marketplace.`,
+    delivery: 'Island-wide: 2–5 days',
+    isService: false
+  };
+}
+
+function updateMarketplaceCounts(products, categories) {
+  const uniqueVendors = new Set(products.map((p) => p.company)).size;
+
+  const heroCounters = document.querySelectorAll('.hs-num');
+  if (heroCounters[0]) heroCounters[0].setAttribute('data-target', String(products.length));
+  if (heroCounters[1]) heroCounters[1].setAttribute('data-target', String(uniqueVendors));
+  if (heroCounters[2]) heroCounters[2].setAttribute('data-target', String(Math.max(1, categories.length || 0)));
+
+  const countByCategory = {};
+  products.forEach((p) => {
+    countByCategory[p.cat] = (countByCategory[p.cat] || 0) + 1;
+  });
+
+  document.querySelectorAll('.cat-item[data-cat]').forEach((btn) => {
+    const cat = btn.getAttribute('data-cat');
+    const countEl = btn.querySelector('.cat-count');
+    if (!countEl) return;
+    if (cat === 'all') {
+      countEl.textContent = String(products.length);
+    } else {
+      countEl.textContent = String(countByCategory[cat] || 0);
+    }
+  });
+}
+
+async function loadMarketplaceData() {
+  try {
+    const [apiProducts, apiCategories] = await Promise.all([
+      getProducts(),
+      getCategories()
+    ]);
+
+    if (apiProducts && apiProducts.length > 0) {
+      const mapped = apiProducts.map(mapApiProduct);
+      PRODUCTS.splice(0, PRODUCTS.length, ...mapped);
+      updateMarketplaceCounts(mapped, apiCategories || []);
+      return true;
+    }
+  } catch (error) {
+    console.error('Failed to load marketplace data from API:', error);
+  }
+
+  updateMarketplaceCounts(PRODUCTS, []);
+  return false;
+}
+
 /*INIT*/
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadMarketplaceData();
   renderProducts();
   animateCounters();
   initNavScroll();
