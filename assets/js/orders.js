@@ -183,8 +183,110 @@ const mockOrders = [
   }
 ];
 
+function normalizeOrderStatus(orderStatus) {
+  if (orderStatus === 'delivered') return 'completed';
+  if (['processing', 'shipped', 'out_for_delivery'].includes(orderStatus)) return 'processing';
+  if (['cancelled', 'returned'].includes(orderStatus)) return 'cancelled';
+  return 'pending';
+}
+
+function buildTimeline(order) {
+  const placedDate = order.order_date || order.created_at;
+  const normalizedStatus = normalizeOrderStatus(order.order_status);
+
+  return [
+    { step: 'placed', date: placedDate, time: 'Recorded' },
+    { step: 'payment', date: placedDate, time: 'Confirmed' },
+    { step: 'processing', date: normalizedStatus !== 'pending' ? placedDate : null, time: normalizedStatus !== 'pending' ? 'In progress' : 'Pending' },
+    { step: 'shipped', date: order.tracking_number ? order.created_at : null, time: order.tracking_number ? 'Tracking assigned' : 'Pending' },
+    { step: 'delivered', date: normalizedStatus === 'completed' ? order.expected_delivery_date || order.created_at : null, time: normalizedStatus === 'completed' ? 'Completed' : 'Pending' }
+  ];
+}
+
+function mapApiOrder(order) {
+  const quantity = Number(order.quantity || 1) || 1;
+  const totalAmount = Number(order.total_amount || 0);
+  const unitPrice = quantity > 0 ? totalAmount / quantity : totalAmount;
+  const normalizedStatus = normalizeOrderStatus(order.order_status);
+
+  return {
+    id: order.order_number,
+    customer: order.customer_name || 'Unknown Customer',
+    email: order.email || 'N/A',
+    phone: order.phone || 'N/A',
+    product: order.product_name || 'Order Item',
+    quantity,
+    price: formatCurrency(unitPrice),
+    total: formatCurrency(totalAmount),
+    vendor: order.vendor_name || 'Unknown Vendor',
+    vendorCategory: order.vendor_category || 'General',
+    vendorRating: Number(order.vendor_rating || 0).toFixed(1),
+    vendorEmail: order.vendor_email || 'N/A',
+    province: order.city || 'N/A',
+    status: normalizedStatus,
+    date: (order.order_date || order.created_at || '').split(' ')[0],
+    shipping: order.shipping_method || 'Standard Delivery',
+    tracking: order.tracking_number || 'Pending',
+    deliveryEst: order.expected_delivery_date || order.created_at,
+    address: order.shipping_address || 'No shipping address recorded',
+    timeline: buildTimeline(order)
+  };
+}
+
+async function loadOrders() {
+  try {
+    const apiOrders = await getOrders();
+    if (apiOrders) {
+      ordersState.allOrders = apiOrders.map(mapApiOrder);
+      updateOrderSummary(ordersState.allOrders);
+      renderOrdersTable();
+      showToast('Loaded orders from database', 'success');
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to load orders from API:', error);
+  }
+
+  ordersState.allOrders = [...mockOrders];
+  updateOrderSummary(ordersState.allOrders);
+  renderOrdersTable();
+  showToast('API unavailable, using sample order data', 'info');
+}
+
+function updateOrderSummary(orders) {
+  const kpiValues = document.querySelectorAll('.kpi-grid .kpi-card .kpi-value');
+  const kpiLabels = document.querySelectorAll('.kpi-grid .kpi-card .kpi-label');
+  const kpiSubLabels = document.querySelectorAll('.kpi-grid .kpi-card .kpi-sublabel');
+
+  if (kpiValues.length < 4 || kpiLabels.length < 4 || kpiSubLabels.length < 4) {
+    return;
+  }
+
+  const totalOrders = orders.length;
+  const completedOrders = orders.filter((order) => order.status === 'completed').length;
+  const processingOrders = orders.filter((order) => order.status === 'processing').length;
+  const cancelledOrders = orders.filter((order) => order.status === 'cancelled').length;
+  const completionRate = totalOrders ? ((completedOrders / totalOrders) * 100).toFixed(1) : '0.0';
+  const cancellationRate = totalOrders ? ((cancelledOrders / totalOrders) * 100).toFixed(1) : '0.0';
+
+  kpiValues[0].textContent = formatNumber(totalOrders);
+  kpiValues[1].textContent = formatNumber(completedOrders);
+  kpiValues[2].textContent = formatNumber(processingOrders);
+  kpiValues[3].textContent = formatNumber(cancelledOrders);
+
+  kpiLabels[0].textContent = 'Total Orders';
+  kpiLabels[1].textContent = 'Completed';
+  kpiLabels[2].textContent = 'Processing';
+  kpiLabels[3].textContent = 'Cancelled';
+
+  kpiSubLabels[0].textContent = 'Loaded from database';
+  kpiSubLabels[1].textContent = `${completionRate}% completion rate`;
+  kpiSubLabels[2].textContent = 'In fulfillment';
+  kpiSubLabels[3].textContent = `${cancellationRate}% cancellation rate`;
+}
+
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Load theme
   if (ordersState.theme === 'dark') {
     document.body.classList.add('dark');
@@ -192,8 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render initial data
   updateDate();
-  ordersState.allOrders = [...mockOrders];
-  renderOrdersTable();
+  await loadOrders();
 
   // Update date every minute
   setInterval(updateDate, 60000);
@@ -349,6 +450,17 @@ function renderOrdersTable() {
     }
     return ordersState.sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
   });
+
+  if (filteredOrders.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align:center;padding:24px;color:#64748b;">
+          No orders found in the database for the selected filters.
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   // Render rows
   tbody.innerHTML = filteredOrders
