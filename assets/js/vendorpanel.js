@@ -68,8 +68,19 @@ document.addEventListener('click', (e) => {
 
 // COUNTER ANIMATION (same as home.js animateCounter)
 
-const COUNTERS = { s1: { target:48500, prefix:'Rs. ' }, s2: { target:1284, prefix:'' }, s3: { target:23, prefix:'' }, s4: { target:324800, prefix:'Rs. ' }, s5: { target:892400, prefix:'Rs. ' } };
+let COUNTERS = { s1: { target:0, prefix:'Rs. ' }, s2: { target:0, prefix:'' }, s3: { target:0, prefix:'' }, s4: { target:0, prefix:'Rs. ' }, s5: { target:0, prefix:'Rs. ' } };
 let countersRun = false;
+
+function setCounterTargets(stats) {
+  COUNTERS = {
+    s1: { target: stats.todaySales, prefix: 'Rs. ' },
+    s2: { target: stats.totalOrders, prefix: '' },
+    s3: { target: stats.pendingOrders, prefix: '' },
+    s4: { target: stats.totalEarnings, prefix: 'Rs. ' },
+    s5: { target: stats.monthlyRevenue, prefix: 'Rs. ' }
+  };
+  countersRun = false;
+}
 
 function animateCounters() {
   if (countersRun) return;
@@ -128,16 +139,42 @@ function initDashCharts() {
   if (chartsCreated.dash) return;
   chartsCreated.dash = true;
 
+  const last7Labels = [];
+  const last7Data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    last7Labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+    const dayTotal = dashboardData.orders
+      .filter((o) => o.date === key && o.status !== 'cancelled')
+      .reduce((sum, o) => sum + o.amount, 0);
+    last7Data.push(dayTotal);
+  }
+
+  const statusMap = { delivered: 0, pending: 0, cancelled: 0, processing: 0 };
+  dashboardData.orders.forEach((o) => {
+    if (o.status === 'shipped') statusMap.processing += 1;
+    else if (statusMap[o.status] !== undefined) statusMap[o.status] += 1;
+  });
+  const statusTotal = Object.values(statusMap).reduce((a, b) => a + b, 0) || 1;
+  const donutData = [
+    Math.round((statusMap.delivered / statusTotal) * 100),
+    Math.round((statusMap.pending / statusTotal) * 100),
+    Math.round((statusMap.cancelled / statusTotal) * 100),
+    Math.round((statusMap.processing / statusTotal) * 100)
+  ];
+
   // Sales line chart
   const sCtx = document.getElementById('salesChart');
   if (sCtx) {
     new Chart(sCtx, {
       type: 'line',
       data: {
-        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        labels: last7Labels,
         datasets: [{
           label: 'Sales (Rs.)',
-          data: [32000,45000,28000,61000,48000,72000,54000],
+          data: last7Data,
           borderColor: VENDOR_GREEN,
           backgroundColor: 'rgba(80,200,120,0.08)',
           borderWidth: 2.5,
@@ -166,7 +203,7 @@ function initDashCharts() {
       type: 'doughnut',
       data: {
         labels: ['Delivered','Pending','Cancelled','Processing'],
-        datasets: [{ data: [62,18,8,12], backgroundColor: [VENDOR_GREEN, ACCENT_ORANGE, ACCENT_RED, ACCENT_BLUE], borderWidth: 0, hoverOffset: 8 }]
+        datasets: [{ data: donutData, backgroundColor: [VENDOR_GREEN, ACCENT_ORANGE, ACCENT_RED, ACCENT_BLUE], borderWidth: 0, hoverOffset: 8 }]
       },
       options: {
         cutout: '70%',
@@ -293,12 +330,140 @@ const SAMPLE_ORDERS = Array.from({length:22}, (_, i) => ({
   date: `2026-02-${String(Math.max(1, 24 - i)).padStart(2,'0')}`
 }));
 
+const dashboardData = {
+  vendors: [],
+  orders: [],
+  products: [],
+  activeVendor: null,
+  loadedFromApi: false
+};
+
+function normalizeOrderStatus(status) {
+  if (status === 'out_for_delivery') return 'shipped';
+  if (status === 'returned') return 'cancelled';
+  return status || 'pending';
+}
+
+function mapApiOrder(row) {
+  return {
+    id: row.order_number,
+    customer: row.customer_name || 'Unknown Customer',
+    district: row.city || 'Sri Lanka',
+    items: Number(row.quantity || 1),
+    amount: Number(row.total_amount || 0),
+    payment: ['unpaid', 'failed'].includes((row.payment_status || '').toLowerCase()) ? 'unpaid' : 'paid',
+    status: normalizeOrderStatus(row.order_status),
+    date: (row.order_date || row.created_at || '').split(' ')[0],
+    vendor: row.vendor_name || 'Unknown Vendor'
+  };
+}
+
+function mapApiProduct(row, index) {
+  const stock = Number(row.stock_quantity || 0);
+  return {
+    name: row.product_name,
+    emoji: ['📦', '🛍️', '🌿', '🧴', '💻', '🛒'][index % 6],
+    price: Number(row.base_price || 0),
+    stock,
+    sku: `PRD-${String(row.product_id).padStart(3, '0')}`,
+    discount: 0,
+    status: Number(row.product_status) === 1 ? (stock > 0 ? 'active' : 'out') : 'draft',
+    img: ''
+  };
+}
+
+function pickActiveVendor(vendors, orders) {
+  if (!vendors || vendors.length === 0) return null;
+  const counts = {};
+  orders.forEach((o) => {
+    counts[o.vendor] = (counts[o.vendor] || 0) + 1;
+  });
+  let chosen = vendors[0];
+  let max = -1;
+  vendors.forEach((v) => {
+    const c = counts[v.vendor_name] || 0;
+    if (c > max) {
+      max = c;
+      chosen = v;
+    }
+  });
+  return chosen;
+}
+
+function filterVendorOrders(orders, vendorName) {
+  if (!vendorName) return orders;
+  const filtered = orders.filter((o) => o.vendor === vendorName);
+  return filtered.length > 0 ? filtered : orders;
+}
+
+function computeStats(orders) {
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const todaySales = orders.filter((o) => o.date === today && o.status !== 'cancelled').reduce((sum, o) => sum + o.amount, 0);
+  const totalOrders = orders.length;
+  const pendingOrders = orders.filter((o) => ['pending', 'processing', 'shipped'].includes(o.status)).length;
+  const totalEarnings = orders.filter((o) => o.status === 'delivered').reduce((sum, o) => sum + o.amount, 0);
+  const monthlyRevenue = orders.filter((o) => {
+    const d = new Date(o.date);
+    return d.getFullYear() === year && d.getMonth() === month && o.status !== 'cancelled';
+  }).reduce((sum, o) => sum + o.amount, 0);
+
+  return { todaySales, totalOrders, pendingOrders, totalEarnings, monthlyRevenue };
+}
+
+function updateVendorIdentity(activeVendor) {
+  if (!activeVendor) return;
+  const firstName = (activeVendor.vendor_name || '').split(' ')[0] || 'Vendor';
+  const profileName = document.querySelector('.profile-name');
+  const profileRole = document.querySelector('.profile-role');
+  const welcomeName = document.querySelector('.vendor-text');
+
+  if (profileName) profileName.textContent = activeVendor.vendor_name;
+  if (profileRole) profileRole.textContent = `Verified Vendor ${activeVendor.vendor_status === 'verified' ? '✅' : ''}`;
+  if (welcomeName) welcomeName.textContent = firstName;
+}
+
+async function loadVendorDashboardData() {
+  try {
+    const [vendors, orders, products] = await Promise.all([getVendors(), getOrders(), getProducts()]);
+    if (vendors && orders && products) {
+      dashboardData.vendors = vendors;
+      const mappedOrders = orders.map(mapApiOrder);
+      const activeVendor = pickActiveVendor(vendors, mappedOrders);
+      const vendorName = activeVendor ? activeVendor.vendor_name : null;
+      dashboardData.orders = filterVendorOrders(mappedOrders, vendorName);
+      dashboardData.products = products
+        .filter((p) => !vendorName || p.shop_name === vendorName)
+        .map(mapApiProduct);
+      dashboardData.activeVendor = activeVendor;
+      dashboardData.loadedFromApi = true;
+
+      if (dashboardData.products.length === 0) {
+        dashboardData.products = products.map(mapApiProduct);
+      }
+
+      updateVendorIdentity(activeVendor);
+      setCounterTargets(computeStats(dashboardData.orders));
+      return;
+    }
+  } catch (error) {
+    console.error('Vendor dashboard API load failed:', error);
+  }
+
+  dashboardData.orders = [...SAMPLE_ORDERS];
+  dashboardData.products = [...PRODUCTS];
+  dashboardData.loadedFromApi = false;
+  setCounterTargets(computeStats(dashboardData.orders));
+}
+
 
 // RENDER RECENT ORDERS
 function renderRecentOrders() {
   const tbody = document.getElementById('recentOrdersBody');
   if (!tbody || tbody.children.length) return;
-  tbody.innerHTML = SAMPLE_ORDERS.slice(0,7).map(o => `
+  tbody.innerHTML = dashboardData.orders.slice(0,7).map(o => `
     <tr>
       <td style="font-family:'Playfair Display',serif;font-size:0.78rem;color:var(--vendor-color);font-weight:700">${o.id}</td>
       <td>${o.customer}</td>
@@ -315,7 +480,14 @@ function renderRecentOrders() {
 function renderOrders(filter) {
   const tbody = document.getElementById('ordersTableBody');
   if (!tbody) return;
-  const data = filter === 'all' ? SAMPLE_ORDERS : SAMPLE_ORDERS.filter(o => o.status === filter);
+  const source = dashboardData.orders.length ? dashboardData.orders : SAMPLE_ORDERS;
+  const data = filter === 'all' ? source : source.filter(o => o.status === filter);
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">No orders found.</td></tr>';
+    return;
+  }
+
   tbody.innerHTML = data.map(o => `
     <tr>
       <td style="font-family:'Playfair Display',serif;font-size:0.75rem;color:var(--vendor-color);font-weight:700">${o.id}</td>
@@ -344,6 +516,10 @@ let allProducts = [...PRODUCTS];
 function renderProducts(list = allProducts) {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
+  if (list.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;color:var(--text-muted)">No products available.</div>';
+    return;
+  }
   grid.innerHTML = list.map(p => {
     const outStock = p.stock === 0;
     const lowStock = p.stock > 0 && p.stock <= 5;
@@ -670,8 +846,10 @@ document.addEventListener('mousemove', (e) => {
 // INIT (same pattern as home.js body fade)
 document.body.style.opacity = '0';
 document.body.style.transition = 'opacity 0.4s';
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   document.body.style.opacity = '1';
+  await loadVendorDashboardData();
+  allProducts = dashboardData.products.length ? [...dashboardData.products] : [...PRODUCTS];
   onPageActivate('dashboard');
 });
 
