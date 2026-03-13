@@ -2,6 +2,8 @@
 
 **ONE FILE TO RULE THEM ALL** - Everything you need, nothing you don't.
 
+**No remote repository is required for this setup.** You can run everything fully on your local machine with XAMPP.
+
 ---
 
 ## Table of Contents

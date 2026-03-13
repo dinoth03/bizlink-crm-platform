@@ -1,48 +1,49 @@
 # bizlink-crm-platform
 
-BizLink CRM Platform - A web-based Customer Relationship Management (CRM) platform designed to support customer data management, vendor coordination, and marketplace integration using modern web technologies.
+BizLink CRM Platform is a web-based CRM and marketplace project with a static frontend (HTML/CSS/JS), PHP APIs, and a MySQL database.
 
-## CI/CD Pipeline (GitHub Actions)
+## Local Setup (No Remote Repository Required)
 
-This repository now includes a GitHub Actions pipeline at `.github/workflows/ci-cd.yml`.
+This project runs fully on your local machine using XAMPP.
 
-### What it does
+1. Install XAMPP (Apache + MySQL + PHP).
+2. Copy this project folder to:
+	`C:\xampp\htdocs\bizlink-crm-platform`
+3. Start Apache and MySQL from XAMPP Control Panel.
+4. Open `http://localhost/phpmyadmin` and import:
+	`bizlink-crm-platform.sql`
+5. Open the app in your browser:
+	`http://localhost/bizlink-crm-platform/pages/home.html`
 
-1. CI on pull requests to `main`: lint PHP files in `api/` using `php -l`.
-2. CI on pull requests to `main`: check JavaScript syntax for all `.js` files using `node --check`.
-3. CD on push to `main`: run only after CI passes.
-4. CD on push to `main`: deploy files to your server over SSH.
-5. CD on push to `main`: automatically skip deployment if required secrets are not configured.
+## Main Project Folders
 
-### Step-by-step setup
+- `api/` PHP endpoints and database configuration
+- `pages/` public pages
+- `admin/` admin pages
+- `customer/` customer pages
+- `vendor/` vendor pages
+- `assets/` CSS and JavaScript files
 
-1. Push this repository to GitHub.
-2. In GitHub, open your repository.
-3. Go to **Settings > Secrets and variables > Actions > New repository secret**.
-4. Add secret `DEPLOY_HOST` (example: `your.server.com`).
-5. Add secret `DEPLOY_USER` (example: `ubuntu` or your hosting SSH user).
-6. Add secret `DEPLOY_SSH_PRIVATE_KEY` (your private key content).
-7. Add secret `DEPLOY_PORT` (usually `22`).
-8. Add secret `DEPLOY_PATH` (absolute path on the server, example: `/var/www/html/bizlink-crm-platform`).
-9. Commit and push changes to `main`.
-10. Open the **Actions** tab in GitHub and verify `Quality Checks` job passes.
-11. Verify `Deploy to Server` runs, or intentionally skips if secrets are not set.
+## Backend Setup Guide
 
-### How to generate an SSH key for deployment
+For full backend instructions, open:
 
-Run locally:
+- `BACKEND_COMPLETE_SETUP.md`
 
-```bash
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/bizlink_deploy_key
-```
+It includes:
 
-Then:
+- complete XAMPP setup
+- database import
+- API file details
+- frontend-to-backend connection instructions
+- testing and troubleshooting
 
-1. Add the public key (`bizlink_deploy_key.pub`) to your server user's `~/.ssh/authorized_keys`.
-2. Copy the private key content (`bizlink_deploy_key`) into the `DEPLOY_SSH_PRIVATE_KEY` GitHub secret.
+## Quick Health Check
 
-### Notes
+After setup, verify these URLs:
 
-- Keep sensitive values only in GitHub Secrets, never in code.
-- Current deployment excludes `.git`, `.github`, and `.vscode`.
-- If your host does not allow SSH-based deploys, this workflow can be adapted to FTP/SFTP.
+- `http://localhost/bizlink-crm-platform/api/get_dashboard_stats.php`
+- `http://localhost/bizlink-crm-platform/api/get_orders.php`
+- `http://localhost/bizlink-crm-platform/pages/marketplace.html`
+
+If API URLs return JSON, backend setup is working.
