@@ -196,6 +196,8 @@ function toggleFinalBtn(checkbox) {
 function handleSignup() {
   const role = state.signupRole;
   const { firstName } = state.formData;
+  const fullName = `${state.formData.firstName || ''} ${state.formData.lastName || ''}`.trim();
+  const email = (state.formData.email || '').trim().toLowerCase();
 
   // Hide all steps
   [1, 2, 3, 4].forEach(i => document.getElementById(`step${i}`)?.classList.add('hidden'));
@@ -233,6 +235,9 @@ function handleSignup() {
   const successBtn = document.querySelector('.success-btn');
   if (successBtn) {
     const dashboardLink = getDashboardLink(role);
+    if (email) {
+      saveSessionUser({ role, email, fullName });
+    }
     successBtn.href = dashboardLink;
     successBtn.onclick = () => {
       window.location.href = dashboardLink;
@@ -242,6 +247,9 @@ function handleSignup() {
 
   // Redirect to dashboard after 3 seconds
   setTimeout(() => {
+    if (email) {
+      saveSessionUser({ role, email, fullName });
+    }
     window.location.href = getDashboardLink(role);
   }, 3000);
 }
@@ -253,6 +261,14 @@ function handleLogin(e) {
     showToast('Please select your role first', 'warn');
     return;
   }
+  const loginEmail = (document.getElementById('loginEmail')?.value || '').trim().toLowerCase();
+  if (!isValidEmail(loginEmail)) {
+    showToast('Please enter a valid email address', 'warn');
+    return;
+  }
+
+  const rememberedName = localStorage.getItem('bizlink_user_name') || '';
+
   const btn = document.getElementById('loginSubmitBtn');
   btn.innerHTML = '<span class="btn-text">Signing In...</span><span class="btn-icon">⏳</span>';
   btn.disabled = true;
@@ -268,6 +284,12 @@ function handleLogin(e) {
       vendor:   '../vendor/vendorpanel.html',
       customer: '../customer/dashboard.html'
     };
+    saveSessionUser({
+      role: state.loginRole,
+      email: loginEmail,
+      fullName: rememberedName
+    });
+
     setTimeout(() => {
       window.location.href = dashboardMap[state.loginRole];
     }, 1500);
@@ -379,6 +401,24 @@ function showToast(msg, type = 'info') {
 /*HELPERS*/
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function saveSessionUser(user) {
+  if (!user || !user.role || !user.email) return;
+
+  const sessionUser = {
+    role: user.role,
+    email: String(user.email).trim().toLowerCase(),
+    fullName: user.fullName || '',
+    loginAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('bizlink_session', JSON.stringify(sessionUser));
+  localStorage.setItem('bizlink_user_email', sessionUser.email);
+  localStorage.setItem('bizlink_user_role', sessionUser.role);
+  if (sessionUser.fullName) {
+    localStorage.setItem('bizlink_user_name', sessionUser.fullName);
+  }
 }
 
 function isValidEmail(email) {

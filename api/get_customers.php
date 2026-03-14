@@ -3,6 +3,7 @@ require 'config.php';
 
 $query = "SELECT 
     c.customer_id,
+    u.user_id,
     u.full_name,
     u.email,
     u.phone,

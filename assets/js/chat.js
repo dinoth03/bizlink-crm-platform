@@ -123,6 +123,28 @@ let state = {
 
 let ME_USER_ID = null;
 
+function resolveChatEmail() {
+  const fromQuery = (new URLSearchParams(window.location.search).get('email') || '').trim().toLowerCase();
+  if (fromQuery) return fromQuery;
+
+  try {
+    const rawSession = localStorage.getItem('bizlink_session');
+    if (rawSession) {
+      const parsed = JSON.parse(rawSession);
+      if (parsed && parsed.email) {
+        return String(parsed.email).trim().toLowerCase();
+      }
+    }
+  } catch (error) {
+    console.warn('Could not parse session for chat identity:', error);
+  }
+
+  const legacyEmail = (localStorage.getItem('bizlink_user_email') || '').trim().toLowerCase();
+  if (legacyEmail) return legacyEmail;
+
+  return 'dilani.silva@gmail.com';
+}
+
 function getInitials(name) {
   return (name || '')
     .split(' ')
@@ -134,7 +156,7 @@ function getInitials(name) {
 
 async function loadChatDataFromApi() {
   try {
-    const emailParam = new URLSearchParams(window.location.search).get('email') || 'dilani.silva@gmail.com';
+    const emailParam = resolveChatEmail();
     const response = await fetch(`../api/chat_data.php?email=${encodeURIComponent(emailParam)}`);
     const payload = await response.json();
 

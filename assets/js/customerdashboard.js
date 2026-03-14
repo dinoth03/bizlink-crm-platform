@@ -125,9 +125,90 @@ const FALLBACK_VENDORS = [
 ];
 
 const customerDashboardState = {
+  customerId: null,
   customerEmail: 'dilani.silva@gmail.com',
+  customerName: 'Dilani Silva',
   notifications: []
 };
+
+function resolveSessionUser() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const queryEmail = (params.get('email') || '').trim().toLowerCase();
+    const queryRole = (params.get('role') || '').trim().toLowerCase();
+    const queryUserId = Number(params.get('user_id') || 0);
+
+    if (queryEmail) {
+      return {
+        email: queryEmail,
+        role: queryRole || 'customer',
+        user_id: queryUserId > 0 ? queryUserId : null
+      };
+    }
+
+    const rawSession = localStorage.getItem('bizlink_session');
+    if (rawSession) {
+      const parsed = JSON.parse(rawSession);
+      if (parsed && parsed.email) {
+        return {
+          email: String(parsed.email).trim().toLowerCase(),
+          role: String(parsed.role || '').toLowerCase(),
+          user_id: parsed.user_id ? Number(parsed.user_id) : null,
+          fullName: parsed.fullName || ''
+        };
+      }
+    }
+
+    const legacyEmail = (localStorage.getItem('bizlink_user_email') || '').trim().toLowerCase();
+    const legacyRole = (localStorage.getItem('bizlink_user_role') || '').trim().toLowerCase();
+    const legacyName = localStorage.getItem('bizlink_user_name') || '';
+    if (legacyEmail) {
+      return { email: legacyEmail, role: legacyRole, fullName: legacyName, user_id: null };
+    }
+  } catch (error) {
+    console.warn('Failed to resolve session user:', error);
+  }
+
+  return {
+    email: FALLBACK_CUSTOMER.email,
+    role: 'customer',
+    user_id: null,
+    fullName: FALLBACK_CUSTOMER.full_name
+  };
+}
+
+function applyCustomerChatLinks() {
+  const safeEmail = customerDashboardState.customerEmail || FALLBACK_CUSTOMER.email;
+  const chatUrl = `../pages/chat.html?email=${encodeURIComponent(safeEmail)}`;
+
+  const messageCenterLink = document.getElementById('messageCenterLink');
+  const supportNavLink = document.getElementById('supportNavLink');
+  if (messageCenterLink) messageCenterLink.href = chatUrl;
+  if (supportNavLink) supportNavLink.href = chatUrl;
+}
+
+function persistResolvedSessionUser() {
+  try {
+    const rawSession = localStorage.getItem('bizlink_session');
+    const parsed = rawSession ? JSON.parse(rawSession) : {};
+    const merged = {
+      role: parsed.role || 'customer',
+      email: customerDashboardState.customerEmail,
+      fullName: customerDashboardState.customerName || parsed.fullName || '',
+      user_id: customerDashboardState.customerId || parsed.user_id || null,
+      loginAt: parsed.loginAt || new Date().toISOString()
+    };
+
+    localStorage.setItem('bizlink_session', JSON.stringify(merged));
+    localStorage.setItem('bizlink_user_email', merged.email || '');
+    localStorage.setItem('bizlink_user_role', merged.role || 'customer');
+    if (merged.fullName) {
+      localStorage.setItem('bizlink_user_name', merged.fullName);
+    }
+  } catch (error) {
+    console.warn('Could not persist resolved customer session:', error);
+  }
+}
 
 function getCustomerNotificationIcon(notification) {
   const type = (notification.notification_type || 'system').toLowerCase();
@@ -374,6 +455,12 @@ function updateCustomerSummary(customer, orders, vendors) {
 }
 
 async function loadCustomerDashboardData() {
+  const sessionUser = resolveSessionUser();
+  customerDashboardState.customerEmail = sessionUser.email || FALLBACK_CUSTOMER.email;
+  customerDashboardState.customerId = sessionUser.user_id || null;
+  customerDashboardState.customerName = sessionUser.fullName || customerDashboardState.customerName;
+  applyCustomerChatLinks();
+
   try {
     const [customers, orders, vendors] = await Promise.all([getCustomers(), getOrders(), getVendors()]);
 
@@ -382,15 +469,24 @@ async function loadCustomerDashboardData() {
       renderRecentOrders(FALLBACK_ORDERS);
       renderAllOrders(FALLBACK_ORDERS);
       renderRecommendedVendors(FALLBACK_VENDORS);
-      await loadCustomerNotifications(FALLBACK_CUSTOMER.email);
+      await loadCustomerNotifications(customerDashboardState.customerEmail);
       return;
     }
 
     const selectedCustomer =
-      customers.find((c) => (c.full_name || '').toLowerCase().includes('dilani')) || customers[0];
+      customers.find((c) => customerDashboardState.customerId && Number(c.user_id) === Number(customerDashboardState.customerId)) ||
+      customers.find((c) => (c.email || '').toLowerCase() === customerDashboardState.customerEmail) ||
+      customers.find((c) => (c.full_name || '').toLowerCase().includes('dilani')) ||
+      customers[0];
+
+    customerDashboardState.customerEmail = (selectedCustomer.email || customerDashboardState.customerEmail || FALLBACK_CUSTOMER.email).toLowerCase();
+    customerDashboardState.customerId = selectedCustomer.user_id ? Number(selectedCustomer.user_id) : customerDashboardState.customerId;
+    customerDashboardState.customerName = selectedCustomer.full_name || customerDashboardState.customerName;
+    persistResolvedSessionUser();
+    applyCustomerChatLinks();
 
     const customerOrders = (orders || []).filter(
-      (o) => (o.customer_name || '').toLowerCase() === (selectedCustomer.full_name || '').toLowerCase()
+      (o) => Number(o.customer_id || 0) === Number(selectedCustomer.customer_id || 0)
     );
 
     const safeOrders = customerOrders.length > 0 ? customerOrders : FALLBACK_ORDERS;
@@ -400,14 +496,14 @@ async function loadCustomerDashboardData() {
     renderRecentOrders(safeOrders);
     renderAllOrders(safeOrders);
     renderRecommendedVendors(safeVendors);
-    await loadCustomerNotifications(selectedCustomer.email || FALLBACK_CUSTOMER.email);
+    await loadCustomerNotifications(customerDashboardState.customerEmail);
   } catch (error) {
     console.error('Customer dashboard API load failed:', error);
     updateCustomerSummary(FALLBACK_CUSTOMER, FALLBACK_ORDERS, FALLBACK_VENDORS);
     renderRecentOrders(FALLBACK_ORDERS);
     renderAllOrders(FALLBACK_ORDERS);
     renderRecommendedVendors(FALLBACK_VENDORS);
-    await loadCustomerNotifications(FALLBACK_CUSTOMER.email);
+    await loadCustomerNotifications(customerDashboardState.customerEmail);
   }
 }
 
