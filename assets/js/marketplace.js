@@ -92,7 +92,88 @@ let state = {
   wishlist: [],
   page: 1,
   itemsPerPage: 12,
+  sessionUser: null,
+  preferenceCounts: {},
 };
+
+function resolveMarketplaceSessionUser() {
+  try {
+    const sessionRaw = localStorage.getItem('bizlink_session');
+    if (sessionRaw) {
+      const parsed = JSON.parse(sessionRaw);
+      if (parsed && parsed.email) {
+        return {
+          role: String(parsed.role || '').toLowerCase(),
+          email: String(parsed.email).trim().toLowerCase(),
+          fullName: parsed.fullName || ''
+        };
+      }
+    }
+  } catch (error) {
+    console.warn('Could not parse marketplace session:', error);
+  }
+
+  const legacyEmail = (localStorage.getItem('bizlink_user_email') || '').trim().toLowerCase();
+  const legacyRole = (localStorage.getItem('bizlink_user_role') || '').trim().toLowerCase();
+  const legacyName = localStorage.getItem('bizlink_user_name') || '';
+  if (legacyEmail) {
+    return { role: legacyRole, email: legacyEmail, fullName: legacyName };
+  }
+
+  return null;
+}
+
+function setupBackToDashboardPath() {
+  const link = document.getElementById('backDashboardLink');
+  if (!link) return;
+
+  const user = state.sessionUser;
+  if (!user || !user.role) {
+    link.classList.add('hidden');
+    return;
+  }
+
+  const dashboardMap = {
+    admin: '../admin/dashboard.html',
+    vendor: '../vendor/vendorpanel.html',
+    customer: '../customer/dashboard.html'
+  };
+
+  const href = dashboardMap[user.role] || '../customer/dashboard.html';
+  link.href = href;
+  link.textContent = '← Back to Dashboard';
+  link.classList.remove('hidden');
+}
+
+function computeCategoryPreferences(orders, products, customerEmail) {
+  if (!customerEmail || !Array.isArray(orders) || orders.length === 0) {
+    return {};
+  }
+
+  const normalizedEmail = customerEmail.toLowerCase();
+  const productCategoryByName = {};
+  products.forEach((product) => {
+    if (product.name) {
+      productCategoryByName[product.name.toLowerCase()] = product.cat;
+    }
+  });
+
+  const counts = {};
+  orders
+    .filter((order) => String(order.email || '').toLowerCase() === normalizedEmail)
+    .forEach((order) => {
+      const byProduct = productCategoryByName[String(order.product_name || '').toLowerCase()];
+      const byVendor = toCategorySlug(order.vendor_category || '');
+      const category = byProduct || byVendor || 'other';
+      counts[category] = (counts[category] || 0) + 1;
+    });
+
+  return counts;
+}
+
+function hasPersonalization() {
+  return Object.keys(state.preferenceCounts || {}).length > 0;
+}
 
 const CATEGORY_ALIASES = {
   electronics: 'electronics',
@@ -204,15 +285,26 @@ function updateMarketplaceCounts(products, categories) {
 }
 
 async function loadMarketplaceData() {
+  state.sessionUser = resolveMarketplaceSessionUser();
+  setupBackToDashboardPath();
+
   try {
-    const [apiProducts, apiCategories] = await Promise.all([
+    const [apiProducts, apiCategories, apiOrders] = await Promise.all([
       getProducts(),
-      getCategories()
+      getCategories(),
+      getOrders()
     ]);
 
     if (apiProducts && apiProducts.length > 0) {
       const mapped = apiProducts.map(mapApiProduct);
       PRODUCTS.splice(0, PRODUCTS.length, ...mapped);
+
+      state.preferenceCounts = computeCategoryPreferences(
+        apiOrders || [],
+        mapped,
+        state.sessionUser?.email || ''
+      );
+
       updateMarketplaceCounts(mapped, apiCategories || []);
       return true;
     }
@@ -397,7 +489,22 @@ function getFilteredProducts() {
     case 'price-desc': list.sort((a,b) => b.price - a.price); break;
     case 'rating':     list.sort((a,b) => b.rating - a.rating); break;
     case 'newest':     list.sort((a,b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
-    default: break; // featured – original order
+    default:
+      if (hasPersonalization()) {
+        list = list
+          .map((product, index) => ({
+            product,
+            index,
+            score: state.preferenceCounts[product.cat] || 0
+          }))
+          .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            if (b.product.rating !== a.product.rating) return b.product.rating - a.product.rating;
+            return a.index - b.index;
+          })
+          .map((entry) => entry.product);
+      }
+      break;
   }
 
   return list;
@@ -414,7 +521,8 @@ function renderProducts() {
   const grid = document.getElementById('productGrid');
   const empty = document.getElementById('emptyState');
 
-  document.getElementById('resultCount').textContent = `${total} product${total !== 1 ? 's' : ''} found`;
+  const personalizedSuffix = hasPersonalization() && state.sort === 'featured' ? ' • Personalized for you' : '';
+  document.getElementById('resultCount').textContent = `${total} product${total !== 1 ? 's' : ''} found${personalizedSuffix}`;
 
   if (pageItems.length === 0) {
     grid.innerHTML = '';
