@@ -361,13 +361,39 @@ function renderVendorNotifications() {
   }
 
   list.innerHTML = dashboardData.notifications.map((notification) => `
-    <div class="notif-item ${notification.is_read ? '' : 'is-new'}">${getVendorNotificationIcon(notification)} <strong>${notification.title}</strong><br>${notification.message}</div>
+    <div class="notif-item ${notification.is_read ? '' : 'is-new'}" onclick="markVendorNotificationRead(${Number(notification.notification_id || 0)})" style="cursor:${notification.is_read ? 'default' : 'pointer'};opacity:${notification.is_read ? '0.75' : '1'};">${getVendorNotificationIcon(notification)} <strong>${notification.title}</strong><br>${notification.message}</div>
   `).join('');
 
   if (badge) {
-    badge.textContent = String(dashboardData.notifications.filter((notification) => !notification.is_read).length);
-    badge.style.display = 'inline-flex';
+    const unreadCount = dashboardData.notifications.filter((notification) => !notification.is_read).length;
+    badge.textContent = String(unreadCount);
+    badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
   }
+}
+
+async function markVendorNotificationRead(notificationId) {
+  if (!notificationId) return;
+  const activeVendor = dashboardData.activeVendor;
+  if (!activeVendor) return;
+
+  const target = dashboardData.notifications.find((notification) => Number(notification.notification_id) === Number(notificationId));
+  if (!target || target.is_read) return;
+
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: activeVendor.email,
+      notification_id: Number(notificationId)
+    });
+
+    if (result && result.success) {
+      target.is_read = true;
+      renderVendorNotifications();
+      return;
+    }
+  }
+
+  target.is_read = true;
+  renderVendorNotifications();
 }
 
 async function loadVendorNotifications(activeVendor) {

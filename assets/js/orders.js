@@ -370,7 +370,7 @@ function renderNotifications() {
   }
 
   list.innerHTML = ordersState.notifications.map((notification) => `
-    <div class="np-item">
+    <div class="np-item" onclick="markOrderNotificationRead(${Number(notification.notification_id || 0)})" style="cursor:${notification.is_read ? 'default' : 'pointer'};opacity:${notification.is_read ? '0.8' : '1'};">
       <div class="np-icon ${getNotificationTone(notification)}">${getNotificationIcon(notification)}</div>
       <div class="np-text">
         <strong>${notification.title}</strong>
@@ -383,6 +383,28 @@ function renderNotifications() {
     badge.textContent = String(ordersState.notifications.filter((notification) => !notification.is_read).length);
     badge.style.display = ordersState.notifications.length > 0 ? 'inline-flex' : 'none';
   }
+}
+
+async function markOrderNotificationRead(notificationId) {
+  if (!notificationId) return;
+  const target = ordersState.notifications.find((notification) => Number(notification.notification_id) === Number(notificationId));
+  if (!target || target.is_read) return;
+
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: ordersState.notificationUserEmail,
+      notification_id: Number(notificationId)
+    });
+
+    if (result && result.success) {
+      target.is_read = true;
+      renderNotifications();
+      return;
+    }
+  }
+
+  target.is_read = true;
+  renderNotifications();
 }
 
 async function loadAdminNotifications() {

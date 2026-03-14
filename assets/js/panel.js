@@ -162,7 +162,7 @@ function renderNotifications() {
   }
 
   list.innerHTML = state.notifications.map(n => `
-    <div class="np-item">
+    <div class="np-item ${n.is_read ? '' : 'is-clickable'}" onclick="markAdminNotificationRead(${Number(n.notification_id || 0)})" style="cursor:${n.is_read ? 'default' : 'pointer'};opacity:${n.is_read ? '0.8' : '1'};">
       <div class="np-icon ${getNotificationTone(n)}">${getNotificationIcon(n)}</div>
       <div class="np-text">
         <strong>${n.title}</strong>
@@ -172,6 +172,28 @@ function renderNotifications() {
   `).join('');
 
   updateNotificationBadge();
+}
+
+async function markAdminNotificationRead(notificationId) {
+  if (!notificationId) return;
+  const target = state.notifications.find((notification) => Number(notification.notification_id) === Number(notificationId));
+  if (!target || target.is_read) return;
+
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: state.notificationUserEmail,
+      notification_id: Number(notificationId)
+    });
+
+    if (result && result.success) {
+      target.is_read = true;
+      renderNotifications();
+      return;
+    }
+  }
+
+  target.is_read = true;
+  renderNotifications();
 }
 
 async function clearNotifs() {
@@ -777,11 +799,102 @@ function selectAll(checkbox) {
   showToast(checkbox.checked ? 'Selected all' : 'Cleared selection', 'info');
 }
 
-function exportReport() {
-  showToast('Exporting report...', 'info');
-  setTimeout(() => {
-    showToast('Report exported successfully! (report.csv)', 'success');
-  }, 1500);
+async function loadScriptOnce(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[data-src="${src}"]`);
+    if (existing) {
+      if (existing.getAttribute('data-loaded') === 'true') {
+        resolve();
+        return;
+      }
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('Failed to load script')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.setAttribute('data-src', src);
+    script.addEventListener('load', () => {
+      script.setAttribute('data-loaded', 'true');
+      resolve();
+    }, { once: true });
+    script.addEventListener('error', () => reject(new Error('Failed to load script')), { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+function getPdfFileName() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  return `bizlink-dashboard-${yyyy}${mm}${dd}-${hh}${min}.pdf`;
+}
+
+async function exportReport() {
+  const page = document.getElementById('page-dashboard');
+  if (!page) {
+    showToast('Dashboard container not found', 'error');
+    return;
+  }
+
+  showToast('Preparing PDF export...', 'info');
+
+  try {
+    if (typeof window.html2canvas === 'undefined') {
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    }
+    if (typeof window.jspdf === 'undefined') {
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+
+    const canvas = await window.html2canvas(page, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#0b1220'
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const usableWidth = pageWidth - margin * 2;
+    const usableHeight = pageHeight - margin * 2;
+
+    const imgWidth = usableWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+
+    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    heightLeft -= usableHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + margin;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= usableHeight;
+    }
+
+    pdf.save(getPdfFileName());
+    showToast('Report exported successfully (.pdf)', 'success');
+  } catch (error) {
+    console.error('PDF export failed:', error);
+    showToast('PDF library failed to load. Opening print dialog...', 'info');
+    window.print();
+  }
 }
 
 function setPeriod(btn) {
