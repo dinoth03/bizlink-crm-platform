@@ -8,7 +8,9 @@ const ordersState = {
   sortField: 'date',
   sortDirection: 'desc',
   selectedOrders: [],
-  allOrders: []
+  allOrders: [],
+  notifications: [],
+  notificationUserEmail: 'kasun@bizlink.lk'
 };
 
 // Mock Orders Data
@@ -294,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Render initial data
   updateDate();
-  await loadOrders();
+  await Promise.all([loadOrders(), loadAdminNotifications()]);
 
   // Update date every minute
   setInterval(updateDate, 60000);
@@ -336,7 +338,89 @@ function toggleNotif() {
   document.getElementById('userMenu').classList.remove('open');
 }
 
-function clearNotifs() {
+function getNotificationIcon(notification) {
+  const type = notification.notification_type || 'system';
+  if (type === 'order_status') return '📦';
+  if (type === 'payment') return '💰';
+  if (type === 'message') return '💬';
+  if (type === 'review') return '⭐';
+  if (type === 'commission') return '📈';
+  if (type === 'promotion') return '🎉';
+  return '🔔';
+}
+
+function getNotificationTone(notification) {
+  if ((notification.priority || '').toLowerCase() === 'high') return 'amber';
+  if ((notification.notification_type || '') === 'payment') return 'green';
+  return 'navy';
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifList');
+  const badge = document.querySelector('.notif-dot');
+  if (!list) return;
+
+  if (ordersState.notifications.length === 0) {
+    list.innerHTML = '<div class="np-item"><div class="np-text"><strong>All caught up</strong><span>No unread notifications right now.</span></div></div>';
+    if (badge) {
+      badge.textContent = '0';
+      badge.style.display = 'none';
+    }
+    return;
+  }
+
+  list.innerHTML = ordersState.notifications.map((notification) => `
+    <div class="np-item">
+      <div class="np-icon ${getNotificationTone(notification)}">${getNotificationIcon(notification)}</div>
+      <div class="np-text">
+        <strong>${notification.title}</strong>
+        <span>${notification.message}</span>
+      </div>
+    </div>
+  `).join('');
+
+  if (badge) {
+    badge.textContent = String(ordersState.notifications.filter((notification) => !notification.is_read).length);
+    badge.style.display = ordersState.notifications.length > 0 ? 'inline-flex' : 'none';
+  }
+}
+
+async function loadAdminNotifications() {
+  if (typeof getNotifications !== 'function') return;
+
+  try {
+    const response = await getNotifications({ email: ordersState.notificationUserEmail, limit: 5 });
+    if (response) {
+      ordersState.notifications = response.data || [];
+      renderNotifications();
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to load notifications:', error);
+  }
+
+  ordersState.notifications = [
+    { title: 'Notifications unavailable', message: 'Showing fallback notification data.', notification_type: 'system', priority: 'medium', is_read: false }
+  ];
+  renderNotifications();
+}
+
+async function clearNotifs() {
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: ordersState.notificationUserEmail,
+      mark_all: true
+    });
+
+    if (result && result.success) {
+      ordersState.notifications = [];
+      renderNotifications();
+      showToast('Notifications marked as read', 'success');
+      document.getElementById('notifPanel').classList.remove('open');
+      return;
+    }
+  }
+
   showToast('Notifications cleared', 'success');
   document.getElementById('notifPanel').classList.remove('open');
 }

@@ -335,8 +335,79 @@ const dashboardData = {
   orders: [],
   products: [],
   activeVendor: null,
+  notifications: [],
   loadedFromApi: false
 };
+
+function getVendorNotificationIcon(notification) {
+  const type = notification.notification_type || 'system';
+  if (type === 'order_status') return '🛒';
+  if (type === 'payment') return '✅';
+  if (type === 'review') return '⭐';
+  if (type === 'message') return '💬';
+  if (type === 'promotion') return '🎉';
+  return '🔔';
+}
+
+function renderVendorNotifications() {
+  const list = document.getElementById('vendorNotifList');
+  const badge = document.querySelector('.notif-dot');
+  if (!list) return;
+
+  if (dashboardData.notifications.length === 0) {
+    list.innerHTML = '<div class="notif-item">All caught up. No unread notifications.</div>';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = dashboardData.notifications.map((notification) => `
+    <div class="notif-item ${notification.is_read ? '' : 'is-new'}">${getVendorNotificationIcon(notification)} <strong>${notification.title}</strong><br>${notification.message}</div>
+  `).join('');
+
+  if (badge) {
+    badge.textContent = String(dashboardData.notifications.filter((notification) => !notification.is_read).length);
+    badge.style.display = 'inline-flex';
+  }
+}
+
+async function loadVendorNotifications(activeVendor) {
+  if (!activeVendor || typeof getNotifications !== 'function') {
+    dashboardData.notifications = [];
+    renderVendorNotifications();
+    return;
+  }
+
+  try {
+    const response = await getNotifications({ email: activeVendor.email, limit: 5 });
+    if (response) {
+      dashboardData.notifications = response.data || [];
+      renderVendorNotifications();
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to load vendor notifications:', error);
+  }
+
+  dashboardData.notifications = [
+    { title: 'Notifications unavailable', message: 'Showing fallback notification data.', notification_type: 'system', is_read: false }
+  ];
+  renderVendorNotifications();
+}
+
+async function markVendorNotificationsRead() {
+  const activeVendor = dashboardData.activeVendor;
+  if (!activeVendor || typeof markNotificationsRead !== 'function') return;
+
+  const result = await markNotificationsRead({
+    email: activeVendor.email,
+    mark_all: true
+  });
+
+  if (result && result.success) {
+    dashboardData.notifications = [];
+    renderVendorNotifications();
+  }
+}
 
 function normalizeOrderStatus(status) {
   if (status === 'out_for_delivery') return 'shipped';
@@ -849,6 +920,7 @@ document.body.style.transition = 'opacity 0.4s';
 window.addEventListener('load', async () => {
   document.body.style.opacity = '1';
   await loadVendorDashboardData();
+  await loadVendorNotifications(dashboardData.activeVendor);
   allProducts = dashboardData.products.length ? [...dashboardData.products] : [...PRODUCTS];
   onPageActivate('dashboard');
 });

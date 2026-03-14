@@ -6,12 +6,8 @@ const state = {
   currentPage: 'dashboard',
   sidebarOpen: true,
   theme: localStorage.getItem('adminTheme') || 'light',
-  notifications: [
-    { id: 1, icon: '📦', title: 'New Vendor Request', text: 'PowerIT Lanka applied for verification', type: 'navy' },
-    { id: 2, icon: '✅', title: 'Order Completed', text: 'Order #OCT-2847 marked as delivered', type: 'green' },
-    { id: 3, icon: '⚠️', title: 'Low Stock Alert', text: 'Electronics category inventory critical', type: 'amber' },
-    { id: 4, icon: '💰', title: 'Revenue Update', text: 'Daily revenue reached target: Rs. 242K', type: 'green' }
-  ]
+  notifications: [],
+  notificationUserEmail: 'kasun@bizlink.lk'
 };
 
 /* NAVIGATION */
@@ -80,13 +76,12 @@ function toggleTheme() {
 }
 
 // Apply saved theme on load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (state.theme === 'dark') {
     document.body.classList.add('dark');
   }
   updateDate();
-  renderDashboard();
-  renderNotifications();
+  await Promise.all([renderDashboard(), loadAdminNotifications()]);
   initActivityFeed();
   setInterval(updateDate, 60000);
 });
@@ -105,22 +100,96 @@ function toggleNotif() {
   document.getElementById('userMenu').classList.remove('open');
 }
 
+function getNotificationIcon(notification) {
+  const type = notification.notification_type || 'system';
+  if (type === 'order_status') return '📦';
+  if (type === 'payment') return '💰';
+  if (type === 'message') return '💬';
+  if (type === 'review') return '⭐';
+  if (type === 'commission') return '📈';
+  if (type === 'promotion') return '🎉';
+  return '🔔';
+}
+
+function getNotificationTone(notification) {
+  if ((notification.priority || '').toLowerCase() === 'high') return 'amber';
+  if ((notification.notification_type || '') === 'payment') return 'green';
+  return 'navy';
+}
+
+function updateNotificationBadge() {
+  const badge = document.querySelector('.notif-dot');
+  if (!badge) return;
+
+  const unreadCount = state.notifications.filter((notification) => !notification.is_read).length;
+  badge.textContent = unreadCount;
+  badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+}
+
+async function loadAdminNotifications() {
+  if (typeof getNotifications !== 'function') {
+    return;
+  }
+
+  try {
+    const response = await getNotifications({ email: state.notificationUserEmail, limit: 6 });
+    if (response) {
+      state.notifications = response.data || [];
+      renderNotifications();
+      updateNotificationBadge();
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to load admin notifications:', error);
+  }
+
+  state.notifications = [
+    { notification_id: 1, notification_type: 'system', title: 'Notifications unavailable', message: 'Showing fallback notification data.', priority: 'medium', is_read: false },
+    { notification_id: 2, notification_type: 'order_status', title: 'Order Completed', message: 'Order BLK-2026-0001 marked as delivered.', priority: 'medium', is_read: false }
+  ];
+  renderNotifications();
+  updateNotificationBadge();
+}
+
 function renderNotifications() {
   const list = document.getElementById('notifList');
+  if (!list) return;
+
+  if (state.notifications.length === 0) {
+    list.innerHTML = '<div class="np-item"><div class="np-text"><strong>All caught up</strong><span>No unread notifications right now.</span></div></div>';
+    updateNotificationBadge();
+    return;
+  }
+
   list.innerHTML = state.notifications.map(n => `
     <div class="np-item">
-      <div class="np-icon ${n.type}">${n.icon}</div>
+      <div class="np-icon ${getNotificationTone(n)}">${getNotificationIcon(n)}</div>
       <div class="np-text">
         <strong>${n.title}</strong>
-        <span>${n.text}</span>
+        <span>${n.message}</span>
       </div>
     </div>
   `).join('');
+
+  updateNotificationBadge();
 }
 
-function clearNotifs() {
+async function clearNotifs() {
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: state.notificationUserEmail,
+      mark_all: true
+    });
+
+    if (result && result.success) {
+      state.notifications = [];
+      renderNotifications();
+      showToast('Notifications marked as read', 'success');
+      return;
+    }
+  }
+
   state.notifications = [];
-  state.notifications.push({ id: 1, icon: '✅', title: 'All cleared', text: 'Notifications have been cleared', type: 'green' });
   renderNotifications();
   showToast('Notifications cleared', 'success');
 }

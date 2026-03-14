@@ -87,11 +87,11 @@
           🔔<span class="notif-dot"></span>
         </button>
         <div class="notif-panel" id="notifPanel">
-          <div class="notif-title">Notifications</div>
-          <div class="notif-item is-new">🛒 New order #LK-00892 received</div>
-          <div class="notif-item is-new">⚠️ Low stock: Ceylon Tea (3 left)</div>
-          <div class="notif-item">✅ Payment of Rs. 12,400 confirmed</div>
-          <div class="notif-item">⭐ New 5-star review from Nimali P.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
+            <div class="notif-title" style="margin-bottom:0;">Notifications</div>
+            <button onclick="markVendorNotificationsRead()" style="background:none;border:none;color:var(--vendor-color);font-weight:700;cursor:pointer;padding:0;">Mark all read</button>
+          </div>
+          <div id="vendorNotifList"></div>
         </div>
       </div>
       <a href="../pages/home.html" class="btn-ghost-sm">← Home</a>

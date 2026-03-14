@@ -106,6 +106,54 @@ async function getCategories() {
     }
 }
 
+// Get Notifications for a user
+async function getNotifications(params = {}) {
+    try {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                query.set(key, value);
+            }
+        });
+
+        const response = await fetch(API_BASE + 'get_notifications.php?' + query.toString());
+        const data = await response.json();
+        if (data.success) {
+            return data;
+        }
+
+        console.error('Error:', data.message);
+        return null;
+    } catch (error) {
+        console.error('API Error:', error);
+        return null;
+    }
+}
+
+// Mark one or all notifications as read
+async function markNotificationsRead(payload = {}) {
+    try {
+        const response = await fetch(API_BASE + 'mark_notifications_read.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            return data;
+        }
+
+        console.error('Error:', data.message);
+        return null;
+    } catch (error) {
+        console.error('API Error:', error);
+        return null;
+    }
+}
+
 // Helper: Format Number (1000000 → 1,000,000)
 function formatNumber(num) {
     return new Intl.NumberFormat().format(num);

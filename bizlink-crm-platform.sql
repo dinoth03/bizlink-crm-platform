@@ -569,6 +569,19 @@ CREATE TABLE notifications (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Notification Reads Table
+CREATE TABLE notification_reads (
+    notification_read_id INT PRIMARY KEY AUTO_INCREMENT,
+    notification_id INT NOT NULL,
+    user_id INT NOT NULL,
+    read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notification_reads_notification FOREIGN KEY (notification_id) REFERENCES notifications(notification_id) ON DELETE CASCADE,
+    CONSTRAINT fk_notification_reads_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY uq_notification_read (notification_id, user_id),
+    INDEX idx_notification_reads_user (user_id),
+    INDEX idx_notification_reads_read_at (read_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Notification Preferences Table
 CREATE TABLE notification_preferences (
     preference_id INT PRIMARY KEY AUTO_INCREMENT,
