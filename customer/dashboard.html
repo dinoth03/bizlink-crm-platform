@@ -16,8 +16,8 @@
       <a href="../pages/home.html" class="logo"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></a>
       <ul class="nav-links">
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
-        <li><a href="#">Orders</a></li>
-        <li><a href="#">Marketplace</a></li>
+        <li><a href="#customerOrdersSection">Orders</a></li>
+        <li><a href="../pages/marketplace.html">Marketplace</a></li>
         <li><a href="#">Support</a></li>
       </ul>
       <div class="nav-cta">
@@ -57,7 +57,7 @@
             <div class="order-item"><span><strong>#BL3005</strong> – Tea gift pack</span> <span class="order-status">Processing</span></div>
             <div class="order-item"><span><strong>#BL3117</strong> – Handicraft</span> <span class="order-status">Out for delivery</span></div>
           </div>
-          <a href="#" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
+          <a href="#customerOrdersSection" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
         </div>
 
         <div class="card">
@@ -79,12 +79,42 @@
         </div>
       </div>
 
+      <div class="card notifications-card">
+        <div class="notifications-head">
+          <div class="card-title" style="margin-bottom:0;">🔔 Notifications</div>
+          <button class="notif-mark-all" onclick="markAllCustomerNotificationsRead()">Mark all read</button>
+        </div>
+        <div id="customerNotificationsList">
+          <div class="customer-notif-item">
+            <div class="customer-notif-icon">🔔</div>
+            <div>
+              <strong>Loading notifications...</strong>
+              <p>Fetching your latest updates.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card all-orders-card" id="customerOrdersSection">
+        <div class="card-title" style="margin-bottom:12px;">🧾 All orders</div>
+        <p class="orders-subtitle">Full history with latest status and vendor details.</p>
+        <div class="orders-list" id="allOrdersList">
+          <div class="all-order-row">
+            <div>
+              <strong>#BL-0000</strong>
+              <span>Loading order history...</span>
+            </div>
+            <span class="order-status">Loading</span>
+          </div>
+        </div>
+      </div>
+
       <!-- quick actions + trust strip (customer style) -->
       <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content: space-between; align-items:center; background:var(--bg-card); border-radius:var(--radius); padding:20px; border:1px solid var(--border);">
-        <span style="font-weight:600;">🔔 2 vendors replied to your chat</span>
+        <span style="font-weight:600;" id="customerNotifSummary">🔔 You have unread notifications</span>
         <span style="display:flex; gap:12px;">
-          <a href="#" class="btn-customer" style="padding:10px 28px;">Message Center</a>
-          <a href="#" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Browse marketplace</a>
+          <a href="../pages/chat.html?email=dilani.silva@gmail.com" class="btn-customer" style="padding:10px 28px;">Message Center</a>
+          <a href="../pages/marketplace.html" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Browse marketplace</a>
         </span>
       </div>
     </div>
@@ -145,7 +175,7 @@
       <div class="footer-grid" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:50px; margin-bottom:40px;">
         <div><div class="logo" style="margin-bottom:16px;"><span class="logo-icon">⬡</span><span>Biz<strong>Link</strong></span></div><p style="color:var(--text-muted);">Serving Sri Lankan customers since 2024</p></div>
         <div><h4>Customer</h4><a href="#">My orders</a><a href="#">Wishlist</a><a href="#">Chat</a></div>
-        <div><h4>Vendors</h4><a href="#">Marketplace</a><a href="#">Top rated</a></div>
+        <div><h4>Vendors</h4><a href="../pages/marketplace.html">Marketplace</a><a href="#">Top rated</a></div>
         <div><h4>Support</h4><a href="#">Help center</a><a href="#">Contact</a></div>
       </div>
       <div class="footer-bottom" style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:24px; color:var(--text-muted);">

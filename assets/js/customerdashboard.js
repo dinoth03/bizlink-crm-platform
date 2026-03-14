@@ -96,6 +96,7 @@ function normalizeStatus(status) {
 
 const FALLBACK_CUSTOMER = {
   full_name: 'Dilani Perera',
+  email: 'dilani.silva@gmail.com',
   total_spent: 148750
 };
 
@@ -123,6 +124,149 @@ const FALLBACK_VENDORS = [
   { shop_name: 'Pure Coconut Lanka', avg_rating: 4.5 }
 ];
 
+const customerDashboardState = {
+  customerEmail: 'dilani.silva@gmail.com',
+  notifications: []
+};
+
+function getCustomerNotificationIcon(notification) {
+  const type = (notification.notification_type || 'system').toLowerCase();
+  if (type === 'order_status') return '📦';
+  if (type === 'payment') return '💳';
+  if (type === 'message') return '💬';
+  if (type === 'promotion') return '🎉';
+  if (type === 'review') return '⭐';
+  return '🔔';
+}
+
+function updateCustomerNotificationSummary() {
+  const summary = document.getElementById('customerNotifSummary');
+  if (!summary) return;
+
+  const unread = customerDashboardState.notifications.filter((n) => !n.is_read).length;
+  if (unread === 0) {
+    summary.textContent = '✅ You are all caught up';
+  } else if (unread === 1) {
+    summary.textContent = '🔔 You have 1 unread notification';
+  } else {
+    summary.textContent = `🔔 You have ${unread} unread notifications`;
+  }
+}
+
+function renderCustomerNotifications(notifications) {
+  const list = document.getElementById('customerNotificationsList');
+  if (!list) return;
+
+  if (!notifications || notifications.length === 0) {
+    list.innerHTML = `
+      <div class="customer-notif-item">
+        <div class="customer-notif-icon">✅</div>
+        <div>
+          <strong>All clear</strong>
+          <p>No unread updates right now.</p>
+        </div>
+      </div>
+    `;
+    updateCustomerNotificationSummary();
+    return;
+  }
+
+  list.innerHTML = notifications
+    .map(
+      (notification) => `
+      <div class="customer-notif-item ${notification.is_read ? 'read' : 'unread'}" onclick="markCustomerNotificationRead(${Number(notification.notification_id || 0)})">
+        <div class="customer-notif-icon">${getCustomerNotificationIcon(notification)}</div>
+        <div>
+          <strong>${notification.title}</strong>
+          <p>${notification.message}</p>
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  updateCustomerNotificationSummary();
+}
+
+async function loadCustomerNotifications(email) {
+  customerDashboardState.customerEmail = email || customerDashboardState.customerEmail;
+
+  if (typeof getNotifications !== 'function') {
+    customerDashboardState.notifications = [];
+    renderCustomerNotifications(customerDashboardState.notifications);
+    return;
+  }
+
+  try {
+    const response = await getNotifications({
+      email: customerDashboardState.customerEmail,
+      limit: 6
+    });
+
+    if (response && Array.isArray(response.data)) {
+      customerDashboardState.notifications = response.data;
+      renderCustomerNotifications(customerDashboardState.notifications);
+      return;
+    }
+  } catch (error) {
+    console.error('Customer notifications load failed:', error);
+  }
+
+  customerDashboardState.notifications = [
+    {
+      notification_id: 0,
+      notification_type: 'system',
+      title: 'Notification service unavailable',
+      message: 'Showing fallback customer notification state.',
+      is_read: false
+    }
+  ];
+  renderCustomerNotifications(customerDashboardState.notifications);
+}
+
+window.markCustomerNotificationRead = async function (notificationId) {
+  if (!notificationId) return;
+
+  const target = customerDashboardState.notifications.find(
+    (notification) => Number(notification.notification_id) === Number(notificationId)
+  );
+  if (!target || target.is_read) return;
+
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: customerDashboardState.customerEmail,
+      notification_id: Number(notificationId)
+    });
+
+    if (result && result.success) {
+      target.is_read = true;
+      renderCustomerNotifications(customerDashboardState.notifications);
+      return;
+    }
+  }
+
+  target.is_read = true;
+  renderCustomerNotifications(customerDashboardState.notifications);
+};
+
+window.markAllCustomerNotificationsRead = async function () {
+  if (typeof markNotificationsRead === 'function') {
+    const result = await markNotificationsRead({
+      email: customerDashboardState.customerEmail,
+      mark_all: true
+    });
+
+    if (result && result.success) {
+      customerDashboardState.notifications = [];
+      renderCustomerNotifications(customerDashboardState.notifications);
+      return;
+    }
+  }
+
+  customerDashboardState.notifications = [];
+  renderCustomerNotifications(customerDashboardState.notifications);
+};
+
 function renderRecentOrders(orders) {
   const container = document.getElementById('recentOrdersList');
   if (!container) return;
@@ -142,6 +286,43 @@ function renderRecentOrders(orders) {
       </div>
     `
     )
+    .join('');
+}
+
+function renderAllOrders(orders) {
+  const container = document.getElementById('allOrdersList');
+  if (!container) return;
+
+  if (!orders || orders.length === 0) {
+    container.innerHTML = `
+      <div class="all-order-row">
+        <div>
+          <strong>No orders yet</strong>
+          <span>Your full order history will appear here.</span>
+        </div>
+        <span class="order-status">-</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = orders
+    .slice(0, 20)
+    .map((order) => {
+      const amount = Number(order.total_amount || order.amount || 0);
+      const amountText = amount > 0 ? `Rs. ${Math.round(amount).toLocaleString()}` : 'Amount pending';
+      const vendor = order.vendor_name || order.vendor || 'Unknown Vendor';
+      const product = order.product_name || 'Order Item';
+      return `
+        <div class="all-order-row">
+          <div>
+            <strong>#${order.order_number}</strong>
+            <span>${product} • ${vendor} • ${amountText}</span>
+          </div>
+          <span class="order-status">${normalizeStatus(order.order_status)}</span>
+        </div>
+      `;
+    })
     .join('');
 }
 
@@ -199,7 +380,9 @@ async function loadCustomerDashboardData() {
     if (!customers || customers.length === 0) {
       updateCustomerSummary(FALLBACK_CUSTOMER, FALLBACK_ORDERS, FALLBACK_VENDORS);
       renderRecentOrders(FALLBACK_ORDERS);
+      renderAllOrders(FALLBACK_ORDERS);
       renderRecommendedVendors(FALLBACK_VENDORS);
+      await loadCustomerNotifications(FALLBACK_CUSTOMER.email);
       return;
     }
 
@@ -215,12 +398,16 @@ async function loadCustomerDashboardData() {
 
     updateCustomerSummary(selectedCustomer, safeOrders, safeVendors);
     renderRecentOrders(safeOrders);
+    renderAllOrders(safeOrders);
     renderRecommendedVendors(safeVendors);
+    await loadCustomerNotifications(selectedCustomer.email || FALLBACK_CUSTOMER.email);
   } catch (error) {
     console.error('Customer dashboard API load failed:', error);
     updateCustomerSummary(FALLBACK_CUSTOMER, FALLBACK_ORDERS, FALLBACK_VENDORS);
     renderRecentOrders(FALLBACK_ORDERS);
+    renderAllOrders(FALLBACK_ORDERS);
     renderRecommendedVendors(FALLBACK_VENDORS);
+    await loadCustomerNotifications(FALLBACK_CUSTOMER.email);
   }
 }
 

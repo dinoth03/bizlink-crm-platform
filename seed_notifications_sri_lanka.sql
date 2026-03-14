@@ -172,6 +172,62 @@ WHERE u.email = 'kasun.fernando@serendibstyle.lk'
       WHERE n.user_id = u.user_id AND n.title = 'Customer asked about size exchange'
   );
 
+INSERT INTO notifications (
+    user_id, notification_type, title, message, related_entity_type, related_entity_id,
+    priority, action_url, created_at
+)
+SELECT u.user_id, 'order_status', 'Your order has been shipped',
+       'Order BLK-2026-0006 is now on the way and should reach Maharagama tomorrow.',
+       'order', NULL, 'high', '../customer/dashboard.html', '2026-03-14 10:05:00'
+FROM users u
+WHERE u.email = 'dilani.silva@gmail.com'
+  AND NOT EXISTS (
+      SELECT 1 FROM notifications n
+      WHERE n.user_id = u.user_id AND n.title = 'Your order has been shipped'
+  );
+
+INSERT INTO notifications (
+    user_id, notification_type, title, message, related_entity_type, related_entity_id,
+    priority, action_url, created_at
+)
+SELECT u.user_id, 'promotion', 'Weekend offer unlocked',
+       'You have a 10% loyalty discount for selected Sri Lankan grocery vendors this weekend.',
+       'promotion', NULL, 'medium', '../pages/marketplace.html', '2026-03-13 16:40:00'
+FROM users u
+WHERE u.email = 'dilani.silva@gmail.com'
+  AND NOT EXISTS (
+      SELECT 1 FROM notifications n
+      WHERE n.user_id = u.user_id AND n.title = 'Weekend offer unlocked'
+  );
+
+INSERT INTO notifications (
+    user_id, notification_type, title, message, related_entity_type, related_entity_id,
+    priority, action_url, created_at
+)
+SELECT u.user_id, 'message', 'Vendor replied in chat',
+       'Ceylon Tech Hub replied to your message about warranty coverage.',
+       'message', NULL, 'medium', '../pages/chat.html?email=dilani.silva@gmail.com', '2026-03-13 20:15:00'
+FROM users u
+WHERE u.email = 'dilani.silva@gmail.com'
+  AND NOT EXISTS (
+      SELECT 1 FROM notifications n
+      WHERE n.user_id = u.user_id AND n.title = 'Vendor replied in chat'
+  );
+
+INSERT IGNORE INTO notification_reads (notification_id, user_id, read_at)
+SELECT n.notification_id, n.user_id, '2026-03-13 20:25:00'
+FROM notifications n
+JOIN users u ON u.user_id = n.user_id
+WHERE u.email = 'dilani.silva@gmail.com'
+  AND n.title = 'Vendor replied in chat';
+
+UPDATE notifications n
+JOIN users u ON u.user_id = n.user_id
+SET n.is_read = 1,
+    n.read_at = '2026-03-13 20:25:00'
+WHERE u.email = 'dilani.silva@gmail.com'
+  AND n.title = 'Vendor replied in chat';
+
 INSERT IGNORE INTO notification_reads (notification_id, user_id, read_at)
 SELECT n.notification_id, n.user_id, '2026-03-13 15:05:00'
 FROM notifications n
