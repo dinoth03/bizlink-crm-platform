@@ -121,8 +121,67 @@ let state = {
   muted: new Set(['conv5']),
 };
 
+let ME_USER_ID = null;
+
+function getInitials(name) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .map((p) => p[0].toUpperCase())
+    .join('')
+    .slice(0, 2) || 'ME';
+}
+
+async function loadChatDataFromApi() {
+  try {
+    const emailParam = new URLSearchParams(window.location.search).get('email') || 'dilani.silva@gmail.com';
+    const response = await fetch(`../api/chat_data.php?email=${encodeURIComponent(emailParam)}`);
+    const payload = await response.json();
+
+    if (!payload.success) {
+      return false;
+    }
+
+    ME_USER_ID = Number(payload.current_user.id);
+    ME.name = payload.current_user.name;
+    ME.initials = getInitials(payload.current_user.name);
+    ME.role = payload.current_user.role;
+
+    CONTACTS.splice(0, CONTACTS.length, ...(payload.contacts || []));
+    CONVERSATIONS.splice(0, CONVERSATIONS.length, ...(payload.conversations || []));
+
+    state.pinned = new Set();
+    state.muted = new Set();
+
+    const ruName = document.querySelector('.ru-name');
+    const ruRole = document.querySelector('.ru-role');
+    const ruAvatar = document.querySelector('.ru-avatar');
+    if (ruName) ruName.textContent = ME.name;
+    if (ruRole) ruRole.textContent = capitalize(ME.role);
+    if (ruAvatar) {
+      ruAvatar.textContent = ME.initials;
+      ruAvatar.style.background = ME.color;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Chat API load failed:', error);
+    return false;
+  }
+}
+
+function conversationDbId(convId) {
+  if (!convId) return 0;
+  if (convId.startsWith('conv')) {
+    return Number(convId.replace('conv', '')) || 0;
+  }
+  return 0;
+}
+
 /*INIT*/
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadChatDataFromApi();
+
   renderConvoList();
   renderEmojiPicker();
   renderTemplates();
@@ -132,7 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
   applyRoleFilterFromUrl();
 
   // Auto-open first conversation
-  setTimeout(() => openConversation('conv1'), 200);
+  if (CONVERSATIONS.length > 0) {
+    setTimeout(() => openConversation(CONVERSATIONS[0].id), 200);
+  }
 
   document.addEventListener('click', handleGlobalClick);
   document.addEventListener('keydown', handleGlobalKey);
@@ -373,12 +434,39 @@ function sendMessage() {
   scrollBottom(true);
   renderConvoList();
 
-  // Simulate status updates
+  // Persist to DB when chat API mode is active
+  const dbConversationId = conversationDbId(state.activeConvId);
+  if (ME_USER_ID && dbConversationId > 0) {
+    fetch('../api/chat_send_message.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        conversation_id: dbConversationId,
+        sender_id: ME_USER_ID,
+        message_content: text
+      })
+    })
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload.success) {
+          msg.status = 'delivered';
+          updateMsgStatus(msg.id, 'delivered');
+        } else {
+          msg.status = 'sent';
+          updateMsgStatus(msg.id, 'sent');
+        }
+      })
+      .catch(() => {
+        msg.status = 'sent';
+        updateMsgStatus(msg.id, 'sent');
+      });
+    return;
+  }
+
+  // Fallback behavior when API mode is not active
   setTimeout(() => { msg.status = 'sent';      updateMsgStatus(msg.id, 'sent'); }, 600);
   setTimeout(() => { msg.status = 'delivered'; updateMsgStatus(msg.id, 'delivered'); }, 1400);
   setTimeout(() => { msg.status = 'read';      updateMsgStatus(msg.id, 'read'); }, 2800);
-
-  // Simulate reply
   if (Math.random() > 0.35) {
     setTimeout(() => simulateReply(conv), 2500 + Math.random() * 3000);
   }

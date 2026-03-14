@@ -428,6 +428,36 @@ CREATE TABLE messages (
     INDEX idx_is_read (is_read)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Conversation Participants Table
+CREATE TABLE conversation_participants (
+    participant_id INT PRIMARY KEY AUTO_INCREMENT,
+    conversation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    participant_role ENUM('admin', 'vendor', 'customer') NOT NULL,
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    left_at DATETIME NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    last_read_message_id INT NULL,
+    CONSTRAINT fk_cp_conversation FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cp_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY uq_cp_conversation_user (conversation_id, user_id),
+    INDEX idx_cp_user (user_id),
+    INDEX idx_cp_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Message Reads Table
+CREATE TABLE message_reads (
+    message_read_id INT PRIMARY KEY AUTO_INCREMENT,
+    message_id INT NOT NULL,
+    user_id INT NOT NULL,
+    read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mr_message FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE,
+    CONSTRAINT fk_mr_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY uq_mr_message_user (message_id, user_id),
+    INDEX idx_mr_user (user_id),
+    INDEX idx_mr_read_at (read_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================================
 -- 7. REVIEWS & RATINGS TABLES
 -- ============================================================================
