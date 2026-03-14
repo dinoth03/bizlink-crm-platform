@@ -82,7 +82,7 @@ body.dark {
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; scroll-behavior: smooth; }
+html { font-size: 20px; scroll-behavior: smooth; }
 body {
   font-family: var(--font-b);
   background: var(--bg);
