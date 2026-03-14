@@ -6,6 +6,8 @@ $query = "SELECT
     v.business_name as vendor_name,
     v.business_name as shop_name,
     u.email,
+    v.business_category,
+    v.avg_rating,
     v.commission_rate,
     v.verification_status as vendor_status,
     v.created_at,

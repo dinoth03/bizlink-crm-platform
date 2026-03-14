@@ -220,6 +220,107 @@ JOIN products p ON p.product_slug = 'ceylon-cinnamon-250g'
 WHERE o.order_number = 'BLK-2026-0006'
   AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
 
+-- Extra common project orders for Dilani Silva (customer dashboard baseline)
+INSERT IGNORE INTO orders (
+  order_number, customer_id, vendor_id, order_status, payment_status, order_date,
+  shipping_address, billing_address, subtotal, discount_amount, tax_amount, shipping_cost,
+  total_amount, currency, shipping_method, tracking_number, carrier_name, created_at
+)
+SELECT 'BLK-2026-0010', c.customer_id, v.vendor_id, 'processing', 'paid', '2026-03-13 09:10:00',
+       'No. 42, High Level Road, Maharagama', 'No. 42, High Level Road, Maharagama',
+       25500.00, 500.00, 0.00, 300.00, 25300.00, 'LKR', 'Standard', 'SLP-0010', 'Domex', '2026-03-13 09:10:00'
+FROM customers c
+JOIN users u ON c.user_id = u.user_id
+JOIN vendors v ON v.store_url_slug = 'ceylon-tech-hub'
+WHERE u.email = 'dilani.silva@gmail.com';
+
+INSERT IGNORE INTO orders (
+  order_number, customer_id, vendor_id, order_status, payment_status, order_date,
+  shipping_address, billing_address, subtotal, discount_amount, tax_amount, shipping_cost,
+  total_amount, currency, shipping_method, tracking_number, carrier_name, created_at
+)
+SELECT 'BLK-2026-0011', c.customer_id, v.vendor_id, 'pending', 'unpaid', '2026-03-13 11:45:00',
+       'No. 42, High Level Road, Maharagama', 'No. 42, High Level Road, Maharagama',
+       3600.00, 0.00, 0.00, 250.00, 3850.00, 'LKR', 'Standard', NULL, NULL, '2026-03-13 11:45:00'
+FROM customers c
+JOIN users u ON c.user_id = u.user_id
+JOIN vendors v ON v.store_url_slug = 'lanka-fresh-mart'
+WHERE u.email = 'dilani.silva@gmail.com';
+
+INSERT IGNORE INTO orders (
+  order_number, customer_id, vendor_id, order_status, payment_status, order_date,
+  shipping_address, billing_address, subtotal, discount_amount, tax_amount, shipping_cost,
+  total_amount, currency, shipping_method, tracking_number, carrier_name, created_at
+)
+SELECT 'BLK-2026-0012', c.customer_id, v.vendor_id, 'delivered', 'paid', '2026-03-12 14:05:00',
+       'No. 42, High Level Road, Maharagama', 'No. 42, High Level Road, Maharagama',
+       12800.00, 800.00, 0.00, 300.00, 12300.00, 'LKR', 'Express', 'SLP-0012', 'PickMe Flash', '2026-03-12 14:05:00'
+FROM customers c
+JOIN users u ON c.user_id = u.user_id
+JOIN vendors v ON v.store_url_slug = 'serendib-style-house'
+WHERE u.email = 'dilani.silva@gmail.com';
+
+INSERT IGNORE INTO orders (
+  order_number, customer_id, vendor_id, order_status, payment_status, order_date,
+  shipping_address, billing_address, subtotal, discount_amount, tax_amount, shipping_cost,
+  total_amount, currency, shipping_method, tracking_number, carrier_name, created_at
+)
+SELECT 'BLK-2026-0013', c.customer_id, v.vendor_id, 'shipped', 'paid', '2026-03-14 08:20:00',
+       'No. 42, High Level Road, Maharagama', 'No. 42, High Level Road, Maharagama',
+       5200.00, 0.00, 0.00, 250.00, 5450.00, 'LKR', 'Standard', 'SLP-0013', 'Sri Lanka Post', '2026-03-14 08:20:00'
+FROM customers c
+JOIN users u ON c.user_id = u.user_id
+JOIN vendors v ON v.store_url_slug = 'serendib-style-house'
+WHERE u.email = 'dilani.silva@gmail.com';
+
+INSERT IGNORE INTO orders (
+  order_number, customer_id, vendor_id, order_status, payment_status, order_date,
+  shipping_address, billing_address, subtotal, discount_amount, tax_amount, shipping_cost,
+  total_amount, currency, shipping_method, tracking_number, carrier_name, created_at
+)
+SELECT 'BLK-2026-0014', c.customer_id, v.vendor_id, 'cancelled', 'refunded', '2026-03-11 17:30:00',
+       'No. 42, High Level Road, Maharagama', 'No. 42, High Level Road, Maharagama',
+       8900.00, 0.00, 0.00, 250.00, 9150.00, 'LKR', 'Standard', 'SLP-0014', 'Koombiyo', '2026-03-11 17:30:00'
+FROM customers c
+JOIN users u ON c.user_id = u.user_id
+JOIN vendors v ON v.store_url_slug = 'ceylon-tech-hub'
+WHERE u.email = 'dilani.silva@gmail.com';
+
+INSERT INTO order_items (order_id, product_id, product_name, price_at_purchase, quantity, subtotal, tax_amount, total_amount)
+SELECT o.order_id, p.product_id, p.product_name, 8500.00, 3, 25500.00, 0.00, 25500.00
+FROM orders o
+JOIN products p ON p.product_slug = 'logitech-wireless-mouse-lk'
+WHERE o.order_number = 'BLK-2026-0010'
+  AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
+
+INSERT INTO order_items (order_id, product_id, product_name, price_at_purchase, quantity, subtotal, tax_amount, total_amount)
+SELECT o.order_id, p.product_id, p.product_name, 1800.00, 2, 3600.00, 0.00, 3600.00
+FROM orders o
+JOIN products p ON p.product_slug = 'ceylon-cinnamon-250g'
+WHERE o.order_number = 'BLK-2026-0011'
+  AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
+
+INSERT INTO order_items (order_id, product_id, product_name, price_at_purchase, quantity, subtotal, tax_amount, total_amount)
+SELECT o.order_id, p.product_id, p.product_name, 12800.00, 1, 12800.00, 0.00, 12800.00
+FROM orders o
+JOIN products p ON p.product_slug = 'handloom-cotton-saree-lk'
+WHERE o.order_number = 'BLK-2026-0012'
+  AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
+
+INSERT INTO order_items (order_id, product_id, product_name, price_at_purchase, quantity, subtotal, tax_amount, total_amount)
+SELECT o.order_id, p.product_id, p.product_name, 5200.00, 1, 5200.00, 0.00, 5200.00
+FROM orders o
+JOIN products p ON p.product_slug = 'batik-office-shirt-lk'
+WHERE o.order_number = 'BLK-2026-0013'
+  AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
+
+INSERT INTO order_items (order_id, product_id, product_name, price_at_purchase, quantity, subtotal, tax_amount, total_amount)
+SELECT o.order_id, p.product_id, p.product_name, 8900.00, 1, 8900.00, 0.00, 8900.00
+FROM orders o
+JOIN products p ON p.product_slug = 'dell-inspiron-15-lk'
+WHERE o.order_number = 'BLK-2026-0014'
+  AND NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.order_id AND oi.product_id = p.product_id);
+
 COMMIT;
 
 SELECT order_number, order_status, total_amount, created_at

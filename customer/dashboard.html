@@ -33,7 +33,7 @@
     <div class="container">
       <div class="dashboard-header">
         <div class="welcome">
-          <h1>Welcome back, <span class="gradient-text-customer">Dilini</span> 👋</h1>
+          <h1>Welcome back, <span class="gradient-text-customer" id="customerName">Dilini</span> 👋</h1>
           <p><span class="sinhala-greeting">ඔයාට සාදරයෙන් පිළිගනිමි</span> • Your personal customer dashboard</p>
         </div>
         <div class="date-badge" id="currentDate"></div>
@@ -51,16 +51,18 @@
       <div class="two-col">
         <div class="card">
           <div class="card-title">📦 Recent orders <span style="font-size:0.8rem; color:var(--customer);">track live</span></div>
-          <div class="order-item"><span><strong>#BL2821</strong> – Fresh Groceries</span> <span class="order-status">Delivered Dec 02</span></div>
-          <div class="order-item"><span><strong>#BL2914</strong> – Textile set</span> <span class="order-status">Shipped</span></div>
-          <div class="order-item"><span><strong>#BL3005</strong> – Tea gift pack</span> <span class="order-status">Processing</span></div>
-          <div class="order-item"><span><strong>#BL3117</strong> – Handicraft</span> <span class="order-status">Out for delivery</span></div>
+          <div id="recentOrdersList">
+            <div class="order-item"><span><strong>#BL2821</strong> – Fresh Groceries</span> <span class="order-status">Delivered Dec 02</span></div>
+            <div class="order-item"><span><strong>#BL2914</strong> – Textile set</span> <span class="order-status">Shipped</span></div>
+            <div class="order-item"><span><strong>#BL3005</strong> – Tea gift pack</span> <span class="order-status">Processing</span></div>
+            <div class="order-item"><span><strong>#BL3117</strong> – Handicraft</span> <span class="order-status">Out for delivery</span></div>
+          </div>
           <a href="#" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
         </div>
 
         <div class="card">
           <div class="card-title">🛍️ Recommended vendors</div>
-          <div class="marketplace-grid">
+          <div class="marketplace-grid" id="recommendedVendorsList">
             <div class="vendor-mini"><span style="font-size:1.2rem;">🍵</span> TeaLanka <span style="color:var(--customer);">4.8★</span></div>
             <div class="vendor-mini"><span style="font-size:1.2rem;">🥥</span> Coco Goods</div>
             <div class="vendor-mini"><span style="font-size:1.2rem;">👗</span> Tharushi Fashion</div>
@@ -153,6 +155,7 @@
     </div>
   </footer>
 
+  <script src="../assets/js/api.js"></script>
   <script src="../assets/js/customerdashboard.js"></script>
 </body>
 </html>
