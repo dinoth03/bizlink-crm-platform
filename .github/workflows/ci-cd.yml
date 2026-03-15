@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -21,7 +21,7 @@ jobs:
           php-version: '8.2'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
 
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Verify deploy secrets
         id: deploy_check
@@ -53,15 +53,15 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets['DEPLOY_HOST'] }}
           DEPLOY_USER: ${{ secrets['DEPLOY_USER'] }}
-          DEPLOY_KEY: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
           DEPLOY_PORT: ${{ secrets['DEPLOY_PORT'] }}
           DEPLOY_PATH: ${{ secrets['DEPLOY_PATH'] }}
         run: |
           set -e
           missing=0
-          for key in DEPLOY_HOST DEPLOY_USER DEPLOY_KEY DEPLOY_PORT DEPLOY_PATH; do
+          for key in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_PRIVATE_KEY DEPLOY_PORT DEPLOY_PATH; do
             if [ -z "${!key}" ]; then
-              echo "::warning::Missing secret: $key"
+              echo "::warning title=Missing GitHub secret::Missing secret: $key"
               missing=1
             fi
           done
