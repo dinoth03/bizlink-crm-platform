@@ -4,6 +4,58 @@
 
 const API_BASE = 'http://localhost/bizlink-crm-platform/api/';
 
+// Auth Signup
+async function authSignup(payload) {
+    try {
+        const response = await fetch(API_BASE + 'auth_signup.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            return data;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to signup service.'
+        };
+    }
+}
+
+// Auth Login
+async function authLogin(payload) {
+    try {
+        const response = await fetch(API_BASE + 'auth_login.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            return data;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to login service.'
+        };
+    }
+}
+
 // Get Dashboard Stats
 async function getDashboardStats() {
     try {

@@ -114,6 +114,7 @@ function validateStep2() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName  = document.getElementById('lastName').value.trim();
   const email     = document.getElementById('signupEmail').value.trim();
+  const phone     = document.getElementById('phoneNumber').value.trim();
   const pass      = document.getElementById('signupPassword').value;
   const confirm   = document.getElementById('confirmPassword').value;
 
@@ -126,6 +127,8 @@ function validateStep2() {
   state.formData.firstName = firstName;
   state.formData.lastName  = lastName;
   state.formData.email     = email;
+  state.formData.phone     = phone;
+  state.formData.password  = pass;
   return true;
 }
 
@@ -149,6 +152,42 @@ function renderStep3() {
   // Colour step3 next button
   const nextBtn = document.querySelector('#step3 .step-next-btn');
   if (nextBtn) applyRoleColour(nextBtn, role);
+}
+
+function collectRoleProfileData(role) {
+  if (role === 'admin') {
+    return {
+      accessCode: document.getElementById('adminAccessCode')?.value?.trim() || '',
+      department: document.getElementById('adminDepartment')?.value?.trim() || '',
+      title: document.getElementById('adminRoleTitle')?.value?.trim() || '',
+      accessReason: document.getElementById('adminAccessReason')?.value?.trim() || ''
+    };
+  }
+
+  if (role === 'vendor') {
+    const employeeRange = document.querySelector('input[name="empSize"]:checked')?.value || '';
+    return {
+      businessName: document.getElementById('vendorBusinessName')?.value?.trim() || '',
+      businessRegNo: document.getElementById('vendorBusinessRegNo')?.value?.trim() || '',
+      industry: document.getElementById('vendorIndustry')?.value?.trim() || '',
+      locationProvince: document.getElementById('vendorLocationProvince')?.value?.trim() || '',
+      employeeRange,
+      referralSource: document.getElementById('vendorReferralSource')?.value?.trim() || ''
+    };
+  }
+
+  if (role === 'customer') {
+    const preferredLanguage = document.querySelector('input[name="lang"]:checked')?.value || 'en';
+    const lookingFor = document.querySelector('input[name="custLook"]:checked')?.value || '';
+    return {
+      city: document.getElementById('customerCity')?.value?.trim() || '',
+      preferredLanguage,
+      lookingFor,
+      referralSource: document.getElementById('customerReferralSource')?.value?.trim() || ''
+    };
+  }
+
+  return {};
 }
 
 /*STEP 4 – REVIEW CARD*/
@@ -193,11 +232,57 @@ function toggleFinalBtn(checkbox) {
 }
 
 /*HANDLE SIGNUP SUBMIT*/
-function handleSignup() {
+async function handleSignup() {
   const role = state.signupRole;
   const { firstName } = state.formData;
   const fullName = `${state.formData.firstName || ''} ${state.formData.lastName || ''}`.trim();
   const email = (state.formData.email || '').trim().toLowerCase();
+  const password = state.formData.password || '';
+  const phone = state.formData.phone || '';
+
+  if (!role) {
+    showToast('Please select account role.', 'warn');
+    return;
+  }
+
+  if (!password || password.length < 8) {
+    showToast('Please enter a valid password.', 'warn');
+    return;
+  }
+
+  const finalBtn = document.getElementById('finalSubmitBtn');
+  if (finalBtn) {
+    finalBtn.disabled = true;
+    finalBtn.innerHTML = '<span class="btn-text">Creating Account...</span><span class="btn-icon">⏳</span>';
+  }
+
+  const profile = collectRoleProfileData(role);
+
+  let signupResult = null;
+  if (typeof authSignup === 'function') {
+    signupResult = await authSignup({
+      role,
+      email,
+      password,
+      first_name: state.formData.firstName || '',
+      last_name: state.formData.lastName || '',
+      phone,
+      profile
+    });
+  }
+
+  if (!signupResult || !signupResult.success) {
+    if (finalBtn) {
+      finalBtn.disabled = false;
+      finalBtn.innerHTML = '<span class="btn-text">Create Account</span><span class="btn-icon">🚀</span>';
+    }
+    showToast((signupResult && signupResult.message) || 'Signup failed. Please check your backend connection.', 'warn');
+    return;
+  }
+
+  const apiUser = signupResult.user || {};
+  const apiFullName = apiUser.full_name || fullName;
+  const apiEmail = (apiUser.email || email || '').trim().toLowerCase();
 
   // Hide all steps
   [1, 2, 3, 4].forEach(i => document.getElementById(`step${i}`)?.classList.add('hidden'));
@@ -233,10 +318,10 @@ function handleSignup() {
 
   // Update success button to go to correct dashboard
   const successBtn = document.querySelector('.success-btn');
+  const dashboardLink = signupResult.dashboard || getDashboardLink(role);
   if (successBtn) {
-    const dashboardLink = getDashboardLink(role);
-    if (email) {
-      saveSessionUser({ role, email, fullName });
+    if (apiEmail) {
+      saveSessionUser({ role, email: apiEmail, fullName: apiFullName });
     }
     successBtn.href = dashboardLink;
     successBtn.onclick = () => {
@@ -247,15 +332,15 @@ function handleSignup() {
 
   // Redirect to dashboard after 3 seconds
   setTimeout(() => {
-    if (email) {
-      saveSessionUser({ role, email, fullName });
+    if (apiEmail) {
+      saveSessionUser({ role, email: apiEmail, fullName: apiFullName });
     }
-    window.location.href = getDashboardLink(role);
+    window.location.href = dashboardLink;
   }, 3000);
 }
 
 /*HANDLE LOGIN SUBMIT*/
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   if (!state.loginRole) {
     showToast('Please select your role first', 'warn');
@@ -266,34 +351,41 @@ function handleLogin(e) {
     showToast('Please enter a valid email address', 'warn');
     return;
   }
-
-  const rememberedName = localStorage.getItem('bizlink_user_name') || '';
+  const loginPassword = document.getElementById('loginPassword')?.value || '';
+  if (!loginPassword) {
+    showToast('Please enter your password', 'warn');
+    return;
+  }
 
   const btn = document.getElementById('loginSubmitBtn');
   btn.innerHTML = '<span class="btn-text">Signing In...</span><span class="btn-icon">⏳</span>';
   btn.disabled = true;
 
-  setTimeout(() => {
-    btn.innerHTML = '<span class="btn-text">Sign In</span><span class="btn-icon">→</span>';
-    btn.disabled = false;
-    showToast(`Welcome back! Redirecting to ${capitalize(state.loginRole)} dashboard...`, 'success');
-    
-    // Redirect to dashboard based on role (paths are relative to pages/index.html)
-    const dashboardMap = {
-      admin:    '../admin/dashboard.html',
-      vendor:   '../vendor/vendorpanel.html',
-      customer: '../customer/dashboard.html'
-    };
-    saveSessionUser({
-      role: state.loginRole,
-      email: loginEmail,
-      fullName: rememberedName
-    });
+  const result = typeof authLogin === 'function'
+    ? await authLogin({ role: state.loginRole, email: loginEmail, password: loginPassword })
+    : null;
 
-    setTimeout(() => {
-      window.location.href = dashboardMap[state.loginRole];
-    }, 1500);
-  }, 1600);
+  btn.innerHTML = '<span class="btn-text">Sign In</span><span class="btn-icon">→</span>';
+  btn.disabled = false;
+
+  if (!result || !result.success) {
+    showToast((result && result.message) || 'Login failed. Please check backend API.', 'warn');
+    return;
+  }
+
+  const user = result.user || {};
+  saveSessionUser({
+    role: user.role || state.loginRole,
+    email: user.email || loginEmail,
+    fullName: user.full_name || ''
+  });
+
+  const dashboardLink = result.dashboard || getDashboardLink(state.loginRole);
+  showToast(`Welcome back! Redirecting to ${capitalize(state.loginRole)} dashboard...`, 'success');
+
+  setTimeout(() => {
+    window.location.href = dashboardLink;
+  }, 900);
 }
 
 /*PASSWORD STRENGTH*/

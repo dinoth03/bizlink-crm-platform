@@ -329,7 +329,7 @@
             <label>Admin Access Code</label>
             <div class="input-wrap">
               <span class="input-icon">🔑</span>
-              <input type="text" placeholder="Enter admin authorization code" />
+              <input type="text" id="adminAccessCode" placeholder="Enter admin authorization code" />
             </div>
             <p class="field-hint">This code is provided by the platform owner</p>
           </div>
@@ -337,19 +337,19 @@
             <label>Organization / Department</label>
             <div class="input-wrap">
               <span class="input-icon">🏢</span>
-              <input type="text" placeholder="e.g. Operations, IT Department" />
+              <input type="text" id="adminDepartment" placeholder="e.g. Operations, IT Department" />
             </div>
           </div>
           <div class="field-group">
             <label>Your Role Title</label>
             <div class="input-wrap">
               <span class="input-icon">👑</span>
-              <input type="text" placeholder="e.g. Platform Manager, System Admin" />
+              <input type="text" id="adminRoleTitle" placeholder="e.g. Platform Manager, System Admin" />
             </div>
           </div>
           <div class="field-group">
             <label>Reason for Admin Access</label>
-            <textarea class="auth-textarea" rows="3" placeholder="Briefly describe your reason for admin access..."></textarea>
+            <textarea class="auth-textarea" id="adminAccessReason" rows="3" placeholder="Briefly describe your reason for admin access..."></textarea>
           </div>
         </form>
 
@@ -360,20 +360,20 @@
               <label>Business Name</label>
               <div class="input-wrap">
                 <span class="input-icon">🏪</span>
-                <input type="text" placeholder="e.g. Lanka Textiles" />
+                <input type="text" id="vendorBusinessName" placeholder="e.g. Lanka Textiles" />
               </div>
             </div>
             <div class="field-group">
               <label>Business Registration No.</label>
               <div class="input-wrap">
                 <span class="input-icon">📋</span>
-                <input type="text" placeholder="e.g. PV/00123" />
+                <input type="text" id="vendorBusinessRegNo" placeholder="e.g. PV/00123" />
               </div>
             </div>
           </div>
           <div class="field-group">
             <label>Industry / Business Type</label>
-            <select class="auth-select">
+            <select class="auth-select" id="vendorIndustry">
               <option value="">— Select your industry —</option>
               <option>Grocery & Food</option>
               <option>Textile & Apparel</option>
@@ -389,7 +389,7 @@
           </div>
           <div class="field-group">
             <label>Business Location</label>
-            <select class="auth-select">
+            <select class="auth-select" id="vendorLocationProvince">
               <option value="">— Select province —</option>
               <option>Western Province</option>
               <option>Central Province</option>
@@ -413,7 +413,7 @@
           </div>
           <div class="field-group">
             <label>How did you hear about BizLink?</label>
-            <select class="auth-select">
+            <select class="auth-select" id="vendorReferralSource">
               <option value="">— Select —</option>
               <option>Social Media (Facebook / Instagram)</option>
               <option>Google Search</option>
@@ -441,7 +441,7 @@
             <label>City / Town</label>
             <div class="input-wrap">
               <span class="input-icon">📍</span>
-              <input type="text" placeholder="e.g. Colombo, Kandy, Galle" />
+              <input type="text" id="customerCity" placeholder="e.g. Colombo, Kandy, Galle" />
             </div>
           </div>
           <div class="field-group">
@@ -475,7 +475,7 @@
           </div>
           <div class="field-group">
             <label>How did you hear about BizLink?</label>
-            <select class="auth-select">
+            <select class="auth-select" id="customerReferralSource">
               <option value="">— Select —</option>
               <option>Social Media</option>
               <option>Friend / Family</option>
@@ -557,6 +557,7 @@
 </div>
 <!-- / auth-wrapper -->
 
+<script src="../assets/js/api.js"></script>
 <script src="../assets/js/index.js"></script>
 </body>
 </html>
