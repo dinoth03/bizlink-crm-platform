@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink — Sustainability & Green CRM</title>
+  <link rel="stylesheet" href="../assets/css/sustainability.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ════════════ FIXED BACKGROUND ════════════ -->
+<div class="hero-bg-grid"></div>
+<div class="hero-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+<!-- Floating particles -->
+<div class="particles" id="particles"></div>
+
+<!-- ════════════ NAVBAR ════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Biz<strong>Link</strong></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#why-sl">Why BizLink</a>
+      <a href="marketplace.html">Marketplace</a>
+      <a href="sustainability.html" class="nav-active">Sustainability</a>
+      <a href="index.html#contact">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <a href="auth.html" class="btn-ghost">Login</a>
+      <a href="auth.html" class="btn-primary">Get Started</a>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div class="mobile-menu hidden" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="sustainability.html" class="nav-active">Sustainability</a>
+    <a href="auth.html" class="btn-primary" style="text-align:center">Get Started</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     HERO SECTION
+════════════════════════════════════════════ -->
+<section class="sus-hero">
+  <div class="sus-hero-inner">
+
+    <div class="sus-hero-badge scroll-reveal">
+      <span class="badge-dot"></span>
+      BizLink Green Initiative 2025
+    </div>
+
+    <h1 class="sus-hero-title scroll-reveal delay-1">
+      Business Growth &<br/>
+      <span class="gradient-text-green">Planet Responsibility</span>
+    </h1>
+
+    <p class="sus-hero-sin scroll-reveal delay-2">
+      ව්‍යාපාරය හා පරිසරය — BizLink හරිත CRM
+    </p>
+
+    <p class="sus-hero-desc scroll-reveal delay-3">
+      BizLink CRM embeds sustainability into every business interaction — from paperless workflows and carbon-tracked orders to green vendor scoring and ESG reporting. Build your business. Protect Sri Lanka.
+    </p>
+
+    <div class="sus-hero-actions scroll-reveal delay-4">
+      <a href="#commitment" class="btn-hero-primary">
+        <span>Our Commitment</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <a href="#features" class="btn-hero-outline">Explore Green Features</a>
+    </div>
+
+    <!-- Impact Counter Row -->
+    <div class="hero-counters scroll-reveal delay-5">
+      <div class="hc-item">
+        <span class="hc-num" data-target="2400">0</span><span class="hc-unit">kg</span>
+        <span class="hc-label">CO₂ Avoided This Month</span>
+      </div>
+      <div class="hc-divider"></div>
+      <div class="hc-item">
+        <span class="hc-num" data-target="98">0</span><span class="hc-unit">%</span>
+        <span class="hc-label">Paperless Transactions</span>
+      </div>
+      <div class="hc-divider"></div>
+      <div class="hc-item">
+        <span class="hc-num" data-target="120">0</span><span class="hc-unit">+</span>
+        <span class="hc-label">Green Certified Vendors</span>
+      </div>
+      <div class="hc-divider"></div>
+      <div class="hc-item">
+        <span class="hc-num" data-target="2030">0</span>
+        <span class="hc-label">Net Zero Target Year</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hero visual: rotating leaf orb -->
+  <div class="sus-hero-visual scroll-reveal delay-3">
+    <div class="leaf-orb">
+      <div class="leaf-ring ring-1"></div>
+      <div class="leaf-ring ring-2"></div>
+      <div class="leaf-ring ring-3"></div>
+      <div class="leaf-core">
+        <span class="leaf-icon">🌿</span>
+        <span class="leaf-text">Green<br/>CRM</span>
+      </div>
+      <!-- Orbiting icons -->
+      <div class="orbit-item" style="--angle:0deg">🌱</div>
+      <div class="orbit-item" style="--angle:60deg">☀️</div>
+      <div class="orbit-item" style="--angle:120deg">♻️</div>
+      <div class="orbit-item" style="--angle:180deg">💧</div>
+      <div class="orbit-item" style="--angle:240deg">🌍</div>
+      <div class="orbit-item" style="--angle:300deg">⚡</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     WHAT IS SUSTAINABILITY IN CRM
+════════════════════════════════════════════ -->
+<section class="section" id="commitment">
+  <div class="container">
+    <div class="section-label scroll-reveal">UNDERSTANDING GREEN CRM</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      What Is <span class="gradient-text">Sustainability in CRM?</span>
+    </h2>
+    <p class="section-sub scroll-reveal delay-2">
+      ව්‍යාපාර CRM හි හරිත භාවිතය
+    </p>
+    <p class="section-desc scroll-reveal delay-3">
+      A Green CRM integrates environmental responsibility into every customer touchpoint — reducing waste, tracking carbon impact, and rewarding eco-conscious business decisions. It transforms your customer data platform into a driver of sustainable growth.
+    </p>
+
+    <div class="what-grid">
+      <div class="what-card scroll-reveal" style="--delay:0s">
+        <div class="wc-icon-wrap green-bg">🌱</div>
+        <h3>Eco-Conscious Operations</h3>
+        <p>Replace paper invoices, physical records, and print-heavy workflows with fully digital, cloud-hosted processes that eliminate paper waste and reduce office energy use.</p>
+        <div class="wc-tag">Paperless First</div>
+      </div>
+      <div class="what-card scroll-reveal" style="--delay:0.1s">
+        <div class="wc-icon-wrap blue-bg">📊</div>
+        <h3>ESG Data Tracking</h3>
+        <p>Monitor your Environmental, Social & Governance (ESG) metrics directly inside your CRM. Track emissions, energy consumption, and sustainability KPIs in real time.</p>
+        <div class="wc-tag">ESG Reporting</div>
+      </div>
+      <div class="what-card scroll-reveal" style="--delay:0.2s">
+        <div class="wc-icon-wrap orange-bg">🔗</div>
+        <h3>Green Supply Chain</h3>
+        <p>Evaluate and score vendors based on their environmental practices. Prioritise suppliers who use renewable energy, ethical sourcing, and low-emission logistics.</p>
+        <div class="wc-tag">Vendor Scoring</div>
+      </div>
+      <div class="what-card scroll-reveal" style="--delay:0.3s">
+        <div class="wc-icon-wrap navy-bg">🤝</div>
+        <h3>Customer Engagement</h3>
+        <p>Build loyalty with eco-conscious customers through green loyalty programs, sustainability-themed campaigns, and transparent impact dashboards they can actually see.</p>
+        <div class="wc-tag">Loyalty & Trust</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     BIZLINK'S 6 GREEN PILLARS
+════════════════════════════════════════════ -->
+<section class="section pillars-section" id="features">
+  <div class="pillars-bg"></div>
+  <div class="container">
+    <div class="section-label scroll-reveal">OUR FRAMEWORK</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      BizLink's <span class="gradient-text-green">6 Green Pillars</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      Six core sustainability dimensions built directly into the BizLink CRM platform — designed for Sri Lankan businesses of every size.
+    </p>
+
+    <div class="pillars-grid">
+
+      <div class="pillar-card scroll-reveal" data-pillar="1" style="--delay:0s">
+        <div class="pc-number">01</div>
+        <div class="pc-icon">☁️</div>
+        <h3 class="pc-title">Cloud-First Infrastructure</h3>
+        <p class="pc-desc">BizLink runs on carbon-neutral cloud servers — eliminating the need for physical hardware, on-site servers, and energy-intensive local infrastructure. No servers. No waste.</p>
+        <ul class="pc-list">
+          <li>99.9% uptime on green cloud</li>
+          <li>Zero physical hardware required</li>
+          <li>Data centers powered by renewable energy</li>
+          <li>Scales without extra carbon cost</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">70%</span>
+          <span class="pc-stat-label">less energy vs. on-premise systems</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+      <div class="pillar-card scroll-reveal" data-pillar="2" style="--delay:0.08s">
+        <div class="pc-number">02</div>
+        <div class="pc-icon">📄</div>
+        <h3 class="pc-title">Paperless Workflows</h3>
+        <p class="pc-desc">From digital invoices and e-signatures to cloud receipts and automated order confirmations — every transaction on BizLink is 100% paper-free by design.</p>
+        <ul class="pc-list">
+          <li>Digital invoicing & e-receipts</li>
+          <li>Integrated e-signature support</li>
+          <li>Automated digital record keeping</li>
+          <li>Paperless customer onboarding</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">98%</span>
+          <span class="pc-stat-label">of BizLink transactions are paperless</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+      <div class="pillar-card scroll-reveal" data-pillar="3" style="--delay:0.16s">
+        <div class="pc-number">03</div>
+        <div class="pc-icon">🌡️</div>
+        <h3 class="pc-title">Carbon Footprint Tracking</h3>
+        <p class="pc-desc">Every order, shipment, and vendor interaction is tracked for its estimated carbon output. Businesses receive monthly carbon reports and actionable reduction tips.</p>
+        <ul class="pc-list">
+          <li>Per-order carbon estimates</li>
+          <li>Delivery route optimisation</li>
+          <li>Monthly CO₂ dashboards</li>
+          <li>Carbon offset marketplace integration</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">2.4T</span>
+          <span class="pc-stat-label">kg CO₂ avoided through BizLink in 2025</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+      <div class="pillar-card scroll-reveal" data-pillar="4" style="--delay:0.24s">
+        <div class="pc-number">04</div>
+        <div class="pc-icon">🏭</div>
+        <h3 class="pc-title">Green Vendor Certification</h3>
+        <p class="pc-desc">Vendors who meet BizLink's environmental standards earn a verified Green Badge — visible to all customers, boosting trust and rewarding responsible business practices.</p>
+        <ul class="pc-list">
+          <li>Eco-certification scoring system</li>
+          <li>Renewable energy usage tracking</li>
+          <li>Ethical sourcing verification</li>
+          <li>Public green badges on listings</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">120+</span>
+          <span class="pc-stat-label">vendors hold Green Certification</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+      <div class="pillar-card scroll-reveal" data-pillar="5" style="--delay:0.32s">
+        <div class="pc-number">05</div>
+        <div class="pc-icon">💚</div>
+        <h3 class="pc-title">Eco Loyalty Program</h3>
+        <p class="pc-desc">Customers earn BizLink Green Points for choosing eco-friendly products, carbon-neutral shipping, and digital payment methods — redeemable for discounts and green rewards.</p>
+        <ul class="pc-list">
+          <li>Green Points for eco choices</li>
+          <li>Carbon-neutral delivery rewards</li>
+          <li>Sustainability pledge badges</li>
+          <li>Eco-product recommendation engine</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">3,200+</span>
+          <span class="pc-stat-label">customers enrolled in Green Points</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+      <div class="pillar-card scroll-reveal" data-pillar="6" style="--delay:0.4s">
+        <div class="pc-number">06</div>
+        <div class="pc-icon">📈</div>
+        <h3 class="pc-title">ESG Reporting & Compliance</h3>
+        <p class="pc-desc">Generate ready-to-submit ESG reports from your BizLink dashboard. Track Environmental, Social, and Governance metrics and stay ahead of upcoming Sri Lankan sustainability regulations.</p>
+        <ul class="pc-list">
+          <li>One-click ESG report export</li>
+          <li>Regulatory compliance tracking</li>
+          <li>Scope 1, 2 & 3 emissions data</li>
+          <li>Stakeholder-ready PDF reports</li>
+        </ul>
+        <div class="pc-stat">
+          <span class="pc-stat-num">100%</span>
+          <span class="pc-stat-label">regulatory readiness for 2026 compliance</span>
+        </div>
+        <div class="pc-glow"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     IMPACT DASHBOARD (visual stats section)
+════════════════════════════════════════════ -->
+<section class="section impact-section" id="impact">
+  <div class="container">
+    <div class="section-label scroll-reveal">MEASURABLE IMPACT</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      Real Impact. <span class="gradient-text">Real Numbers.</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      Sustainability isn't a promise — it's a tracked metric inside every BizLink account.
+    </p>
+
+    <div class="impact-dashboard scroll-reveal delay-3">
+
+      <!-- Left: big CO2 ring -->
+      <div class="id-ring-side">
+        <div class="co2-ring-wrap">
+          <svg class="co2-ring" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(80,200,120,0.08)" stroke-width="14"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="url(#greenGrad)" stroke-width="14"
+              stroke-dasharray="515.2" stroke-dashoffset="46" stroke-linecap="round"
+              transform="rotate(-90 100 100)" class="ring-arc"/>
+            <defs>
+              <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#50C878"/>
+                <stop offset="100%" stop-color="#4f8cff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="co2-center">
+            <span class="co2-pct">91%</span>
+            <span class="co2-lbl">Sustainability<br/>Score</span>
+          </div>
+        </div>
+        <div class="id-ring-legend">
+          <div class="irl-item"><span class="irl-dot green-dot"></span>Carbon Tracking Active</div>
+          <div class="irl-item"><span class="irl-dot blue-dot"></span>ESG Reports Generated</div>
+          <div class="irl-item"><span class="irl-dot orange-dot"></span>Pending Certifications</div>
+        </div>
+      </div>
+
+      <!-- Right: KPI cards grid -->
+      <div class="id-stats-grid">
+
+        <div class="isg-card green-card">
+          <div class="isg-icon">🌲</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="840">0</span>
+            <span class="isg-unit">trees</span>
+          </div>
+          <p class="isg-label">Trees Planted via Vendor Offset Program</p>
+          <div class="isg-bar"><div class="isg-bar-fill" style="width:72%"></div></div>
+        </div>
+
+        <div class="isg-card blue-card">
+          <div class="isg-icon">💧</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="18">0</span>
+            <span class="isg-unit">M L</span>
+          </div>
+          <p class="isg-label">Water Saved via Digital-Only Processes</p>
+          <div class="isg-bar"><div class="isg-bar-fill blue-fill" style="width:58%"></div></div>
+        </div>
+
+        <div class="isg-card orange-card">
+          <div class="isg-icon">⚡</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="34">0</span>
+            <span class="isg-unit">%</span>
+          </div>
+          <p class="isg-label">Renewable Energy in Data Operations</p>
+          <div class="isg-bar"><div class="isg-bar-fill orange-fill" style="width:34%"></div></div>
+        </div>
+
+        <div class="isg-card navy-card">
+          <div class="isg-icon">♻️</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="12400">0</span>
+            <span class="isg-unit">kg</span>
+          </div>
+          <p class="isg-label">Paper Eliminated via Digital Workflows</p>
+          <div class="isg-bar"><div class="isg-bar-fill navy-fill" style="width:89%"></div></div>
+        </div>
+
+        <div class="isg-card green-card">
+          <div class="isg-icon">🚚</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="1840">0</span>
+            <span class="isg-unit">km</span>
+          </div>
+          <p class="isg-label">Delivery Routes Optimised for Lower Emissions</p>
+          <div class="isg-bar"><div class="isg-bar-fill" style="width:65%"></div></div>
+        </div>
+
+        <div class="isg-card blue-card">
+          <div class="isg-icon">📊</div>
+          <div class="isg-body">
+            <span class="isg-num" data-target="284">0</span>
+            <span class="isg-unit">+</span>
+          </div>
+          <p class="isg-label">ESG Reports Generated by Vendors</p>
+          <div class="isg-bar"><div class="isg-bar-fill blue-fill" style="width:45%"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     WHY IT MATTERS — Sri Lanka Context
+════════════════════════════════════════════ -->
+<section class="section sl-context-section">
+  <div class="slc-bg"></div>
+  <div class="container">
+    <div class="section-label scroll-reveal">SRI LANKA CONTEXT</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      Why Sustainability Matters<br/>
+      <span class="gradient-text-green">for Sri Lankan Businesses</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      Sri Lanka faces real environmental pressures. BizLink CRM equips local businesses to respond responsibly — and profitably.
+    </p>
+
+    <div class="sl-context-grid">
+
+      <div class="slc-fact scroll-reveal" style="--delay:0s">
+        <div class="slcf-icon">🌊</div>
+        <div class="slcf-body">
+          <h4>Coastal Vulnerability</h4>
+          <p>With 1,340 km of coastline, Sri Lanka is directly impacted by rising sea levels. Sustainable business practices help protect the livelihoods of coastal vendors on BizLink.</p>
+        </div>
+      </div>
+
+      <div class="slc-fact scroll-reveal" style="--delay:0.1s">
+        <div class="slcf-icon">🍵</div>
+        <div class="slcf-body">
+          <h4>Agriculture & Tea Export</h4>
+          <p>Sri Lanka's Rs. 220B tea and agriculture industry is climate-sensitive. BizLink's carbon tracking helps agri-vendors protect yield quality and export certifications.</p>
+        </div>
+      </div>
+
+      <div class="slc-fact scroll-reveal" style="--delay:0.2s">
+        <div class="slcf-icon">🏙️</div>
+        <div class="slcf-body">
+          <h4>Urban Growth Pressure</h4>
+          <p>Colombo's rapid expansion demands digital-first business tools that reduce physical infrastructure, traffic, and resource use — exactly what BizLink delivers.</p>
+        </div>
+      </div>
+
+      <div class="slc-fact scroll-reveal" style="--delay:0.3s">
+        <div class="slcf-icon">🌏</div>
+        <div class="slcf-body">
+          <h4>Export Market Expectations</h4>
+          <p>EU, UK, and US buyers increasingly require ESG compliance from import partners. BizLink's ESG reporting prepares Sri Lankan exporters for international sustainability standards.</p>
+        </div>
+      </div>
+
+      <div class="slc-fact scroll-reveal" style="--delay:0.4s">
+        <div class="slcf-icon">⚡</div>
+        <div class="slcf-body">
+          <h4>Energy Transition</h4>
+          <p>Sri Lanka targets 70% renewable energy by 2030. BizLink aligns its cloud infrastructure with this goal — and helps vendors track and reduce their own energy consumption.</p>
+        </div>
+      </div>
+
+      <div class="slc-fact scroll-reveal" style="--delay:0.5s">
+        <div class="slcf-icon">👨‍👩‍👧</div>
+        <div class="slcf-body">
+          <h4>Consumer Consciousness</h4>
+          <p>Over 68% of Sri Lankan urban consumers prefer businesses with visible sustainability commitments. BizLink's Green Badge makes that commitment instantly visible.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     GREEN FEATURES TIMELINE
+════════════════════════════════════════════ -->
+<section class="section timeline-section">
+  <div class="container">
+    <div class="section-label scroll-reveal">ROADMAP</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      Our <span class="gradient-text">Green Journey</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      From launch to net zero — every milestone on our sustainability roadmap.
+    </p>
+
+    <div class="timeline">
+      <div class="timeline-track"></div>
+
+      <div class="tl-item tl-left scroll-reveal">
+        <div class="tl-dot done-dot"></div>
+        <div class="tl-card done-card">
+          <span class="tl-year">2023</span>
+          <h4>BizLink Launches — Cloud Native</h4>
+          <p>Platform built from day one on cloud infrastructure with zero on-premise servers. 100% paperless from launch.</p>
+          <span class="tl-badge done-badge">✓ Completed</span>
+        </div>
+      </div>
+
+      <div class="tl-item tl-right scroll-reveal" style="--delay:0.1s">
+        <div class="tl-dot done-dot"></div>
+        <div class="tl-card done-card">
+          <span class="tl-year">2024</span>
+          <h4>Green Vendor Certification Launched</h4>
+          <p>Introduced eco-scoring for vendors. 120+ vendors now hold verified Green Badges. Carbon estimates added to all orders.</p>
+          <span class="tl-badge done-badge">✓ Completed</span>
+        </div>
+      </div>
+
+      <div class="tl-item tl-left scroll-reveal" style="--delay:0.2s">
+        <div class="tl-dot active-dot"></div>
+        <div class="tl-card active-card">
+          <span class="tl-year">2025</span>
+          <h4>ESG Reporting Dashboard</h4>
+          <p>Live ESG dashboards for every vendor. One-click compliance reports. Eco Loyalty Points program goes live for all customers.</p>
+          <span class="tl-badge active-badge">🔄 In Progress</span>
+        </div>
+      </div>
+
+      <div class="tl-item tl-right scroll-reveal" style="--delay:0.3s">
+        <div class="tl-dot future-dot"></div>
+        <div class="tl-card future-card">
+          <span class="tl-year">2026</span>
+          <h4>AI-Powered Sustainability Advisor</h4>
+          <p>AI recommends personalised sustainability actions per vendor. Automated regulatory compliance alerts for Sri Lankan law.</p>
+          <span class="tl-badge future-badge">⏳ Planned</span>
+        </div>
+      </div>
+
+      <div class="tl-item tl-left scroll-reveal" style="--delay:0.4s">
+        <div class="tl-dot future-dot"></div>
+        <div class="tl-card future-card">
+          <span class="tl-year">2028</span>
+          <h4>Circular Economy Marketplace</h4>
+          <p>Dedicated marketplace section for recycled, upcycled, and sustainably produced goods. Circular supply chain tracking for all vendors.</p>
+          <span class="tl-badge future-badge">⏳ Planned</span>
+        </div>
+      </div>
+
+      <div class="tl-item tl-right scroll-reveal" style="--delay:0.5s">
+        <div class="tl-dot future-dot"></div>
+        <div class="tl-card future-card">
+          <span class="tl-year">2030</span>
+          <h4>BizLink Achieves Net Zero</h4>
+          <p>Full carbon neutrality across all operations, vendor networks, and logistics. 100% renewable energy in data infrastructure.</p>
+          <span class="tl-badge future-badge">🎯 Net Zero Target</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     GREEN PLEDGE / CTA
+════════════════════════════════════════════ -->
+<section class="section pledge-section" id="pledge">
+  <div class="pledge-orbs">
+    <div class="p-orb p-orb-1"></div>
+    <div class="p-orb p-orb-2"></div>
+  </div>
+  <div class="container">
+    <div class="pledge-box scroll-reveal">
+      <div class="pb-badge">🌿 Join the Green Movement</div>
+      <h2 class="pb-title">
+        Take the BizLink<br/>
+        <span class="gradient-text-green">Sustainability Pledge</span>
+      </h2>
+      <p class="pb-sin">ශ්‍රී ලංකාව සඳහා හරිත ව්‍යාපාරය</p>
+      <p class="pb-desc">
+        Every vendor and customer who joins BizLink automatically contributes to a greener Sri Lanka. Enable your Green Dashboard today — track your impact, earn your badge, and grow responsibly.
+      </p>
+      <div class="pb-promises">
+        <div class="pp-item">
+          <span class="pp-icon">✅</span>
+          <span>Go 100% paperless on day one</span>
+        </div>
+        <div class="pp-item">
+          <span class="pp-icon">✅</span>
+          <span>Track your carbon footprint monthly</span>
+        </div>
+        <div class="pp-item">
+          <span class="pp-icon">✅</span>
+          <span>Earn your verified Green Vendor Badge</span>
+        </div>
+        <div class="pp-item">
+          <span class="pp-icon">✅</span>
+          <span>Generate ESG reports for compliance</span>
+        </div>
+      </div>
+      <div class="pb-actions">
+        <a href="auth.html" class="btn-green-large">
+          <span>Start Your Green Journey</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="#features" class="btn-ghost-large">Explore Features First</a>
+      </div>
+      <!-- Animated leaf ring in corner -->
+      <div class="pb-deco">
+        <div class="pb-deco-ring"></div>
+        <span class="pb-deco-icon">🌍</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="ft-brand">
+        <div class="logo">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">Biz<strong>Link</strong></span>
+        </div>
+        <p class="ft-tagline">ශ්‍රී ලංකාවේ හරිත ව්‍යාපාර CRM</p>
+        <p class="ft-desc">Sri Lanka's sustainable CRM platform — connecting businesses and protecting the planet, one transaction at a time.</p>
+        <div class="ft-social">
+          <a href="#" class="fs-btn" title="Facebook">f</a>
+          <a href="#" class="fs-btn" title="Instagram">in</a>
+          <a href="#" class="fs-btn" title="LinkedIn">Li</a>
+          <a href="#" class="fs-btn" title="Twitter/X">𝕏</a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="fl-col">
+          <h5>Platform</h5>
+          <a href="index.html">Home</a>
+          <a href="marketplace.html">Marketplace</a>
+          <a href="auth.html">Register</a>
+          <a href="admin.html">Admin Panel</a>
+        </div>
+        <div class="fl-col">
+          <h5>Sustainability</h5>
+          <a href="#commitment">Our Commitment</a>
+          <a href="#features">Green Features</a>
+          <a href="#impact">Impact Dashboard</a>
+          <a href="#pledge">Take the Pledge</a>
+        </div>
+        <div class="fl-col">
+          <h5>Company</h5>
+          <a href="#">About Us</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 BizLink CRM. Built in Sri Lanka 🇱🇰 — Committed to a greener future.</p>
+      <div class="fb-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">ESG Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll-to-top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script src="../assets/js/sustainability.js"></script>
+</body>
+</html>
