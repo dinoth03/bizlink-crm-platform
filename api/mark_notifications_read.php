@@ -1,5 +1,9 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
+
+// Require authentication
+requireAuth();
 
 function readPayload(): array {
     $raw = file_get_contents('php://input');
@@ -11,37 +15,22 @@ function readPayload(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
-function resolveNotificationUserFromPayload(mysqli $conn, array $payload): ?array {
-    $email = isset($payload['email']) ? trim((string) $payload['email']) : '';
-    $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : 0;
-
-    if ($userId > 0) {
-        $stmt = $conn->prepare("SELECT user_id, email, full_name FROM users WHERE user_id = ? LIMIT 1");
-        $stmt->bind_param('i', $userId);
-    } else {
-        if ($email === '') {
-            $email = 'kasun@bizlink.lk';
-        }
-        $stmt = $conn->prepare("SELECT user_id, email, full_name FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param('s', $email);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result ? $result->fetch_assoc() : null;
-    $stmt->close();
-
-    return $user ?: null;
-}
-
 $payload = readPayload();
-$user = resolveNotificationUserFromPayload($conn, $payload);
+$userId = getCurrentUser()['user_id'];
+
+// Get user info
+$userStmt = $conn->prepare("SELECT user_id, email, full_name FROM users WHERE user_id = ? LIMIT 1");
+$userStmt->bind_param('i', $userId);
+$userStmt->execute();
+$userResult = $userStmt->get_result();
+$user = $userResult->fetch_assoc();
+$userStmt->close();
 
 if (!$user) {
     http_response_code(404);
     echo json_encode([
         'success' => false,
-        'message' => 'Notification user not found.'
+        'message' => 'User not found.'
     ]);
     $conn->close();
     exit();
@@ -69,13 +58,13 @@ try {
                       FROM notifications
                       WHERE user_id = ?";
         $insertStmt = $conn->prepare($insertSql);
-        $insertStmt->bind_param('i', $user['user_id']);
+        $insertStmt->bind_param('i', $userId);
         $insertStmt->execute();
         $insertStmt->close();
 
         $updateSql = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ?";
         $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param('i', $user['user_id']);
+        $updateStmt->bind_param('i', $userId);
         $updateStmt->execute();
         $affectedRows = $updateStmt->affected_rows;
         $updateStmt->close();
@@ -85,13 +74,13 @@ try {
                       FROM notifications
                       WHERE notification_id = ? AND user_id = ?";
         $insertStmt = $conn->prepare($insertSql);
-        $insertStmt->bind_param('ii', $notificationId, $user['user_id']);
+        $insertStmt->bind_param('ii', $notificationId, $userId);
         $insertStmt->execute();
         $insertStmt->close();
 
         $updateSql = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE notification_id = ? AND user_id = ?";
         $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param('ii', $notificationId, $user['user_id']);
+        $updateStmt->bind_param('ii', $notificationId, $userId);
         $updateStmt->execute();
         $affectedRows = $updateStmt->affected_rows;
         $updateStmt->close();

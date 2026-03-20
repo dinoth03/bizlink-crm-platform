@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -98,6 +99,13 @@ $updateStmt = $conn->prepare('UPDATE users SET last_login = NOW() WHERE user_id 
 $updateStmt->bind_param('i', $user['user_id']);
 $updateStmt->execute();
 $updateStmt->close();
+
+// Set PHP session variables for server-side authentication
+$_SESSION['user_id'] = (int)$user['user_id'];
+$_SESSION['email'] = $user['email'];
+$_SESSION['role'] = $user['role'];
+$_SESSION['full_name'] = $user['full_name'];
+$_SESSION['login_time'] = time();
 
 $dashboardMap = [
     'admin' => '../admin/dashboard.html',

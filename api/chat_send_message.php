@@ -1,5 +1,9 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
+
+// Require authentication
+requireAuth();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -10,15 +14,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $conversationId = isset($input['conversation_id']) ? (int)$input['conversation_id'] : 0;
-$senderId = isset($input['sender_id']) ? (int)$input['sender_id'] : 0;
 $messageContent = trim($input['message_content'] ?? '');
 
-if ($conversationId <= 0 || $senderId <= 0 || $messageContent === '') {
+// Get sender from authenticated session (not from request)
+$senderId = getCurrentUser()['user_id'];
+
+if ($conversationId <= 0 || $messageContent === '') {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'conversation_id, sender_id, and message_content are required']);
+    echo json_encode(['success' => false, 'message' => 'conversation_id and message_content are required']);
     $conn->close();
     exit;
 }
+
+// Verify sender is a participant in this conversation
+$participantSql = "SELECT 1 FROM conversation_participants WHERE conversation_id = ? AND user_id = ? AND is_active = 1 LIMIT 1";
+$participantStmt = $conn->prepare($participantSql);
+$participantStmt->bind_param('ii', $conversationId, $senderId);
+$participantStmt->execute();
+$participantRes = $participantStmt->get_result();
+if ($participantRes->num_rows === 0) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'You are not a participant in this conversation']);
+    $conn->close();
+    exit;
+}
+$participantStmt->close();
 
 $receiverSql = "
 SELECT cp.user_id

@@ -1,5 +1,12 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
+
+// Require authentication
+requireAuth();
+
+$userRole = getUserRole();
+$userId = getCurrentUser()['user_id'];
 
 $query = "SELECT 
     v.vendor_id,
@@ -14,7 +21,23 @@ $query = "SELECT
     COUNT(p.product_id) as total_products
 FROM vendors v
 LEFT JOIN users u ON v.user_id = u.user_id
-LEFT JOIN products p ON v.vendor_id = p.vendor_id
+LEFT JOIN products p ON v.vendor_id = p.vendor_id";
+
+// Add role-based filtering
+if ($userRole === 'admin') {
+    // Admins see all vendors
+    $whereClause = "WHERE 1=1";
+} elseif ($userRole === 'vendor') {
+    // Vendors only see their own info
+    $whereClause = "WHERE v.user_id = $userId";
+} else {
+    // Customers shouldn't access vendor API endpoint
+    http_response_code(403);
+    echo json_encode(['error' => 'Customers do not have access to vendor information']);
+    exit;
+}
+
+$query = $query . " " . $whereClause . " 
 GROUP BY v.vendor_id
 ORDER BY v.created_at DESC
 LIMIT 100";

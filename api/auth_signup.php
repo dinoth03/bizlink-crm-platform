@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -203,6 +204,13 @@ try {
     }
 
     $conn->commit();
+
+    // Set PHP session variables for server-side authentication
+    $_SESSION['user_id'] = $userId;
+    $_SESSION['email'] = $email;
+    $_SESSION['role'] = $role;
+    $_SESSION['full_name'] = $fullName;
+    $_SESSION['login_time'] = time();
 
     $dashboardMap = [
         'admin' => '../admin/dashboard.html',

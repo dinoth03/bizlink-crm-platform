@@ -1,41 +1,12 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
 
-function resolveNotificationUser(mysqli $conn): ?array {
-    $email = isset($_GET['email']) ? trim($_GET['email']) : '';
-    $userId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : 0;
+// Require authentication
+requireAuth();
 
-    if ($userId > 0) {
-        $stmt = $conn->prepare("SELECT user_id, email, full_name, role FROM users WHERE user_id = ? LIMIT 1");
-        $stmt->bind_param('i', $userId);
-    } else {
-        if ($email === '') {
-            $email = 'kasun@bizlink.lk';
-        }
-        $stmt = $conn->prepare("SELECT user_id, email, full_name, role FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param('s', $email);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result ? $result->fetch_assoc() : null;
-    $stmt->close();
-
-    return $user ?: null;
-}
-
+$userId = getCurrentUser()['user_id'];
 $limit = isset($_GET['limit']) ? max(1, min(20, (int) $_GET['limit'])) : 6;
-$user = resolveNotificationUser($conn);
-
-if (!$user) {
-    http_response_code(404);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Notification user not found.'
-    ]);
-    $conn->close();
-    exit();
-}
 
 $query = "SELECT
     n.notification_id,
@@ -62,7 +33,7 @@ ORDER BY is_read ASC, n.created_at DESC
 LIMIT ?";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param('iii', $user['user_id'], $user['user_id'], $limit);
+$stmt->bind_param('iii', $userId, $userId, $limit);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -78,6 +49,14 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $stmt->close();
+
+// Get current user info
+$userStmt = $conn->prepare("SELECT user_id, email, full_name, role FROM users WHERE user_id = ? LIMIT 1");
+$userStmt->bind_param('i', $userId);
+$userStmt->execute();
+$userResult = $userStmt->get_result();
+$user = $userResult->fetch_assoc();
+$userStmt->close();
 
 echo json_encode([
     'success' => true,

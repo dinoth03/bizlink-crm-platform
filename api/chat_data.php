@@ -1,35 +1,17 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
 
-function getUserIdFromRequest(mysqli $conn): int {
-    if (isset($_GET['user_id']) && is_numeric($_GET['user_id'])) {
-        return (int)$_GET['user_id'];
-    }
+// Require authentication
+requireAuth();
 
-    $email = $_GET['email'] ?? 'dilani.silva@gmail.com';
-    $stmt = $conn->prepare('SELECT user_id FROM users WHERE email = ? LIMIT 1');
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $stmt->close();
-
-    return $row ? (int)$row['user_id'] : 0;
-}
+$userId = getCurrentUser()['user_id'];
 
 function mapStatus(?string $accountStatus): string {
     $status = strtolower((string)$accountStatus);
     if ($status === 'active') return 'online';
     if ($status === 'pending_verification') return 'away';
     return 'offline';
-}
-
-$userId = getUserIdFromRequest($conn);
-if ($userId === 0) {
-    http_response_code(404);
-    echo json_encode(['success' => false, 'message' => 'User not found']);
-    $conn->close();
-    exit;
 }
 
 $currentUserStmt = $conn->prepare('SELECT user_id, full_name, role FROM users WHERE user_id = ? LIMIT 1');

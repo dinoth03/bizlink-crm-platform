@@ -1,7 +1,13 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
 
-$query = "SELECT 
+// Authentication required for sensitive operations
+$isAuthenticated = isLoggedIn();
+$userRole = isLoggedIn() ? getUserRole() : null;
+$userId = isLoggedIn() ? getCurrentUser()['user_id'] : null;
+
+$baseQuery = "SELECT 
     p.product_id,
     p.product_name,
     p.category,
@@ -12,7 +18,18 @@ $query = "SELECT
     p.is_active as product_status,
     p.created_at
 FROM products p
-LEFT JOIN vendors v ON p.vendor_id = v.vendor_id
+LEFT JOIN vendors v ON p.vendor_id = v.vendor_id";
+
+// Role-based filtering
+if ($isAuthenticated && $userRole === 'vendor') {
+    // Vendors see their own products + other active products for marketplace
+    $whereClause = "WHERE (v.user_id = $userId OR p.is_active = 1)";
+} else {
+    // Public or customers see only active products
+    $whereClause = "WHERE p.is_active = 1";
+}
+
+$query = $baseQuery . " " . $whereClause . " 
 ORDER BY p.created_at DESC
 LIMIT 100";
 

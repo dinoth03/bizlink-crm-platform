@@ -1,8 +1,15 @@
 <?php
+require 'auth_middleware.php';
 require 'config.php';
 
-// Get orders with customer, vendor, and first order item information
-$query = "SELECT 
+// Require authentication
+requireAuth();
+
+$userRole = getUserRole();
+$userId = getCurrentUser()['user_id'];
+
+// Build base query
+$baseQuery = "SELECT 
     o.order_id,
     o.order_number,
     o.customer_id,
@@ -19,6 +26,7 @@ $query = "SELECT
     o.shipping_method,
     o.tracking_number,
     o.expected_delivery_date,
+    v.vendor_id,
     v.business_name as vendor_name,
     v.business_category as vendor_category,
     v.business_email as vendor_email,
@@ -29,7 +37,25 @@ FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.customer_id
 LEFT JOIN users u ON c.user_id = u.user_id
 LEFT JOIN vendors v ON o.vendor_id = v.vendor_id
-LEFT JOIN order_items oi ON o.order_id = oi.order_id
+LEFT JOIN order_items oi ON o.order_id = oi.order_id";
+
+// Add role-based filtering
+if ($userRole === 'admin') {
+    // Admins see all orders
+    $whereClause = "WHERE 1=1";
+} elseif ($userRole === 'vendor') {
+    // Vendors see only their own orders
+    $whereClause = "WHERE v.user_id = $userId";
+} elseif ($userRole === 'customer') {
+    // Customers see only their own orders
+    $whereClause = "WHERE u.user_id = $userId";
+} else {
+    http_response_code(403);
+    echo json_encode(['error' => 'Invalid role']);
+    exit;
+}
+
+$query = $baseQuery . " " . $whereClause . " 
 GROUP BY 
     o.order_id,
     o.order_number,
@@ -47,6 +73,7 @@ GROUP BY
     o.shipping_method,
     o.tracking_number,
     o.expected_delivery_date,
+    v.vendor_id,
     v.business_name,
     v.business_category,
     v.business_email,
