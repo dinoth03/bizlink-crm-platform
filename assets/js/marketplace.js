@@ -133,13 +133,7 @@ function setupBackToDashboardPath() {
     return;
   }
 
-  const dashboardMap = {
-    admin: '../admin/dashboard.html',
-    vendor: '../vendor/vendorpanel.html',
-    customer: '../customer/dashboard.html'
-  };
-
-  const href = dashboardMap[user.role] || '../customer/dashboard.html';
+  const href = '../dashboard.php';
   link.href = href;
   link.textContent = '← Back to Dashboard';
   link.classList.remove('hidden');

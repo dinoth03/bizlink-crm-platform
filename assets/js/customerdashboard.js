@@ -131,55 +131,8 @@ const customerDashboardState = {
   notifications: []
 };
 
-function resolveSessionUser() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const queryEmail = (params.get('email') || '').trim().toLowerCase();
-    const queryRole = (params.get('role') || '').trim().toLowerCase();
-    const queryUserId = Number(params.get('user_id') || 0);
-
-    if (queryEmail) {
-      return {
-        email: queryEmail,
-        role: queryRole || 'customer',
-        user_id: queryUserId > 0 ? queryUserId : null
-      };
-    }
-
-    const rawSession = localStorage.getItem('bizlink_session');
-    if (rawSession) {
-      const parsed = JSON.parse(rawSession);
-      if (parsed && parsed.email) {
-        return {
-          email: String(parsed.email).trim().toLowerCase(),
-          role: String(parsed.role || '').toLowerCase(),
-          user_id: parsed.user_id ? Number(parsed.user_id) : null,
-          fullName: parsed.fullName || ''
-        };
-      }
-    }
-
-    const legacyEmail = (localStorage.getItem('bizlink_user_email') || '').trim().toLowerCase();
-    const legacyRole = (localStorage.getItem('bizlink_user_role') || '').trim().toLowerCase();
-    const legacyName = localStorage.getItem('bizlink_user_name') || '';
-    if (legacyEmail) {
-      return { email: legacyEmail, role: legacyRole, fullName: legacyName, user_id: null };
-    }
-  } catch (error) {
-    console.warn('Failed to resolve session user:', error);
-  }
-
-  return {
-    email: FALLBACK_CUSTOMER.email,
-    role: 'customer',
-    user_id: null,
-    fullName: FALLBACK_CUSTOMER.full_name
-  };
-}
-
 function applyCustomerChatLinks() {
-  const safeEmail = customerDashboardState.customerEmail || FALLBACK_CUSTOMER.email;
-  const chatUrl = `../pages/chat.html?email=${encodeURIComponent(safeEmail)}`;
+  const chatUrl = '../pages/chat.html';
 
   const messageCenterLink = document.getElementById('messageCenterLink');
   const supportNavLink = document.getElementById('supportNavLink');
@@ -455,10 +408,9 @@ function updateCustomerSummary(customer, orders, vendors) {
 }
 
 async function loadCustomerDashboardData() {
-  const sessionUser = resolveSessionUser();
-  customerDashboardState.customerEmail = sessionUser.email || FALLBACK_CUSTOMER.email;
-  customerDashboardState.customerId = sessionUser.user_id || null;
-  customerDashboardState.customerName = sessionUser.fullName || customerDashboardState.customerName;
+  customerDashboardState.customerEmail = FALLBACK_CUSTOMER.email;
+  customerDashboardState.customerId = null;
+  customerDashboardState.customerName = FALLBACK_CUSTOMER.full_name;
   applyCustomerChatLinks();
 
   try {

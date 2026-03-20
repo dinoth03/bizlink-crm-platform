@@ -522,12 +522,10 @@ function scrollToTop() {
 }
 
 function getDashboardLink(role) {
-  const dashboardMap = {
-    admin:    '../admin/dashboard.html',
-    vendor:   '../vendor/vendorpanel.html',
-    customer: '../customer/dashboard.html'
-  };
-  return dashboardMap[role] || 'index.html';
+  if (role === 'admin' || role === 'vendor' || role === 'customer') {
+    return '../dashboard.php';
+  }
+  return 'index.html';
 }
 
 /*INPUT FOCUS – DYNAMIC BORDER GLOW BY ROLE*/

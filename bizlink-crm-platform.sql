@@ -117,6 +117,37 @@ CREATE TABLE customers (
     INDEX idx_account_tier (account_tier)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Login Activity Table
+CREATE TABLE login_activity (
+    activity_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    login_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_login_activity_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_login_activity_user (user_id),
+    INDEX idx_login_activity_time (login_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Failed Login Attempts Table
+CREATE TABLE failed_login_attempts (
+    attempt_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NULL,
+    email VARCHAR(255) NOT NULL,
+    role VARCHAR(20),
+    failure_reason VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(500),
+    attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_failed_login_attempts_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+    INDEX idx_failed_login_user (user_id),
+    INDEX idx_failed_login_email (email),
+    INDEX idx_failed_login_time (attempted_at),
+    INDEX idx_failed_login_reason (failure_reason)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================================
 -- 2. PRODUCT/SERVICE MANAGEMENT TABLES
 -- ============================================================================
