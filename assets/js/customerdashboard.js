@@ -140,29 +140,6 @@ function applyCustomerChatLinks() {
   if (supportNavLink) supportNavLink.href = chatUrl;
 }
 
-function persistResolvedSessionUser() {
-  try {
-    const rawSession = localStorage.getItem('bizlink_session');
-    const parsed = rawSession ? JSON.parse(rawSession) : {};
-    const merged = {
-      role: parsed.role || 'customer',
-      email: customerDashboardState.customerEmail,
-      fullName: customerDashboardState.customerName || parsed.fullName || '',
-      user_id: customerDashboardState.customerId || parsed.user_id || null,
-      loginAt: parsed.loginAt || new Date().toISOString()
-    };
-
-    localStorage.setItem('bizlink_session', JSON.stringify(merged));
-    localStorage.setItem('bizlink_user_email', merged.email || '');
-    localStorage.setItem('bizlink_user_role', merged.role || 'customer');
-    if (merged.fullName) {
-      localStorage.setItem('bizlink_user_name', merged.fullName);
-    }
-  } catch (error) {
-    console.warn('Could not persist resolved customer session:', error);
-  }
-}
-
 function getCustomerNotificationIcon(notification) {
   const type = (notification.notification_type || 'system').toLowerCase();
   if (type === 'order_status') return '📦';
@@ -434,7 +411,6 @@ async function loadCustomerDashboardData() {
     customerDashboardState.customerEmail = (selectedCustomer.email || customerDashboardState.customerEmail || FALLBACK_CUSTOMER.email).toLowerCase();
     customerDashboardState.customerId = selectedCustomer.user_id ? Number(selectedCustomer.user_id) : customerDashboardState.customerId;
     customerDashboardState.customerName = selectedCustomer.full_name || customerDashboardState.customerName;
-    persistResolvedSessionUser();
     applyCustomerChatLinks();
 
     const customerOrders = (orders || []).filter(

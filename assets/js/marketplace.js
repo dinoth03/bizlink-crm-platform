@@ -92,46 +92,12 @@ let state = {
   wishlist: [],
   page: 1,
   itemsPerPage: 12,
-  sessionUser: null,
   preferenceCounts: {},
 };
-
-function resolveMarketplaceSessionUser() {
-  try {
-    const sessionRaw = localStorage.getItem('bizlink_session');
-    if (sessionRaw) {
-      const parsed = JSON.parse(sessionRaw);
-      if (parsed && parsed.email) {
-        return {
-          role: String(parsed.role || '').toLowerCase(),
-          email: String(parsed.email).trim().toLowerCase(),
-          fullName: parsed.fullName || ''
-        };
-      }
-    }
-  } catch (error) {
-    console.warn('Could not parse marketplace session:', error);
-  }
-
-  const legacyEmail = (localStorage.getItem('bizlink_user_email') || '').trim().toLowerCase();
-  const legacyRole = (localStorage.getItem('bizlink_user_role') || '').trim().toLowerCase();
-  const legacyName = localStorage.getItem('bizlink_user_name') || '';
-  if (legacyEmail) {
-    return { role: legacyRole, email: legacyEmail, fullName: legacyName };
-  }
-
-  return null;
-}
 
 function setupBackToDashboardPath() {
   const link = document.getElementById('backDashboardLink');
   if (!link) return;
-
-  const user = state.sessionUser;
-  if (!user || !user.role) {
-    link.classList.add('hidden');
-    return;
-  }
 
   const href = '../dashboard.php';
   link.href = href;
@@ -139,12 +105,10 @@ function setupBackToDashboardPath() {
   link.classList.remove('hidden');
 }
 
-function computeCategoryPreferences(orders, products, customerEmail) {
-  if (!customerEmail || !Array.isArray(orders) || orders.length === 0) {
+function computeCategoryPreferences(orders, products) {
+  if (!Array.isArray(orders) || orders.length === 0) {
     return {};
   }
-
-  const normalizedEmail = customerEmail.toLowerCase();
   const productCategoryByName = {};
   products.forEach((product) => {
     if (product.name) {
@@ -154,7 +118,6 @@ function computeCategoryPreferences(orders, products, customerEmail) {
 
   const counts = {};
   orders
-    .filter((order) => String(order.email || '').toLowerCase() === normalizedEmail)
     .forEach((order) => {
       const byProduct = productCategoryByName[String(order.product_name || '').toLowerCase()];
       const byVendor = toCategorySlug(order.vendor_category || '');
@@ -279,7 +242,6 @@ function updateMarketplaceCounts(products, categories) {
 }
 
 async function loadMarketplaceData() {
-  state.sessionUser = resolveMarketplaceSessionUser();
   setupBackToDashboardPath();
 
   try {
@@ -295,8 +257,7 @@ async function loadMarketplaceData() {
 
       state.preferenceCounts = computeCategoryPreferences(
         apiOrders || [],
-        mapped,
-        state.sessionUser?.email || ''
+        mapped
       );
 
       updateMarketplaceCounts(mapped, apiCategories || []);

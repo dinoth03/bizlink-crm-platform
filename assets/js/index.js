@@ -320,9 +320,6 @@ async function handleSignup() {
   const successBtn = document.querySelector('.success-btn');
   const dashboardLink = signupResult.dashboard || getDashboardLink(role);
   if (successBtn) {
-    if (apiEmail) {
-      saveSessionUser({ role, email: apiEmail, fullName: apiFullName });
-    }
     successBtn.href = dashboardLink;
     successBtn.onclick = () => {
       window.location.href = dashboardLink;
@@ -332,9 +329,6 @@ async function handleSignup() {
 
   // Redirect to dashboard after 3 seconds
   setTimeout(() => {
-    if (apiEmail) {
-      saveSessionUser({ role, email: apiEmail, fullName: apiFullName });
-    }
     window.location.href = dashboardLink;
   }, 3000);
 }
@@ -372,13 +366,6 @@ async function handleLogin(e) {
     showToast((result && result.message) || 'Login failed. Please check backend API.', 'warn');
     return;
   }
-
-  const user = result.user || {};
-  saveSessionUser({
-    role: user.role || state.loginRole,
-    email: user.email || loginEmail,
-    fullName: user.full_name || ''
-  });
 
   const dashboardLink = result.dashboard || getDashboardLink(state.loginRole);
   showToast(`Welcome back! Redirecting to ${capitalize(state.loginRole)} dashboard...`, 'success');
@@ -493,24 +480,6 @@ function showToast(msg, type = 'info') {
 /*HELPERS*/
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function saveSessionUser(user) {
-  if (!user || !user.role || !user.email) return;
-
-  const sessionUser = {
-    role: user.role,
-    email: String(user.email).trim().toLowerCase(),
-    fullName: user.fullName || '',
-    loginAt: new Date().toISOString()
-  };
-
-  localStorage.setItem('bizlink_session', JSON.stringify(sessionUser));
-  localStorage.setItem('bizlink_user_email', sessionUser.email);
-  localStorage.setItem('bizlink_user_role', sessionUser.role);
-  if (sessionUser.fullName) {
-    localStorage.setItem('bizlink_user_name', sessionUser.fullName);
-  }
 }
 
 function isValidEmail(email) {

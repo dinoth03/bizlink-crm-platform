@@ -470,42 +470,8 @@ function mapApiProduct(row, index) {
   };
 }
 
-function getSessionUser() {
-  try {
-    const raw = localStorage.getItem('bizlink_session');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || !parsed.email) return null;
-    return {
-      role: (parsed.role || '').toLowerCase(),
-      email: String(parsed.email).trim().toLowerCase(),
-      fullName: String(parsed.fullName || '').trim()
-    };
-  } catch (error) {
-    console.warn('Could not parse bizlink_session:', error);
-    return null;
-  }
-}
-
-function pickActiveVendor(vendors, orders, sessionUser) {
+function pickActiveVendor(vendors, orders) {
   if (!vendors || vendors.length === 0) return null;
-
-  if (sessionUser && sessionUser.role === 'vendor') {
-    const emailMatch = vendors.find((vendor) => {
-      const vendorEmail = String(vendor.email || '').trim().toLowerCase();
-      return vendorEmail && vendorEmail === sessionUser.email;
-    });
-    if (emailMatch) return emailMatch;
-
-    if (sessionUser.fullName) {
-      const normalizedSessionName = sessionUser.fullName.toLowerCase();
-      const nameMatch = vendors.find((vendor) => {
-        const vendorName = String(vendor.vendor_name || '').toLowerCase();
-        return vendorName && (vendorName.includes(normalizedSessionName) || normalizedSessionName.includes(vendorName));
-      });
-      if (nameMatch) return nameMatch;
-    }
-  }
 
   const counts = {};
   orders.forEach((o) => {
@@ -523,7 +489,7 @@ function pickActiveVendor(vendors, orders, sessionUser) {
   return chosen;
 }
 
-function filterVendorOrders(orders, activeVendor, sessionUser) {
+function filterVendorOrders(orders, activeVendor) {
   if (!orders || orders.length === 0) return [];
 
   const vendorName = activeVendor ? activeVendor.vendor_name : '';
@@ -536,10 +502,6 @@ function filterVendorOrders(orders, activeVendor, sessionUser) {
 
   if (filtered.length === 0 && vendorEmail) {
     filtered = orders.filter((o) => o.vendorEmail === vendorEmail);
-  }
-
-  if (filtered.length === 0 && sessionUser && sessionUser.email) {
-    filtered = orders.filter((o) => o.vendorEmail === sessionUser.email);
   }
 
   return filtered.length > 0 ? filtered : orders;
@@ -608,32 +570,15 @@ function updateVendorIdentity(activeVendor) {
   }
 }
 
-function updateSessionIdentityFallback(sessionUser) {
-  if (!sessionUser) return;
-  const profileName = document.querySelector('.profile-name');
-  const welcomeName = document.querySelector('.vendor-text');
-  const settingsOwnerName = document.getElementById('settingsOwnerName');
-  const searchInput = document.querySelector('.search-bar input');
-
-  if (profileName && sessionUser.fullName) profileName.textContent = sessionUser.fullName;
-  if (welcomeName && sessionUser.fullName) welcomeName.textContent = sessionUser.fullName.split(' ')[0];
-  if (settingsOwnerName && sessionUser.fullName) settingsOwnerName.value = sessionUser.fullName;
-  if (searchInput && sessionUser.email) {
-    searchInput.value = sessionUser.email;
-    searchInput.readOnly = true;
-  }
-}
-
 async function loadVendorDashboardData() {
-  const sessionUser = getSessionUser();
   try {
     const [vendors, orders, products] = await Promise.all([getVendors(), getOrders(), getProducts()]);
     if (vendors && orders && products) {
       dashboardData.vendors = vendors;
       const mappedOrders = orders.map(mapApiOrder);
-      const activeVendor = pickActiveVendor(vendors, mappedOrders, sessionUser);
+      const activeVendor = pickActiveVendor(vendors, mappedOrders);
       const vendorName = activeVendor ? activeVendor.vendor_name : null;
-      dashboardData.orders = filterVendorOrders(mappedOrders, activeVendor, sessionUser);
+      dashboardData.orders = filterVendorOrders(mappedOrders, activeVendor);
       dashboardData.products = products
         .filter((p) => !vendorName || p.shop_name === vendorName)
         .map(mapApiProduct);
@@ -661,7 +606,6 @@ async function loadVendorDashboardData() {
   dashboardData.orders = [...SAMPLE_ORDERS];
   dashboardData.products = [...PRODUCTS];
   dashboardData.loadedFromApi = false;
-  updateSessionIdentityFallback(sessionUser);
   setCounterTargets(computeStats(dashboardData.orders));
 }
 
