@@ -95,16 +95,6 @@ let state = {
   preferenceCounts: {},
 };
 
-function setupBackToDashboardPath() {
-  const link = document.getElementById('backDashboardLink');
-  if (!link) return;
-
-  const href = '../dashboard.php';
-  link.href = href;
-  link.textContent = '← Back to Dashboard';
-  link.classList.remove('hidden');
-}
-
 function computeCategoryPreferences(orders, products) {
   if (!Array.isArray(orders) || orders.length === 0) {
     return {};
@@ -242,8 +232,6 @@ function updateMarketplaceCounts(products, categories) {
 }
 
 async function loadMarketplaceData() {
-  setupBackToDashboardPath();
-
   try {
     const [apiProducts, apiCategories, apiOrders] = await Promise.all([
       getProducts(),
