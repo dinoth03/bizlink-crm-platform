@@ -2,7 +2,23 @@
 // API HELPER - Call all your backend API files
 // ============================================
 
-const API_BASE = 'http://localhost/bizlink-crm-platform/api/';
+const API_BASE = (() => {
+    // Allow explicit override from HTML: window.API_BASE = 'https://.../api/'
+    if (window.API_BASE && typeof window.API_BASE === 'string') {
+        return window.API_BASE;
+    }
+
+    const origin = window.location.origin;
+    const host = window.location.hostname;
+
+    // Local XAMPP path keeps project under /bizlink-crm-platform
+    if (host === 'localhost' || host === '127.0.0.1') {
+        return origin + '/bizlink-crm-platform/api/';
+    }
+
+    // Production (Cloud Run / custom domain) serves from root
+    return origin + '/api/';
+})();
 
 // Auth Signup
 async function authSignup(payload) {
