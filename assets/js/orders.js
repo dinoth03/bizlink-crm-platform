@@ -13,178 +13,6 @@ const ordersState = {
   notificationUserEmail: 'kasun@bizlink.lk'
 };
 
-// Mock Orders Data
-const mockOrders = [
-  {
-    id: 'ORD#2847',
-    customer: 'Amara Perera',
-    email: 'amara@example.com',
-    phone: '+94 77 123 4567',
-    product: 'Laptop 15" Gold',
-    quantity: 1,
-    price: 'Rs. 189,000',
-    total: 'Rs. 189,000',
-    vendor: 'TechZone Lanka',
-    vendorCategory: 'Electronics',
-    vendorRating: 4.8,
-    vendorEmail: 'contact@techzone.lk',
-    province: 'Western',
-    status: 'completed',
-    date: '2024-02-23',
-    shipping: 'Standard Express',
-    tracking: 'TZ-2847-567890',
-    deliveryEst: '2024-02-26',
-    address: '42/1 Main St, Colombo 3, Western Province',
-    timeline: [
-      { step: 'placed', date: '2024-02-23', time: '10:30 AM' },
-      { step: 'payment', date: '2024-02-23', time: '10:35 AM' },
-      { step: 'processing', date: '2024-02-23', time: '02:15 PM' },
-      { step: 'shipped', date: '2024-02-24', time: '08:45 AM' },
-      { step: 'delivered', date: '2024-02-25', time: '03:20 PM' }
-    ]
-  },
-  {
-    id: 'ORD#2846',
-    customer: 'Kasun Silva',
-    email: 'kasun@example.com',
-    phone: '+94 76 987 6543',
-    product: 'Cotton Saree',
-    quantity: 2,
-    price: 'Rs. 4,475',
-    total: 'Rs. 8,950',
-    vendor: 'Fashion Plus',
-    vendorCategory: 'Fashion',
-    vendorRating: 4.6,
-    vendorEmail: 'info@fashionplus.lk',
-    province: 'Central',
-    status: 'processing',
-    date: '2024-02-23',
-    shipping: 'Standard Courier',
-    tracking: 'FP-2846-123456',
-    deliveryEst: '2024-02-28',
-    address: '15 Hill Street, Kandy, Central Province',
-    timeline: [
-      { step: 'placed', date: '2024-02-23', time: '02:45 PM' },
-      { step: 'payment', date: '2024-02-23', time: '02:50 PM' },
-      { step: 'processing', date: '2024-02-23', time: '04:00 PM' },
-      { step: 'shipped', date: '2024-02-26', time: '10:00 AM' },
-      { step: 'delivered', date: null, time: 'Pending' }
-    ]
-  },
-  {
-    id: 'ORD#2845',
-    customer: 'Nirmala K',
-    email: 'nirmala@example.com',
-    phone: '+94 71 234 5678',
-    product: 'Premium Black Tea (1kg)',
-    quantity: 3,
-    price: 'Rs. 1,067',
-    total: 'Rs. 3,200',
-    vendor: 'Grocery Mart',
-    vendorCategory: 'Grocery',
-    vendorRating: 4.4,
-    vendorEmail: 'sales@grocerymart.lk',
-    province: 'Southern',
-    status: 'completed',
-    date: '2024-02-22',
-    shipping: 'Standard Express',
-    tracking: 'GM-2845-654321',
-    deliveryEst: '2024-02-24',
-    address: '88 Beach Road, Galle, Southern Province',
-    timeline: [
-      { step: 'placed', date: '2024-02-22', time: '11:20 AM' },
-      { step: 'payment', date: '2024-02-22', time: '11:25 AM' },
-      { step: 'processing', date: '2024-02-22', time: '12:00 PM' },
-      { step: 'shipped', date: '2024-02-23', time: '06:15 AM' },
-      { step: 'delivered', date: '2024-02-24', time: '02:45 PM' }
-    ]
-  },
-  {
-    id: 'ORD#2844',
-    customer: 'Roshan W',
-    email: 'roshan@example.com',
-    phone: '+94 70 111 2222',
-    product: 'Organic Vegetables Bundle',
-    quantity: 1,
-    price: 'Rs. 12,400',
-    total: 'Rs. 12,400',
-    vendor: 'Agriculture Pro',
-    vendorCategory: 'Agriculture',
-    vendorRating: 4.3,
-    vendorEmail: 'orders@agripro.lk',
-    province: 'North Central',
-    status: 'completed',
-    date: '2024-02-21',
-    shipping: 'Fresh Express',
-    tracking: 'AP-2844-789012',
-    deliveryEst: '2024-02-23',
-    address: '234 Farm Lane, Anuradhapura, North Central',
-    timeline: [
-      { step: 'placed', date: '2024-02-21', time: '08:00 AM' },
-      { step: 'payment', date: '2024-02-21', time: '08:05 AM' },
-      { step: 'processing', date: '2024-02-21', time: '09:30 AM' },
-      { step: 'shipped', date: '2024-02-22', time: '05:00 AM' },
-      { step: 'delivered', date: '2024-02-23', time: '10:30 AM' }
-    ]
-  },
-  {
-    id: 'ORD#2843',
-    customer: 'Lakshmi D',
-    email: 'lakshmi@example.com',
-    phone: '+94 75 555 6666',
-    product: 'Export Grade Tea (500g)',
-    quantity: 5,
-    price: 'Rs. 13,560',
-    total: 'Rs. 67,800',
-    vendor: 'Export Tea Co',
-    vendorCategory: 'Beverages',
-    vendorRating: 4.9,
-    vendorEmail: 'export@teatrade.lk',
-    province: 'Western',
-    status: 'cancelled',
-    date: '2024-02-20',
-    shipping: 'International Express',
-    tracking: 'ETC-2843-345678',
-    deliveryEst: '2024-03-05',
-    address: '567 Trade Street, Colombo 1, Western Province',
-    timeline: [
-      { step: 'placed', date: '2024-02-20', time: '09:15 AM' },
-      { step: 'payment', date: '2024-02-20', time: '09:20 AM' },
-      { step: 'cancelled', date: '2024-02-21', time: '11:00 AM' },
-      { step: 'refund', date: '2024-02-21', time: '02:30 PM' },
-      { step: 'completed', date: null, time: 'N/A' }
-    ]
-  },
-  {
-    id: 'ORD#2842',
-    customer: 'Dilini Perera',
-    email: 'dilini@example.com',
-    phone: '+94 78 999 8888',
-    product: 'Handmade Ceramic Pot',
-    quantity: 1,
-    price: 'Rs. 5,200',
-    total: 'Rs. 5,200',
-    vendor: 'Artisan Crafts',
-    vendorCategory: 'Handicrafts',
-    vendorRating: 4.7,
-    vendorEmail: 'hello@artisancrafts.lk',
-    province: 'Western',
-    status: 'pending',
-    date: '2024-02-25',
-    shipping: 'Standard Courier',
-    tracking: 'AC-2842-901234',
-    deliveryEst: '2024-03-02',
-    address: '99 Artist Lane, Colombo 7, Western Province',
-    timeline: [
-      { step: 'placed', date: '2024-02-25', time: '03:50 PM' },
-      { step: 'payment', date: '2024-02-25', time: '03:55 PM' },
-      { step: 'processing', date: '2024-02-26', time: '10:00 AM' },
-      { step: 'shipped', date: null, time: 'Pending' },
-      { step: 'delivered', date: null, time: 'Pending' }
-    ]
-  }
-];
-
 function normalizeOrderStatus(orderStatus) {
   if (orderStatus === 'delivered') return 'completed';
   if (['processing', 'shipped', 'out_for_delivery'].includes(orderStatus)) return 'processing';
@@ -249,10 +77,10 @@ async function loadOrders() {
     console.error('Failed to load orders from API:', error);
   }
 
-  ordersState.allOrders = [...mockOrders];
+  ordersState.allOrders = [];
   updateOrderSummary(ordersState.allOrders);
   renderOrdersTable();
-  showToast('API unavailable, using sample order data', 'info');
+  showToast('Unable to load orders from API', 'error');
 }
 
 function updateOrderSummary(orders) {
@@ -421,9 +249,7 @@ async function loadAdminNotifications() {
     console.error('Failed to load notifications:', error);
   }
 
-  ordersState.notifications = [
-    { title: 'Notifications unavailable', message: 'Showing fallback notification data.', notification_type: 'system', priority: 'medium', is_read: false }
-  ];
+  ordersState.notifications = [];
   renderNotifications();
 }
 

@@ -16,9 +16,86 @@
       });
     }
 
-    // send message demo – changes colour based on role selection
+    // send message – changes colour based on role selection and submits to backend
     const sendBtn = document.getElementById('sendMsgBtn');
     const roleSelect = document.getElementById('roleSelect');
+    const nameInput = document.getElementById('contactName');
+    const emailInput = document.getElementById('contactEmail');
+    const messageInput = document.getElementById('contactMessage');
+    const statusEl = document.getElementById('contactFormStatus');
+
+    const setStatus = (message, tone) => {
+      if (!statusEl) return;
+      statusEl.textContent = message || '';
+      if (tone === 'success') {
+        statusEl.style.color = '#50C878';
+      } else if (tone === 'error') {
+        statusEl.style.color = '#ff6b6b';
+      } else {
+        statusEl.style.color = 'var(--text-muted)';
+      }
+    };
+
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+
+    const submitContactForm = async () => {
+      const role = roleSelect ? roleSelect.value : 'customer';
+      const fullName = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+      const message = messageInput ? messageInput.value.trim() : '';
+
+      if (fullName.length < 2) {
+        setStatus('Please enter your full name.', 'error');
+        return;
+      }
+      if (!isValidEmail(email)) {
+        setStatus('Please enter a valid email address.', 'error');
+        return;
+      }
+      if (message.length < 10) {
+        setStatus('Please enter at least 10 characters in your message.', 'error');
+        return;
+      }
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+      }
+      setStatus('Sending your message...', 'info');
+
+      try {
+        const response = await fetch('../api/contact_submit.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            role,
+            name: fullName,
+            email,
+            message,
+            source_page: '/pages/contact.html'
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error((result && result.message) || 'Unable to submit your message.');
+        }
+
+        setStatus(`Message sent successfully. Ticket #${result.inquiry_id}`, 'success');
+        if (messageInput) messageInput.value = '';
+      } catch (error) {
+        console.error('Contact form submit failed:', error);
+        setStatus(error.message || 'Submission failed. Please try again.', 'error');
+      } finally {
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send message';
+        }
+      }
+    };
+
     if (sendBtn && roleSelect) {
       const updateBtnStyle = () => {
         const role = roleSelect.value;
@@ -36,9 +113,9 @@
       roleSelect.addEventListener('change', updateBtnStyle);
       updateBtnStyle(); // initial
 
-      sendBtn.addEventListener('click', (e) => {
+      sendBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        alert(`📨 Demo: message sent to ${roleSelect.value} team. (real form would submit)`);
+        await submitContactForm();
       });
     }
 

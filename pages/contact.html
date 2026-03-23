@@ -100,10 +100,11 @@
             <option value="customer" selected>🛍️ Customer care</option>
           </select>
         </div>
-        <div class="form-group"><input type="text" placeholder="Your full name" /></div>
-        <div class="form-group"><input type="email" placeholder="Email address" /></div>
-        <div class="form-group"><textarea rows="4" placeholder="How can we help?"></textarea></div>
-        <button class="send-btn" id="sendMsgBtn">Send message (demo)</button>
+        <div class="form-group"><input type="text" id="contactName" placeholder="Your full name" /></div>
+        <div class="form-group"><input type="email" id="contactEmail" placeholder="Email address" /></div>
+        <div class="form-group"><textarea rows="4" id="contactMessage" placeholder="How can we help?"></textarea></div>
+        <button class="send-btn" id="sendMsgBtn">Send message</button>
+        <p id="contactFormStatus" style="color:var(--text-muted); font-size:0.8rem; margin-top:12px; min-height: 1.2em;"></p>
         <p style="color:var(--text-muted); font-size:0.8rem; margin-top:12px;">We’ll reply within 24h – 🇱🇰</p>
       </div>
     </div>
