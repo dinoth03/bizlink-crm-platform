@@ -414,9 +414,7 @@ async function loadVendorNotifications(activeVendor) {
     console.error('Failed to load vendor notifications:', error);
   }
 
-  dashboardData.notifications = [
-    { title: 'Notifications unavailable', message: 'Showing fallback notification data.', notification_type: 'system', is_read: false }
-  ];
+  dashboardData.notifications = [];
   renderVendorNotifications();
 }
 

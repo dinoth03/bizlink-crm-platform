@@ -94,40 +94,26 @@ function normalizeStatus(status) {
   return map[(status || '').toLowerCase()] || 'Pending';
 }
 
-const FALLBACK_CUSTOMER = {
-  full_name: 'Dilani Perera',
-  email: 'dilani.silva@gmail.com',
-  total_spent: 148750
-};
-
-const FALLBACK_ORDERS = [
-  { order_number: 'BL-4201', product_name: 'Ceylon Tea Gift Pack', order_status: 'delivered', vendor_name: 'Ceylon Tea House' },
-  { order_number: 'BL-4202', product_name: 'Handloom Cotton Saree', order_status: 'shipped', vendor_name: 'Serendib Style House' },
-  { order_number: 'BL-4203', product_name: 'Organic Samba Rice 5kg', order_status: 'processing', vendor_name: 'Lanka Fresh Mart' },
-  { order_number: 'BL-4204', product_name: 'Ayurvedic Body Oil', order_status: 'out_for_delivery', vendor_name: 'Suwasetha Wellness' },
-  { order_number: 'BL-4205', product_name: 'Batik Office Shirt', order_status: 'pending', vendor_name: 'Colombo Batik Studio' },
-  { order_number: 'BL-4206', product_name: 'Ceylon Cinnamon Pack', order_status: 'delivered', vendor_name: 'Matara Spice House' },
-  { order_number: 'BL-4207', product_name: 'Kithul Jaggery Bundle', order_status: 'processing', vendor_name: 'Kithul Naturals' },
-  { order_number: 'BL-4208', product_name: 'Laptop Wireless Mouse', order_status: 'shipped', vendor_name: 'Ceylon Tech Hub' },
-  { order_number: 'BL-4209', product_name: 'Coconut Oil 1L', order_status: 'delivered', vendor_name: 'Pure Coconut Lanka' }
-];
-
-const FALLBACK_VENDORS = [
-  { shop_name: 'Ceylon Tea House', avg_rating: 4.8 },
-  { shop_name: 'Lanka Fresh Mart', avg_rating: 4.6 },
-  { shop_name: 'Serendib Style House', avg_rating: 4.9 },
-  { shop_name: 'Ceylon Tech Hub', avg_rating: 4.7 },
-  { shop_name: 'Matara Spice House', avg_rating: 4.5 },
-  { shop_name: 'Kithul Naturals', avg_rating: 4.6 },
-  { shop_name: 'Suwasetha Wellness', avg_rating: 4.4 },
-  { shop_name: 'Colombo Batik Studio', avg_rating: 4.7 },
-  { shop_name: 'Pure Coconut Lanka', avg_rating: 4.5 }
-];
+function getSessionCustomer() {
+  try {
+    const raw = localStorage.getItem('bizlink_session');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || String(parsed.role || '').toLowerCase() !== 'customer') return null;
+    return {
+      email: String(parsed.email || '').trim().toLowerCase(),
+      fullName: String(parsed.fullName || '').trim()
+    };
+  } catch (error) {
+    console.warn('Could not parse bizlink_session for customer dashboard:', error);
+    return null;
+  }
+}
 
 const customerDashboardState = {
   customerId: null,
-  customerEmail: 'dilani.silva@gmail.com',
-  customerName: 'Dilani Silva',
+  customerEmail: '',
+  customerName: 'Customer',
   notifications: []
 };
 
@@ -223,15 +209,7 @@ async function loadCustomerNotifications(email) {
     console.error('Customer notifications load failed:', error);
   }
 
-  customerDashboardState.notifications = [
-    {
-      notification_id: 0,
-      notification_type: 'system',
-      title: 'Notification service unavailable',
-      message: 'Showing fallback customer notification state.',
-      is_read: false
-    }
-  ];
+  customerDashboardState.notifications = [];
   renderCustomerNotifications(customerDashboardState.notifications);
 }
 
@@ -385,19 +363,24 @@ function updateCustomerSummary(customer, orders, vendors) {
 }
 
 async function loadCustomerDashboardData() {
-  customerDashboardState.customerEmail = FALLBACK_CUSTOMER.email;
+  const sessionCustomer = getSessionCustomer();
+  customerDashboardState.customerEmail = (sessionCustomer?.email || '').toLowerCase();
   customerDashboardState.customerId = null;
-  customerDashboardState.customerName = FALLBACK_CUSTOMER.full_name;
+  customerDashboardState.customerName = sessionCustomer?.fullName || 'Customer';
   applyCustomerChatLinks();
 
   try {
     const [customers, orders, vendors] = await Promise.all([getCustomers(), getOrders(), getVendors()]);
 
     if (!customers || customers.length === 0) {
-      updateCustomerSummary(FALLBACK_CUSTOMER, FALLBACK_ORDERS, FALLBACK_VENDORS);
-      renderRecentOrders(FALLBACK_ORDERS);
-      renderAllOrders(FALLBACK_ORDERS);
-      renderRecommendedVendors(FALLBACK_VENDORS);
+      updateCustomerSummary(
+        { full_name: customerDashboardState.customerName, total_spent: 0 },
+        [],
+        []
+      );
+      renderRecentOrders([]);
+      renderAllOrders([]);
+      renderRecommendedVendors([]);
       await loadCustomerNotifications(customerDashboardState.customerEmail);
       return;
     }
@@ -405,10 +388,9 @@ async function loadCustomerDashboardData() {
     const selectedCustomer =
       customers.find((c) => customerDashboardState.customerId && Number(c.user_id) === Number(customerDashboardState.customerId)) ||
       customers.find((c) => (c.email || '').toLowerCase() === customerDashboardState.customerEmail) ||
-      customers.find((c) => (c.full_name || '').toLowerCase().includes('dilani')) ||
       customers[0];
 
-    customerDashboardState.customerEmail = (selectedCustomer.email || customerDashboardState.customerEmail || FALLBACK_CUSTOMER.email).toLowerCase();
+    customerDashboardState.customerEmail = (selectedCustomer.email || customerDashboardState.customerEmail || '').toLowerCase();
     customerDashboardState.customerId = selectedCustomer.user_id ? Number(selectedCustomer.user_id) : customerDashboardState.customerId;
     customerDashboardState.customerName = selectedCustomer.full_name || customerDashboardState.customerName;
     applyCustomerChatLinks();
@@ -417,8 +399,8 @@ async function loadCustomerDashboardData() {
       (o) => Number(o.customer_id || 0) === Number(selectedCustomer.customer_id || 0)
     );
 
-    const safeOrders = customerOrders.length > 0 ? customerOrders : FALLBACK_ORDERS;
-    const safeVendors = vendors && vendors.length > 0 ? vendors : FALLBACK_VENDORS;
+    const safeOrders = customerOrders;
+    const safeVendors = vendors || [];
 
     updateCustomerSummary(selectedCustomer, safeOrders, safeVendors);
     renderRecentOrders(safeOrders);
@@ -427,10 +409,14 @@ async function loadCustomerDashboardData() {
     await loadCustomerNotifications(customerDashboardState.customerEmail);
   } catch (error) {
     console.error('Customer dashboard API load failed:', error);
-    updateCustomerSummary(FALLBACK_CUSTOMER, FALLBACK_ORDERS, FALLBACK_VENDORS);
-    renderRecentOrders(FALLBACK_ORDERS);
-    renderAllOrders(FALLBACK_ORDERS);
-    renderRecommendedVendors(FALLBACK_VENDORS);
+    updateCustomerSummary(
+      { full_name: customerDashboardState.customerName, total_spent: 0 },
+      [],
+      []
+    );
+    renderRecentOrders([]);
+    renderAllOrders([]);
+    renderRecommendedVendors([]);
     await loadCustomerNotifications(customerDashboardState.customerEmail);
   }
 }

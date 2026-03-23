@@ -143,10 +143,7 @@ async function loadAdminNotifications() {
     console.error('Failed to load admin notifications:', error);
   }
 
-  state.notifications = [
-    { notification_id: 1, notification_type: 'system', title: 'Notifications unavailable', message: 'Showing fallback notification data.', priority: 'medium', is_read: false },
-    { notification_id: 2, notification_type: 'order_status', title: 'Order Completed', message: 'Order BLK-2026-0001 marked as delivered.', priority: 'medium', is_read: false }
-  ];
+  state.notifications = [];
   renderNotifications();
   updateNotificationBadge();
 }
@@ -433,7 +430,7 @@ async function renderRecentOrders() {
     console.warn('Could not fetch orders from API:', e);
   }
   
-  // Fallback if API fails
+  // Show empty-state row when API is unavailable
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No orders found in database</td></tr>';
 }
 
