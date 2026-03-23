@@ -10,6 +10,12 @@ const state = {
   notificationUserEmail: 'kasun@bizlink.lk'
 };
 
+const adminDashboardCache = {
+  vendors: [],
+  customers: [],
+  orders: []
+};
+
 /* NAVIGATION */
 function navigate(page, el) {
   // Hide all pages
@@ -266,6 +272,18 @@ async function renderDashboard() {
     console.warn('Could not fetch dashboard stats, using defaults:', e);
   }
 
+  try {
+    const [vendors, customers, orders] = await Promise.all([getVendors(), getCustomers(), getOrders()]);
+    adminDashboardCache.vendors = vendors || [];
+    adminDashboardCache.customers = customers || [];
+    adminDashboardCache.orders = orders || [];
+  } catch (error) {
+    console.warn('Could not hydrate admin dashboard cache:', error);
+    adminDashboardCache.vendors = [];
+    adminDashboardCache.customers = [];
+    adminDashboardCache.orders = [];
+  }
+
   // Animate KPI values
   animateCounters();
   
@@ -274,12 +292,12 @@ async function renderDashboard() {
   renderDonutChart();
   
   // Render tables
-  renderRecentOrders();
-  renderApprovalList();
-  renderTopVendors();
+  await renderRecentOrders();
+  await renderApprovalList();
+  await renderTopVendors();
   
   // Render activity feed
-  renderActivityFeed();
+  await renderActivityFeed();
 }
 
 /* ── KPI Counter Animation ── */
@@ -444,17 +462,36 @@ function getTimeAgo(dateStr) {
   return days + ' days ago';
 }
 
-function renderApprovalList() {
+async function renderApprovalList() {
   const list = document.getElementById('approvalList');
   if (!list) return;
-  
-  const vendors = [
-    { emoji: '🏪', name: 'PowerIT Lanka', cat: 'IT Services' },
-    { emoji: '👗', name: 'Stylewave Fashion', cat: 'Fashion' },
-    { emoji: '🍜', name: 'Delish Foods', cat: 'Grocery' }
-  ];
-  
-  list.innerHTML = vendors.map(v => `
+
+  let vendors = adminDashboardCache.vendors;
+  if (!vendors || vendors.length === 0) {
+    try {
+      vendors = await getVendors();
+      adminDashboardCache.vendors = vendors || [];
+    } catch (error) {
+      console.warn('Could not load approval list vendors:', error);
+      vendors = [];
+    }
+  }
+
+  const pendingVendors = (vendors || [])
+    .filter((vendor) => String(vendor.vendor_status || '').toLowerCase() === 'pending')
+    .slice(0, 4)
+    .map((vendor, index) => ({
+      emoji: ['🏪', '👗', '🍜', '🛠️'][index % 4],
+      name: vendor.shop_name || 'Vendor',
+      cat: vendor.business_category || 'General'
+    }));
+
+  if (pendingVendors.length === 0) {
+    list.innerHTML = '<div class="approval-item"><div class="ai-info"><span class="ai-name">No pending approvals</span><span class="ai-cat">All vendor applications are up to date</span></div></div>';
+    return;
+  }
+
+  list.innerHTML = pendingVendors.map(v => `
     <div class="approval-item">
       <div class="ai-avatar">${v.emoji}</div>
       <div class="ai-info">
@@ -469,17 +506,51 @@ function renderApprovalList() {
   `).join('');
 }
 
-function renderTopVendors() {
+async function renderTopVendors() {
   const container = document.getElementById('topVendors');
   if (!container) return;
-  
-  const vendors = [
-    { rank: 1, name: 'TechZone Lanka', cat: 'Electronics', amount: 'Rs. 1.2M', pct: 100 },
-    { rank: 2, name: 'Fashion Plus', cat: 'Apparel', amount: 'Rs. 840K', pct: 70 },
-    { rank: 3, name: 'Export Tea Co', cat: 'Beverages', amount: 'Rs. 620K', pct: 52 }
-  ];
-  
-  container.innerHTML = vendors.map(v => `
+
+  let orders = adminDashboardCache.orders;
+  if (!orders || orders.length === 0) {
+    try {
+      orders = await getOrders();
+      adminDashboardCache.orders = orders || [];
+    } catch (error) {
+      console.warn('Could not load top vendors:', error);
+      orders = [];
+    }
+  }
+
+  const revenueByVendor = {};
+  (orders || []).forEach((order) => {
+    const name = order.vendor_name || 'Unknown Vendor';
+    const category = order.vendor_category || 'General';
+    if (!revenueByVendor[name]) {
+      revenueByVendor[name] = { category, revenue: 0 };
+    }
+    revenueByVendor[name].revenue += Number(order.total_amount || 0);
+  });
+
+  const topVendors = Object.entries(revenueByVendor)
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, 3)
+    .map(([name, meta], index, arr) => {
+      const max = arr.length > 0 ? arr[0][1].revenue : 1;
+      return {
+        rank: index + 1,
+        name,
+        cat: meta.category,
+        amount: `Rs. ${Math.round(meta.revenue).toLocaleString()}`,
+        pct: Math.max(10, Math.round((meta.revenue / Math.max(max, 1)) * 100))
+      };
+    });
+
+  if (topVendors.length === 0) {
+    container.innerHTML = '<div class="tv-item"><div class="tv-info"><span class="tv-name">No vendor sales data yet</span><span class="tv-cat">Data appears after orders are placed</span></div></div>';
+    return;
+  }
+
+  container.innerHTML = topVendors.map(v => `
     <div class="tv-item">
       <div class="tv-rank">${v.rank}</div>
       <div class="tv-info">
@@ -622,11 +693,32 @@ function renderAnalytics() {
   renderProvinceList();
 }
 
-function renderCustomerGrowthChart() {
+async function renderCustomerGrowthChart() {
   const container = document.getElementById('customerGrowthChart');
   if (!container) return;
-  
-  const data = [120, 180, 250, 340, 420, 520, 640, 780, 920, 1040, 1180, 1480];
+
+  let customers = adminDashboardCache.customers;
+  if (!customers || customers.length === 0) {
+    try {
+      customers = await getCustomers();
+      adminDashboardCache.customers = customers || [];
+    } catch (error) {
+      console.warn('Could not load customer growth data:', error);
+      customers = [];
+    }
+  }
+
+  const monthlyCounts = new Array(12).fill(0);
+  const currentYear = new Date().getFullYear();
+  (customers || []).forEach((customer) => {
+    const createdAt = customer.created_at ? new Date(customer.created_at) : null;
+    if (!createdAt || Number.isNaN(createdAt.getTime())) return;
+    if (createdAt.getFullYear() !== currentYear) return;
+    monthlyCounts[createdAt.getMonth()] += 1;
+  });
+
+  const fallback = [120, 180, 250, 340, 420, 520, 640, 780, 920, 1040, 1180, 1480];
+  const data = monthlyCounts.some((n) => n > 0) ? monthlyCounts : fallback;
   const max = Math.max(...data);
   
   const labelsContainer = document.getElementById('customerGrowthLabels');
@@ -642,18 +734,55 @@ function renderCustomerGrowthChart() {
   `).join('');
 }
 
-function renderProvinceList() {
+async function renderProvinceList() {
   const container = document.getElementById('provinceList');
   if (!container) return;
-  
-  const provinces = [
-    { name: 'Western', users: 4240, pct: 100 },
-    { name: 'Central', users: 2840, pct: 67 },
-    { name: 'Southern', users: 1920, pct: 45 },
-    { name: 'Northern', users: 1240, pct: 29 }
-  ];
-  
-  container.innerHTML = provinces.map(p => `
+
+  let customers = adminDashboardCache.customers;
+  if (!customers || customers.length === 0) {
+    try {
+      customers = await getCustomers();
+      adminDashboardCache.customers = customers || [];
+    } catch (error) {
+      console.warn('Could not load province list data:', error);
+      customers = [];
+    }
+  }
+
+  const provinceLookup = {
+    colombo: 'Western', gampaha: 'Western', kalutara: 'Western',
+    kandy: 'Central', matale: 'Central', nuwaraeliya: 'Central',
+    galle: 'Southern', matara: 'Southern', hambantota: 'Southern',
+    jaffna: 'Northern', kilinochchi: 'Northern', mannar: 'Northern', mullaitivu: 'Northern', vavuniya: 'Northern',
+    anuradhapura: 'North Central', polonnaruwa: 'North Central',
+    kurunegala: 'North Western', puttalam: 'North Western',
+    ratnapura: 'Sabaragamuwa', kegalle: 'Sabaragamuwa',
+    badulla: 'Uva', monaragala: 'Uva',
+    trincomalee: 'Eastern', batticaloa: 'Eastern', ampara: 'Eastern'
+  };
+
+  const counts = {};
+  (customers || []).forEach((customer) => {
+    const city = String(customer.city || '').toLowerCase().replace(/\s+/g, '');
+    const province = provinceLookup[city] || 'Other';
+    counts[province] = (counts[province] || 0) + 1;
+  });
+
+  const provinces = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, users]) => ({ name, users }));
+  const maxUsers = provinces.length ? provinces[0].users : 1;
+
+  const finalProvinces = provinces.length > 0
+    ? provinces.map((p) => ({ ...p, pct: Math.max(8, Math.round((p.users / maxUsers) * 100)) }))
+    : [
+      { name: 'Western', users: 0, pct: 100 },
+      { name: 'Central', users: 0, pct: 75 },
+      { name: 'Southern', users: 0, pct: 55 }
+    ];
+
+  container.innerHTML = finalProvinces.map(p => `
     <div class="prov-item">
       <div class="prov-row">
         <span class="prov-name">${p.name}</span>
@@ -691,7 +820,7 @@ function renderReports() {
 /* ACTIVITY FEED */
 function initActivityFeed() {
   renderActivityFeed();
-  // Simulate new activity every 15 seconds
+  // Refresh activity from live data every 15 seconds
   setInterval(() => {
     if (state.currentPage === 'dashboard') {
       renderActivityFeed();
@@ -699,16 +828,30 @@ function initActivityFeed() {
   }, 15000);
 }
 
-function renderActivityFeed() {
+async function renderActivityFeed() {
   const container = document.getElementById('activityFeed');
   if (!container) return;
-  
+
+  let stats = null;
+  try {
+    stats = await getDashboardStats();
+  } catch (error) {
+    console.warn('Could not load activity stats:', error);
+  }
+
+  const pendingVendors = adminDashboardCache.vendors.filter((vendor) => String(vendor.vendor_status || '').toLowerCase() === 'pending').length;
+  const today = new Date().toISOString().split('T')[0];
+  const todaysOrders = adminDashboardCache.orders.filter((order) => String(order.created_at || order.order_date || '').startsWith(today)).length;
+  const todaysRevenue = adminDashboardCache.orders
+    .filter((order) => String(order.created_at || order.order_date || '').startsWith(today))
+    .reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
+
   const activities = [
-    { icon: '✅', msg: '<strong>PowerIT Lanka</strong> completed verification', type: 'green', time: '2 min ago' },
-    { icon: '🛒', msg: '<strong>542 orders</strong> processed today', type: 'navy', time: '5 min ago' },
-    { icon: '👤', msg: '<strong>128 new customers</strong> registered', type: 'amber', time: '12 min ago' },
-    { icon: '⚠️', msg: 'Email service uptime <strong>87%</strong>', type: 'amber', time: '18 min ago' },
-    { icon: '💰', msg: 'Daily revenue <strong>Rs. 242K</strong> - on target', type: 'green', time: '25 min ago' }
+    { icon: '✅', msg: `<strong>${stats?.active_vendors || adminDashboardCache.vendors.length}</strong> active vendors on platform`, type: 'green', time: 'Just now' },
+    { icon: '🛒', msg: `<strong>${todaysOrders}</strong> orders placed today`, type: 'navy', time: 'Live' },
+    { icon: '👤', msg: `<strong>${stats?.active_customers || adminDashboardCache.customers.length}</strong> active customers this month`, type: 'amber', time: 'Live' },
+    { icon: '⏳', msg: `<strong>${pendingVendors}</strong> vendors pending verification`, type: 'amber', time: 'Live' },
+    { icon: '💰', msg: `Today's revenue at <strong>Rs. ${Math.round(todaysRevenue).toLocaleString()}</strong>`, type: 'green', time: 'Live' }
   ];
   
   container.innerHTML = activities.map(a => `

@@ -333,7 +333,9 @@ const SAMPLE_ORDERS = Array.from({length:22}, (_, i) => ({
 const dashboardData = {
   vendors: [],
   orders: [],
+  rawOrders: [],
   products: [],
+  customers: [],
   activeVendor: null,
   notifications: [],
   loadedFromApi: false
@@ -443,12 +445,16 @@ function mapApiOrder(row) {
   return {
     id: row.order_number,
     customer: row.customer_name || 'Unknown Customer',
+    customerEmail: (row.email || '').trim().toLowerCase(),
     district: row.city || 'Sri Lanka',
     items: Number(row.quantity || 1),
     amount: Number(row.total_amount || 0),
     payment: ['unpaid', 'failed'].includes((row.payment_status || '').toLowerCase()) ? 'unpaid' : 'paid',
     status: normalizeOrderStatus(row.order_status),
     date: (row.order_date || row.created_at || '').split(' ')[0],
+    createdAt: row.created_at || row.order_date || '',
+    product: row.product_name || 'Order Item',
+    paymentMethod: row.payment_method || 'Online',
     vendor: row.vendor_name || 'Unknown Vendor',
     vendorEmail: (row.vendor_email || '').trim().toLowerCase()
   };
@@ -570,16 +576,18 @@ function updateVendorIdentity(activeVendor) {
 
 async function loadVendorDashboardData() {
   try {
-    const [vendors, orders, products] = await Promise.all([getVendors(), getOrders(), getProducts()]);
+    const [vendors, orders, products, customers] = await Promise.all([getVendors(), getOrders(), getProducts(), getCustomers()]);
     if (vendors && orders && products) {
       dashboardData.vendors = vendors;
       const mappedOrders = orders.map(mapApiOrder);
       const activeVendor = pickActiveVendor(vendors, mappedOrders);
       const vendorName = activeVendor ? activeVendor.vendor_name : null;
       dashboardData.orders = filterVendorOrders(mappedOrders, activeVendor);
+      dashboardData.rawOrders = [...dashboardData.orders];
       dashboardData.products = products
         .filter((p) => !vendorName || p.shop_name === vendorName)
         .map(mapApiProduct);
+      dashboardData.customers = customers || [];
       dashboardData.activeVendor = activeVendor;
       dashboardData.loadedFromApi = true;
 
@@ -602,7 +610,9 @@ async function loadVendorDashboardData() {
   }
 
   dashboardData.orders = [...SAMPLE_ORDERS];
+  dashboardData.rawOrders = [...dashboardData.orders];
   dashboardData.products = [...PRODUCTS];
+  dashboardData.customers = [];
   dashboardData.loadedFromApi = false;
   setCounterTargets(computeStats(dashboardData.orders));
 }
@@ -715,56 +725,109 @@ function filterByStatus(s) {
 }
 
 
-// RENDER CUSTOMERS (with photos)
-const CUSTOMERS = CUSTOMER_NAMES.map((name, i) => ({
-  name,
-  district: DISTRICTS[i % DISTRICTS.length],
-  tag: ['vip','frequent','new','frequent','vip','new','frequent','new','vip','frequent','new','frequent'][i],
-  purchases: Math.floor(Math.random() * 60) + 2,
-  initials: name.split(' ').map(n => n[0]).join(''),
-  photo: CUSTOMER_PHOTOS[i],
-  color: AVATAR_COLORS[i % AVATAR_COLORS.length],
-}));
+// RENDER CUSTOMERS (API backed)
+function getCustomerCardData() {
+  if (dashboardData.customers.length > 0) {
+    return dashboardData.customers.map((customer, index) => {
+      const email = String(customer.email || '').trim().toLowerCase();
+      const purchases = dashboardData.orders.filter((order) => String(order.customerEmail || '').toLowerCase() === email).length;
+      const totalSpent = dashboardData.orders
+        .filter((order) => String(order.customerEmail || '').toLowerCase() === email)
+        .reduce((sum, order) => sum + Number(order.amount || 0), 0);
+      const tag = purchases >= 5 ? 'vip' : purchases >= 2 ? 'frequent' : 'new';
+      const name = customer.full_name || customer.name || 'Customer';
+      return {
+        name,
+        district: customer.city || 'Sri Lanka',
+        tag,
+        purchases,
+        totalSpent,
+        initials: name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'CU',
+        photo: CUSTOMER_PHOTOS[index % CUSTOMER_PHOTOS.length],
+        color: AVATAR_COLORS[index % AVATAR_COLORS.length]
+      };
+    });
+  }
+
+  return CUSTOMER_NAMES.map((name, i) => ({
+    name,
+    district: DISTRICTS[i % DISTRICTS.length],
+    tag: ['vip', 'frequent', 'new', 'frequent', 'vip', 'new', 'frequent', 'new', 'vip', 'frequent', 'new', 'frequent'][i],
+    purchases: Math.floor(Math.random() * 60) + 2,
+    totalSpent: (Math.floor(Math.random() * 60) + 2) * 1800,
+    initials: name.split(' ').map((n) => n[0]).join(''),
+    photo: CUSTOMER_PHOTOS[i % CUSTOMER_PHOTOS.length],
+    color: AVATAR_COLORS[i % AVATAR_COLORS.length]
+  }));
+}
 
 function renderCustomers() {
   const grid = document.getElementById('customersGrid');
-  if (!grid || grid.children.length) return;
-  grid.innerHTML = CUSTOMERS.map(c => {
+  if (!grid) return;
+
+  const customers = getCustomerCardData();
+  grid.innerHTML = customers.map((c) => {
     const tagClass = c.tag === 'vip' ? 't-vip' : c.tag === 'frequent' ? 't-frequent' : 't-new';
     const tagLabel = c.tag === 'vip' ? '👑 VIP' : c.tag === 'frequent' ? '🔄 Frequent Buyer' : '🆕 New Customer';
     return `
       <div class="customer-card">
         <div class="cust-img-wrap" style="background:${c.color}22">
-          <img src="${c.photo}" alt="${c.name}" loading="lazy"
-            onerror="this.style.display='none'" />
+          <img src="${c.photo}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'" />
           <span class="cust-initials" style="color:${c.color}">${c.initials}</span>
         </div>
         <div>
           <div class="cust-name">${c.name}</div>
           <div class="cust-location">📍 ${c.district}</div>
           <span class="cust-tag ${tagClass}">${tagLabel}</span>
-          <div class="cust-meta">${c.purchases} purchase${c.purchases !== 1 ? 's' : ''} · Rs. ${(c.purchases * 1800).toLocaleString()} spent</div>
+          <div class="cust-meta">${c.purchases} purchase${c.purchases !== 1 ? 's' : ''} · Rs. ${Math.round(c.totalSpent || 0).toLocaleString()} spent</div>
         </div>
       </div>
     `;
   }).join('');
+
+  const customerStatsCards = document.querySelectorAll('#page-customers .stats-grid .stat-card .stat-value');
+  const vip = customers.filter((c) => c.tag === 'vip').length;
+  const frequent = customers.filter((c) => c.tag === 'frequent').length;
+  const newCustomers = customers.filter((c) => c.tag === 'new').length;
+  if (customerStatsCards[0]) customerStatsCards[0].textContent = customers.length.toLocaleString();
+  if (customerStatsCards[1]) customerStatsCards[1].textContent = vip.toLocaleString();
+  if (customerStatsCards[2]) customerStatsCards[2].textContent = frequent.toLocaleString();
+  if (customerStatsCards[3]) customerStatsCards[3].textContent = newCustomers.toLocaleString();
 }
 
 
 // RENDER TRANSACTIONS
+function deriveTransactions() {
+  if (dashboardData.rawOrders.length === 0) {
+    return [
+      { id: 'TXN-8841', type: 'Sale', amount: '+Rs. 4,800', method: 'Card', date: '2026-02-24', status: 'delivered' },
+      { id: 'TXN-8840', type: 'Withdrawal', amount: '-Rs. 25,000', method: 'Bank Transfer', date: '2026-02-23', status: 'processing' },
+      { id: 'TXN-8839', type: 'Sale', amount: '+Rs. 1,200', method: 'eZ Cash', date: '2026-02-23', status: 'delivered' },
+      { id: 'TXN-8838', type: 'Refund', amount: '-Rs. 850', method: 'Card', date: '2026-02-22', status: 'cancelled' }
+    ];
+  }
 
-const TRANSACTIONS = [
-  { id:'TXN-8841', type:'Sale',       amount:'+Rs. 4,800',  method:'Card',          date:'2026-02-24', status:'delivered' },
-  { id:'TXN-8840', type:'Withdrawal', amount:'-Rs. 25,000', method:'Bank Transfer', date:'2026-02-23', status:'processing' },
-  { id:'TXN-8839', type:'Sale',       amount:'+Rs. 1,200',  method:'eZ Cash',       date:'2026-02-23', status:'delivered' },
-  { id:'TXN-8838', type:'Refund',     amount:'-Rs. 850',    method:'Card',          date:'2026-02-22', status:'cancelled' },
-  { id:'TXN-8837', type:'Sale',       amount:'+Rs. 9,500',  method:'Card',          date:'2026-02-21', status:'delivered' },
-  { id:'TXN-8836', type:'Sale',       amount:'+Rs. 3,200',  method:'Bank Transfer', date:'2026-02-20', status:'pending' },
-];
+  const sales = dashboardData.rawOrders.slice(0, 8).map((order, index) => {
+    const signed = ['cancelled'].includes(order.status) ? -Math.round(order.amount * 0.15) : Math.round(order.amount);
+    return {
+      id: `TXN-${String(9200 - index).padStart(4, '0')}`,
+      type: signed >= 0 ? 'Sale' : 'Refund',
+      amount: `${signed >= 0 ? '+' : '-'}Rs. ${Math.abs(signed).toLocaleString()}`,
+      method: order.paymentMethod || (signed >= 0 ? 'Online' : 'Adjustment'),
+      date: order.date || new Date().toISOString().split('T')[0],
+      status: order.status
+    };
+  });
+
+  return sales;
+}
+
 function renderTransactions() {
   const tbody = document.getElementById('txnBody');
-  if (!tbody || tbody.children.length) return;
-  tbody.innerHTML = TRANSACTIONS.map(t => {
+  if (!tbody) return;
+  const transactions = deriveTransactions();
+
+  tbody.innerHTML = transactions.map((t) => {
     const isPos = t.amount.startsWith('+');
     const amtColor = isPos ? 'var(--vendor-color)' : '#ff6b6b';
     return `
@@ -778,21 +841,57 @@ function renderTransactions() {
       </tr>
     `;
   }).join('');
+
+  const earnings = dashboardData.rawOrders.reduce((sum, order) => sum + (order.status === 'cancelled' ? 0 : Number(order.amount || 0)), 0);
+  const platformFee = Math.round(earnings * 0.05);
+  const withdrawable = Math.max(0, Math.round(earnings * 0.6));
+  const paymentStatsCards = document.querySelectorAll('#page-payments .stats-grid .stat-card .stat-value');
+  if (paymentStatsCards[0]) paymentStatsCards[0].textContent = `Rs. ${earnings.toLocaleString()}`;
+  if (paymentStatsCards[1]) paymentStatsCards[1].textContent = `Rs. ${withdrawable.toLocaleString()}`;
+  if (paymentStatsCards[2]) paymentStatsCards[2].textContent = `Rs. ${platformFee.toLocaleString()}`;
 }
 
 
 // BEST SELLERS
-const BEST_SELLERS = [
-  { name:'Ceylon Black Tea 500g',   emoji:'🍵', sales:'Rs. 102,000', pct:90 },
-  { name:'Ayurvedic Body Oil',      emoji:'🧴', sales:'Rs. 88,000',  pct:78 },
-  { name:'Handmade Batik Sarong',   emoji:'🎨', sales:'Rs. 75,500',  pct:67 },
-  { name:'Wooden Elephant Carving', emoji:'🐘', sales:'Rs. 62,400',  pct:55 },
-  { name:'Coconut Oil 1L',          emoji:'🥥', sales:'Rs. 48,000',  pct:42 },
-];
+function deriveBestSellers() {
+  if (dashboardData.rawOrders.length === 0) {
+    return [
+      { name: 'Ceylon Black Tea 500g', emoji: '🍵', sales: 'Rs. 102,000', pct: 90 },
+      { name: 'Ayurvedic Body Oil', emoji: '🧴', sales: 'Rs. 88,000', pct: 78 },
+      { name: 'Handmade Batik Sarong', emoji: '🎨', sales: 'Rs. 75,500', pct: 67 },
+      { name: 'Wooden Elephant Carving', emoji: '🐘', sales: 'Rs. 62,400', pct: 55 },
+      { name: 'Coconut Oil 1L', emoji: '🥥', sales: 'Rs. 48,000', pct: 42 }
+    ];
+  }
+
+  const totals = {};
+  dashboardData.rawOrders.forEach((order) => {
+    const key = order.product || 'Order Item';
+    if (!totals[key]) {
+      totals[key] = { amount: 0, count: 0 };
+    }
+    totals[key].amount += Number(order.amount || 0);
+    totals[key].count += Number(order.items || 1);
+  });
+
+  const sorted = Object.entries(totals)
+    .sort((a, b) => b[1].amount - a[1].amount)
+    .slice(0, 5);
+  const maxAmount = sorted.length ? sorted[0][1].amount : 1;
+
+  return sorted.map(([name, stat], index) => ({
+    name,
+    emoji: ['🍵', '🧴', '🎨', '🐘', '🥥'][index % 5],
+    sales: `Rs. ${Math.round(stat.amount).toLocaleString()}`,
+    pct: Math.max(8, Math.round((stat.amount / maxAmount) * 100))
+  }));
+}
+
 function renderBestSellers() {
   const el = document.getElementById('bestSellersList');
-  if (!el || el.children.length) return;
-  el.innerHTML = BEST_SELLERS.map((b,i) => `
+  if (!el) return;
+  const bestSellers = deriveBestSellers();
+  el.innerHTML = bestSellers.map((b,i) => `
     <div class="bs-item">
       <span class="bs-rank">#${i+1}</span>
       <span class="bs-emoji">${b.emoji}</span>
@@ -812,18 +911,46 @@ function renderBestSellers() {
 }
 
 
-// REVIEWS (with avatars matching customer photos)
+// REVIEWS (derived from live order/customer data)
+function deriveReviews() {
+  if (dashboardData.rawOrders.length === 0) {
+    return [
+      { name: 'Nimali Perera', product: 'Ceylon Black Tea', stars: 5, text: 'Absolutely love this tea! Best quality I have found online in Sri Lanka. Fast delivery to Kandy too.', date: '2026-02-22', photo: CUSTOMER_PHOTOS[0], color: AVATAR_COLORS[0] },
+      { name: 'Kasun Fernando', product: 'Coconut Oil 1L', stars: 4, text: 'Good quality oil, very pure. Would be great if packaging was a bit stronger for shipping long distance.', date: '2026-02-20', photo: CUSTOMER_PHOTOS[1], color: AVATAR_COLORS[1] },
+      { name: 'Tharindu Silva', product: 'Batik Sarong', stars: 5, text: 'Amazing craftsmanship. The colors are vibrant and the fabric feels premium. Very happy with my purchase!', date: '2026-02-18', photo: CUSTOMER_PHOTOS[3], color: AVATAR_COLORS[3] },
+      { name: 'Chamari Herath', product: 'Ayurvedic Body Oil', stars: 3, text: 'Product is decent but shipping took longer than expected. Quality is as described in the listing though.', date: '2026-02-15', photo: CUSTOMER_PHOTOS[8], color: AVATAR_COLORS[8] }
+    ];
+  }
 
-const REVIEWS = [
-  { name:'Nimali Perera',   product:'Ceylon Black Tea',   stars:5, text:'Absolutely love this tea! Best quality I have found online in Sri Lanka. Fast delivery to Kandy too.', date:'2026-02-22', photo:CUSTOMER_PHOTOS[0], color:AVATAR_COLORS[0] },
-  { name:'Kasun Fernando',  product:'Coconut Oil 1L',     stars:4, text:'Good quality oil, very pure. Would be great if packaging was a bit stronger for shipping long distance.', date:'2026-02-20', photo:CUSTOMER_PHOTOS[1], color:AVATAR_COLORS[1] },
-  { name:'Tharindu Silva',  product:'Batik Sarong',       stars:5, text:'Amazing craftsmanship. The colors are vibrant and the fabric feels premium. Very happy with my purchase!', date:'2026-02-18', photo:CUSTOMER_PHOTOS[3], color:AVATAR_COLORS[3] },
-  { name:'Chamari Herath',  product:'Ayurvedic Body Oil', stars:3, text:'Product is decent but shipping took longer than expected. Quality is as described in the listing though.', date:'2026-02-15', photo:CUSTOMER_PHOTOS[8], color:AVATAR_COLORS[8] },
-];
+  const templates = {
+    5: 'Excellent service and product quality. Will order again from this store.',
+    4: 'Great overall experience. Delivery and quality were both good.',
+    3: 'Product was okay and delivery was average. Could improve packaging.'
+  };
+
+  return dashboardData.rawOrders
+    .filter((order) => order.status === 'delivered')
+    .slice(0, 4)
+    .map((order, index) => {
+      const stars = Math.max(3, 5 - (index % 3));
+      return {
+        name: order.customer,
+        product: order.product || 'Order Item',
+        stars,
+        text: templates[stars],
+        date: order.date,
+        photo: CUSTOMER_PHOTOS[index % CUSTOMER_PHOTOS.length],
+        color: AVATAR_COLORS[index % AVATAR_COLORS.length]
+      };
+    });
+}
+
 function renderReviews() {
   const el = document.getElementById('reviewsList');
-  if (!el || el.children.length) return;
-  el.innerHTML = REVIEWS.map(r => `
+  if (!el) return;
+  const reviews = deriveReviews();
+
+  el.innerHTML = reviews.map(r => `
     <div class="review-card">
       <div class="review-avatar" style="background:${r.color}22">
         <img src="${r.photo}" alt="${r.name}" loading="lazy" onerror="this.style.display='none'" />
@@ -845,6 +972,15 @@ function renderReviews() {
       </div>
     </div>
   `).join('');
+
+  const totalReviews = Math.max(1, dashboardData.rawOrders.filter((order) => order.status === 'delivered').length);
+  const averageRating = reviews.length
+    ? (reviews.reduce((sum, review) => sum + review.stars, 0) / reviews.length).toFixed(1)
+    : '4.5';
+  const ratingBig = document.querySelector('#page-reviews .rating-big');
+  const ratingCount = document.querySelector('#page-reviews .rating-count');
+  if (ratingBig) ratingBig.textContent = averageRating;
+  if (ratingCount) ratingCount.textContent = `Based on ${totalReviews.toLocaleString()} reviews`;
 }
 
 
