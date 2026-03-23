@@ -134,6 +134,9 @@ function updateNotificationBadge() {
 
 async function loadAdminNotifications() {
   if (typeof getNotifications !== 'function') {
+    state.notifications = [];
+    renderNotifications();
+    updateNotificationBadge();
     return;
   }
 
