@@ -20,23 +20,73 @@ const API_BASE = (() => {
     return origin + '/api/';
 })();
 
+function getLoginPageUrl(reason = 'session_expired') {
+    const origin = window.location.origin;
+    const host = window.location.hostname;
+    const params = new URLSearchParams({ reason });
+
+    if (host === 'localhost' || host === '127.0.0.1') {
+        return origin + '/bizlink-crm-platform/pages/index.html?' + params.toString();
+    }
+
+    return origin + '/pages/index.html?' + params.toString();
+}
+
+function handleAuthFailure(status, payload = {}) {
+    let reason = 'session_expired';
+
+    if (status === 429 || payload.code === 'rate_limited') {
+        reason = 'too_many_requests';
+    }
+
+    if (payload.code === 'unauthorized') {
+        reason = 'unauthorized';
+    }
+
+    window.location.href = getLoginPageUrl(reason);
+}
+
+async function parseJsonSafely(response) {
+    const text = await response.text();
+    if (!text) return {};
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        return {
+            success: false,
+            message: 'Invalid JSON response from server.'
+        };
+    }
+}
+
+async function apiRequest(path, options = {}, shouldRedirectOnAuthFailure = true) {
+    const response = await fetch(API_BASE + path, options);
+    const data = await parseJsonSafely(response);
+
+    if ((response.status === 401 || response.status === 429) && shouldRedirectOnAuthFailure) {
+        handleAuthFailure(response.status, data || {});
+        return null;
+    }
+
+    return {
+        ok: response.ok,
+        status: response.status,
+        data
+    };
+}
+
 // Auth Signup
 async function authSignup(payload) {
     try {
-        const response = await fetch(API_BASE + 'auth_signup.php', {
+        const result = await apiRequest('auth_signup.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload || {})
-        });
+        }, false);
 
-        const data = await response.json();
-        if (data.success) {
-            return data;
-        }
-
-        return data;
+        return result ? (result.data || { success: false, message: 'Signup failed.' }) : { success: false, message: 'Signup failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -49,20 +99,15 @@ async function authSignup(payload) {
 // Auth Login
 async function authLogin(payload) {
     try {
-        const response = await fetch(API_BASE + 'auth_login.php', {
+        const result = await apiRequest('auth_login.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload || {})
-        });
+        }, false);
 
-        const data = await response.json();
-        if (data.success) {
-            return data;
-        }
-
-        return data;
+        return result ? (result.data || { success: false, message: 'Login failed.' }) : { success: false, message: 'Login failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -72,11 +117,106 @@ async function authLogin(payload) {
     }
 }
 
+async function authLogout() {
+    try {
+        const result = await apiRequest('auth_logout.php', {
+            method: 'POST'
+        }, false);
+
+        return result ? (result.data || { success: false, message: 'Logout failed.' }) : { success: false, message: 'Logout failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to logout service.'
+        };
+    }
+}
+
+async function authForgotPassword(payload) {
+    try {
+        const result = await apiRequest('auth_forgot_password.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        }, false);
+
+        return result ? (result.data || { success: false, message: 'Request failed.' }) : { success: false, message: 'Request failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to password reset service.'
+        };
+    }
+}
+
+async function authResetPassword(payload) {
+    try {
+        const result = await apiRequest('auth_reset_password.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        }, false);
+
+        return result ? (result.data || { success: false, message: 'Reset failed.' }) : { success: false, message: 'Reset failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to reset service.'
+        };
+    }
+}
+
+async function authVerifyEmail(payload) {
+    try {
+        const token = (payload && payload.token) ? String(payload.token) : '';
+        const query = new URLSearchParams({ verify_token: token }).toString();
+        const result = await apiRequest('auth_verify_email.php?' + query, {
+            method: 'GET'
+        }, false);
+
+        return result ? (result.data || { success: false, message: 'Verification failed.' }) : { success: false, message: 'Verification failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to verification service.'
+        };
+    }
+}
+
+async function authResendVerification(payload) {
+    try {
+        const result = await apiRequest('auth_resend_verification.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        }, false);
+
+        return result ? (result.data || { success: false, message: 'Resend failed.' }) : { success: false, message: 'Resend failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to verification service.'
+        };
+    }
+}
+
 // Get Dashboard Stats
 async function getDashboardStats() {
     try {
-        const response = await fetch(API_BASE + 'get_dashboard_stats.php');
-        const data = await response.json();
+        const result = await apiRequest('get_dashboard_stats.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -92,8 +232,9 @@ async function getDashboardStats() {
 // Get All Orders
 async function getOrders() {
     try {
-        const response = await fetch(API_BASE + 'get_orders.php');
-        const data = await response.json();
+        const result = await apiRequest('get_orders.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -109,8 +250,9 @@ async function getOrders() {
 // Get All Products
 async function getProducts() {
     try {
-        const response = await fetch(API_BASE + 'get_products.php');
-        const data = await response.json();
+        const result = await apiRequest('get_products.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -126,8 +268,9 @@ async function getProducts() {
 // Get All Vendors
 async function getVendors() {
     try {
-        const response = await fetch(API_BASE + 'get_vendors.php');
-        const data = await response.json();
+        const result = await apiRequest('get_vendors.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -143,8 +286,9 @@ async function getVendors() {
 // Get All Customers
 async function getCustomers() {
     try {
-        const response = await fetch(API_BASE + 'get_customers.php');
-        const data = await response.json();
+        const result = await apiRequest('get_customers.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -160,8 +304,9 @@ async function getCustomers() {
 // Get Categories
 async function getCategories() {
     try {
-        const response = await fetch(API_BASE + 'get_categories.php');
-        const data = await response.json();
+        const result = await apiRequest('get_categories.php');
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data.data;
         } else {
@@ -184,8 +329,9 @@ async function getNotifications(params = {}) {
             }
         });
 
-        const response = await fetch(API_BASE + 'get_notifications.php?' + query.toString());
-        const data = await response.json();
+        const result = await apiRequest('get_notifications.php?' + query.toString());
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data;
         }
@@ -201,7 +347,7 @@ async function getNotifications(params = {}) {
 // Mark one or all notifications as read
 async function markNotificationsRead(payload = {}) {
     try {
-        const response = await fetch(API_BASE + 'mark_notifications_read.php', {
+        const result = await apiRequest('mark_notifications_read.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -209,7 +355,8 @@ async function markNotificationsRead(payload = {}) {
             body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
+        if (!result) return null;
+        const data = result.data || {};
         if (data.success) {
             return data;
         }

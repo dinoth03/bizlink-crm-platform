@@ -10,8 +10,20 @@ define('DB_NAME', getenv('DB_NAME') ?: 'bizlink_crm');
 define('DB_PORT', (int) (getenv('DB_PORT') ?: 3306));
 define('DB_SOCKET', getenv('DB_SOCKET') ?: '');
 
-// Optional comma-separated CORS allowlist, e.g. https://example.com,https://app.example.com
-define('CORS_ALLOWED_ORIGINS', getenv('CORS_ALLOWED_ORIGINS') ?: '');
+// ============================================
+// SECURITY CONFIGURATION
+// ============================================
+
+// Frontend origin whitelist (comma-separated) - NEVER use wildcard in production
+// Examples: 'https://app.example.com,https://admin.example.com'
+// For local dev: 'http://localhost,http://localhost:3000,http://127.0.0.1'
+define('ALLOWED_ORIGINS', getenv('ALLOWED_ORIGINS') ?: 'http://localhost,http://127.0.0.1');
+
+// CSRF protection enabled by default
+define('CSRF_ENABLED', (bool)(getenv('CSRF_ENABLED') ?? true));
+
+// Enable security headers by default
+define('SECURITY_HEADERS_ENABLED', (bool)(getenv('SECURITY_HEADERS_ENABLED') ?? true));
 
 // Create Connection
 if (DB_SOCKET !== '') {
@@ -34,30 +46,69 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 // ============================================
-// CORS HEADERS (Allow Frontend to Call API)
+// CORS HEADERS - Restrict to whitelist (no wildcard)
 // ============================================
 
-// Resolve allowed origin for local and production deployments.
 $requestOrigin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
-$allowedOriginsRaw = trim((string) CORS_ALLOWED_ORIGINS);
-$allowOrigin = '*';
+$allowOrigin = '';
 
-if ($allowedOriginsRaw !== '' && $requestOrigin !== '') {
+// Parse allowed origins list
+$allowedOriginsRaw = trim((string) ALLOWED_ORIGINS);
+if ($allowedOriginsRaw !== '') {
     $allowList = array_map('trim', explode(',', $allowedOriginsRaw));
-    if (in_array($requestOrigin, $allowList, true)) {
+    
+    // Only allow origins in whitelist
+    if ($requestOrigin !== '' && in_array($requestOrigin, $allowList, true)) {
         $allowOrigin = $requestOrigin;
-    } else {
-        $allowOrigin = $allowList[0] ?: '*';
+    } elseif (!empty($allowList) && $allowList[0] !== '') {
+        // If no matching origin found, don't set Access-Control-Allow-Origin
+        // This prevents unauthorized cross-origin access
+        $allowOrigin = '';
     }
-} elseif ($requestOrigin !== '') {
-    $allowOrigin = $requestOrigin;
 }
 
-header('Access-Control-Allow-Origin: ' . $allowOrigin);
-header('Vary: Origin');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json');
+// Only send CORS headers if origin is whitelisted
+if ($allowOrigin !== '') {
+    header('Access-Control-Allow-Origin: ' . $allowOrigin);
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token');
+    header('Access-Control-Max-Age: 3600'); // Preflight cache
+    header('Access-Control-Allow-Credentials: true');
+}
+
+// ============================================
+// SECURITY HEADERS
+// ============================================
+
+if (SECURITY_HEADERS_ENABLED) {
+    // Content Security Policy - Prevent XSS
+    // Adjust 'script-src' based on your real domains
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'");
+    
+    // Prevent clickjacking attacks
+    header('X-Frame-Options: SAME-ORIGIN');
+    
+    // Prevent MIME sniffing
+    header('X-Content-Type-Options: nosniff');
+    
+    // Referrer policy - limit referrer information
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    
+    // Force HTTPS in production
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+    }
+    
+    // Disable plugins
+    header('X-Permitted-Cross-Domain-Policies: none');
+    
+    // Additional security policies
+    header('X-XSS-Protection: 1; mode=block');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+}
+
+header('Content-Type: application/json; charset=utf-8');
 
 // Handle preflight requests from browser
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {

@@ -94,22 +94,6 @@ function normalizeStatus(status) {
   return map[(status || '').toLowerCase()] || 'Pending';
 }
 
-function getSessionCustomer() {
-  try {
-    const raw = localStorage.getItem('bizlink_session');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || String(parsed.role || '').toLowerCase() !== 'customer') return null;
-    return {
-      email: String(parsed.email || '').trim().toLowerCase(),
-      fullName: String(parsed.fullName || '').trim()
-    };
-  } catch (error) {
-    console.warn('Could not parse bizlink_session for customer dashboard:', error);
-    return null;
-  }
-}
-
 const customerDashboardState = {
   customerId: null,
   customerEmail: '',
@@ -363,10 +347,9 @@ function updateCustomerSummary(customer, orders, vendors) {
 }
 
 async function loadCustomerDashboardData() {
-  const sessionCustomer = getSessionCustomer();
-  customerDashboardState.customerEmail = (sessionCustomer?.email || '').toLowerCase();
+  customerDashboardState.customerEmail = '';
   customerDashboardState.customerId = null;
-  customerDashboardState.customerName = sessionCustomer?.fullName || 'Customer';
+  customerDashboardState.customerName = 'Customer';
   applyCustomerChatLinks();
 
   try {
@@ -449,6 +432,18 @@ window.showProfile = function () {
   if (dashboardView) dashboardView.style.display = 'none';
   if (profileView) profileView.style.display = 'block';
 };
+
+async function customerLogout() {
+  try {
+    if (typeof authLogout === 'function') {
+      await authLogout();
+    }
+  } catch (error) {
+    console.warn('Customer logout request failed, redirecting anyway:', error);
+  }
+
+  window.location.href = '../pages/index.html';
+}
 
 window.addEventListener('load', async () => {
   await loadCustomerDashboardData();

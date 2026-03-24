@@ -137,6 +137,13 @@ async function loadChatDataFromApi() {
     const response = await fetch('../api/chat_data.php');
     const payload = await response.json();
 
+    if (response.status === 401 || response.status === 429) {
+      if (typeof handleAuthFailure === 'function') {
+        handleAuthFailure(response.status, payload || {});
+      }
+      return false;
+    }
+
     if (!payload.success) {
       return false;
     }
@@ -445,8 +452,15 @@ function sendMessage() {
         message_content: text
       })
     })
-      .then((res) => res.json())
-      .then((payload) => {
+      .then(async (res) => ({ status: res.status, payload: await res.json() }))
+      .then(({ status, payload }) => {
+        if (status === 401 || status === 429) {
+          if (typeof handleAuthFailure === 'function') {
+            handleAuthFailure(status, payload || {});
+          }
+          return;
+        }
+
         if (payload.success) {
           msg.status = 'delivered';
           updateMsgStatus(msg.id, 'delivered');

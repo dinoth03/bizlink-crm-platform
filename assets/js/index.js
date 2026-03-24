@@ -280,17 +280,13 @@ async function handleSignup() {
     return;
   }
 
-  const apiUser = signupResult.user || {};
-  const apiFullName = apiUser.full_name || fullName;
-  const apiEmail = (apiUser.email || email || '').trim().toLowerCase();
-
   // Hide all steps
   [1, 2, 3, 4].forEach(i => document.getElementById(`step${i}`)?.classList.add('hidden'));
   const successEl = document.getElementById('successState');
   successEl.classList.remove('hidden');
 
   // Update success screen
-  document.getElementById('successMsg').innerHTML = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Your account is ready.`;
+  document.getElementById('successMsg').innerHTML = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Please verify your email before login.`;
 
   const roleTagMap = {
     admin:    { text: '👑 Administrator', style: 'background:var(--admin-gradient);color:#fff;' },
@@ -313,24 +309,27 @@ async function handleSignup() {
     if (line) line.classList.add('done');
   });
 
-  showToast('Account created successfully! 🎉', 'success');
+  showToast('Account created. Please verify your email.', 'success');
   scrollToTop();
 
-  // Update success button to go to correct dashboard
+  const redirectLink = '../pages/index.html';
   const successBtn = document.querySelector('.success-btn');
-  const dashboardLink = signupResult.dashboard || getDashboardLink(role);
   if (successBtn) {
-    successBtn.href = dashboardLink;
+    successBtn.href = redirectLink;
+    successBtn.querySelector('.btn-text').textContent = 'Go to Sign In';
     successBtn.onclick = () => {
-      window.location.href = dashboardLink;
+      window.location.href = redirectLink;
       return false;
     };
   }
 
-  // Redirect to dashboard after 3 seconds
+  if (signupResult.verification_link) {
+    window.prompt('Local development verification link:', signupResult.verification_link);
+  }
+
   setTimeout(() => {
-    window.location.href = dashboardLink;
-  }, 3000);
+    window.location.href = redirectLink;
+  }, 3500);
 }
 
 /*HANDLE LOGIN SUBMIT*/
@@ -363,6 +362,20 @@ async function handleLogin(e) {
   btn.disabled = false;
 
   if (!result || !result.success) {
+    if (result && result.code === 'email_not_verified') {
+      const resend = confirm('Your email is not verified yet. Send a new verification link?');
+      if (resend && typeof authResendVerification === 'function') {
+        const resendResult = await authResendVerification({ role: state.loginRole, email: loginEmail });
+        if (resendResult && resendResult.success) {
+          showToast('Verification link sent. Check your email.', 'info');
+          if (resendResult.verification_link) {
+            window.prompt('Local development verification link:', resendResult.verification_link);
+          }
+          return;
+        }
+      }
+    }
+
     showToast((result && result.message) || 'Login failed. Please check backend API.', 'warn');
     return;
   }
@@ -497,6 +510,70 @@ function getDashboardLink(role) {
   return 'index.html';
 }
 
+async function triggerForgotPasswordFlow() {
+  const email = window.prompt('Enter your account email to reset password:');
+  if (!email) return;
+
+  if (!isValidEmail(email)) {
+    showToast('Please enter a valid email address.', 'warn');
+    return;
+  }
+
+  if (typeof authForgotPassword !== 'function') {
+    showToast('Password reset service is unavailable.', 'warn');
+    return;
+  }
+
+  const result = await authForgotPassword({ email: String(email).trim().toLowerCase() });
+  showToast((result && result.message) || 'If your account exists, a reset link was generated.', 'info');
+
+  if (result && result.reset_link) {
+    window.prompt('Local development reset link:', result.reset_link);
+  }
+}
+
+async function handleAuthQueryFlows() {
+  const params = new URLSearchParams(window.location.search);
+  const reason = params.get('reason') || '';
+  const verifyToken = params.get('verify_token') || '';
+  const resetToken = params.get('reset_token') || '';
+
+  if (reason === 'session_expired' || reason === 'unauthorized') {
+    showToast('Your session expired. Please sign in again.', 'info');
+  } else if (reason === 'too_many_requests') {
+    showToast('Too many requests. Please wait a moment and try again.', 'warn');
+  }
+
+  if (verifyToken && typeof authVerifyEmail === 'function') {
+    const verifyResult = await authVerifyEmail({ token: verifyToken });
+    showToast((verifyResult && verifyResult.message) || 'Verification failed.', verifyResult && verifyResult.success ? 'success' : 'warn');
+    params.delete('verify_token');
+    const nextVerify = params.toString();
+    window.history.replaceState({}, '', nextVerify ? `?${nextVerify}` : window.location.pathname);
+    switchTab('login');
+  }
+
+  if (resetToken && typeof authResetPassword === 'function') {
+    const newPassword = window.prompt('Enter your new password (min 8 characters):');
+    if (newPassword && newPassword.length >= 8) {
+      const confirmPassword = window.prompt('Confirm your new password:');
+      if (confirmPassword === newPassword) {
+        const resetResult = await authResetPassword({ token: resetToken, password: newPassword });
+        showToast((resetResult && resetResult.message) || 'Password reset failed.', resetResult && resetResult.success ? 'success' : 'warn');
+      } else {
+        showToast('Passwords do not match.', 'warn');
+      }
+    } else if (newPassword) {
+      showToast('Password must be at least 8 characters.', 'warn');
+    }
+
+    params.delete('reset_token');
+    const nextReset = params.toString();
+    window.history.replaceState({}, '', nextReset ? `?${nextReset}` : window.location.pathname);
+    switchTab('login');
+  }
+}
+
 /*INPUT FOCUS – DYNAMIC BORDER GLOW BY ROLE*/
 function applyInputGlow() {
   const role = state.signupRole || state.loginRole;
@@ -514,9 +591,19 @@ function applyInputGlow() {
 }
 
 /*INIT*/
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Default to login tab
   switchTab('login');
+
+  const forgotLink = document.querySelector('.forgot-link');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      triggerForgotPasswordFlow();
+    });
+  }
+
+  await handleAuthQueryFlows();
 
   // Global focus tracking to apply role glow on inputs
   document.querySelectorAll('.input-wrap input').forEach(input => {

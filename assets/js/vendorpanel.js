@@ -34,6 +34,18 @@ function onPageActivate(page) {
   if (page === 'promotions') { startCountdown(); }
 }
 
+async function vendorLogout() {
+  try {
+    if (typeof authLogout === 'function') {
+      await authLogout();
+    }
+  } catch (error) {
+    console.warn('Vendor logout request failed, redirecting anyway:', error);
+  }
+
+  window.location.href = '../pages/index.html';
+}
+
 // SIDEBAR TOGGLE 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');

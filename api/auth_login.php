@@ -1,6 +1,9 @@
 <?php
 session_start();
 require 'config.php';
+require 'csrf_protection.php';
+require 'rate_limiting.php';
+require 'secure_logging.php';
 
 $requestIpAddress = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
 $requestUserAgent = substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 500);
@@ -93,6 +96,22 @@ if (!is_array($payload)) {
     exit;
 }
 
+// CSRF Protection
+if (CSRF_ENABLED) {
+    $csrfToken = getCsrfTokenFromRequest();
+    if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
+        logCsrfFailure('auth_login');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'code' => 'csrf_validation_failed',
+            'message' => 'Invalid or missing CSRF token.'
+        ]);
+        $conn->close();
+        exit;
+    }
+}
+
 $role = strtolower(trim((string)($payload['role'] ?? '')));
 $email = strtolower(trim((string)($payload['email'] ?? '')));
 $password = (string)($payload['password'] ?? '');
@@ -119,6 +138,11 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
     exit;
 }
 
+// Rate Limiting - per IP address and per email/role combination
+$clientIp = getClientIpAddress();
+requireRateLimit($conn, $clientIp, 'login_by_ip', 20, 900); // 20 attempts per 15 min per IP
+requireRateLimit($conn, $email . ':' . $role, 'login_by_account', 5, 900); // 5 attempts per 15 min per account
+
 $lockout = getLockoutInfo($conn, $email, $role, $lockoutWindowMinutes, $maxFailedAttempts);
 if ($lockout['is_locked']) {
     $remainingSeconds = (int)$lockout['remaining_seconds'];
@@ -138,7 +162,7 @@ if ($lockout['is_locked']) {
 }
 
 $stmt = $conn->prepare(
-    'SELECT user_id, email, password_hash, role, full_name, account_status FROM users WHERE email = ? AND role = ? AND deleted_at IS NULL LIMIT 1'
+    'SELECT user_id, email, password_hash, role, full_name, account_status, is_verified FROM users WHERE email = ? AND role = ? AND deleted_at IS NULL LIMIT 1'
 );
 $stmt->bind_param('ss', $email, $role);
 $stmt->execute();
@@ -157,6 +181,18 @@ if (!$user) {
 }
 
 $status = strtolower((string)$user['account_status']);
+if ((int)($user['is_verified'] ?? 0) !== 1) {
+    logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'email_not_verified', $requestIpAddress, $requestUserAgent);
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'code' => 'email_not_verified',
+        'message' => 'Please verify your email before logging in.'
+    ]);
+    $conn->close();
+    exit;
+}
+
 if (in_array($status, ['inactive', 'suspended'], true)) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'account_not_active', $requestIpAddress, $requestUserAgent);
     http_response_code(403);

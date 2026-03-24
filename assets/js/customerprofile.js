@@ -44,6 +44,18 @@
       alert('✎ Profile editor would open (demo). In real app you can update details.');
     });
 
+    // sign out
+    document.getElementById('customerProfileLogoutBtn')?.addEventListener('click', async () => {
+      try {
+        if (typeof authLogout === 'function') {
+          await authLogout();
+        }
+      } catch (error) {
+        console.warn('Profile logout request failed, redirecting anyway:', error);
+      }
+      window.location.href = '../pages/index.html';
+    });
+
     // ripple effect for buttons (same as home)
     const style = document.createElement('style');
     style.textContent = `@keyframes rippleOut{to{width:300px;height:300px;opacity:0;}}`;

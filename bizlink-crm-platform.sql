@@ -148,6 +148,64 @@ CREATE TABLE failed_login_attempts (
     INDEX idx_failed_login_reason (failure_reason)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Password Reset Tokens Table
+CREATE TABLE password_reset_tokens (
+    reset_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_password_reset_user (user_id),
+    UNIQUE INDEX uq_password_reset_token_hash (token_hash),
+    INDEX idx_password_reset_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Email Verification Tokens Table
+CREATE TABLE email_verification_tokens (
+    verification_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_email_verify_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_email_verify_user (user_id),
+    UNIQUE INDEX uq_email_verify_token_hash (token_hash),
+    INDEX idx_email_verify_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- CSRF Protection Tokens Table
+CREATE TABLE csrf_tokens (
+    csrf_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NULL,
+    session_id VARCHAR(255),
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_csrf_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_csrf_user (user_id),
+    INDEX idx_csrf_session (session_id),
+    INDEX idx_csrf_expires (expires_at),
+    INDEX idx_csrf_used (used_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Rate Limiting Log Table
+CREATE TABLE rate_limit_log (
+    rate_limit_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    limit_key CHAR(64) NOT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    identifier VARCHAR(255) NOT NULL,
+    timestamp INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_rate_limit_key (limit_key),
+    INDEX idx_rate_limit_endpoint (endpoint),
+    INDEX idx_rate_limit_timestamp (timestamp),
+    INDEX idx_rate_limit_identifier (identifier)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================================
 -- 2. PRODUCT/SERVICE MANAGEMENT TABLES
 -- ============================================================================

@@ -1,6 +1,11 @@
 <?php
 session_start();
 require 'config.php';
+require 'auth_token_utils.php';
+require 'mail_service.php';
+require 'csrf_protection.php';
+require 'rate_limiting.php';
+require 'secure_logging.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -21,6 +26,22 @@ if (!is_array($payload)) {
     ]);
     $conn->close();
     exit;
+}
+
+// CSRF Protection
+if (CSRF_ENABLED) {
+    $csrfToken = getCsrfTokenFromRequest();
+    if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
+        logCsrfFailure('auth_signup');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'code' => 'csrf_validation_failed',
+            'message' => 'Invalid or missing CSRF token.'
+        ]);
+        $conn->close();
+        exit;
+    }
 }
 
 $role = strtolower(trim((string)($payload['role'] ?? '')));
@@ -61,6 +82,11 @@ if (strlen($password) < 8) {
     $conn->close();
     exit;
 }
+
+// Rate Limiting - per IP address for signup
+$clientIp = getClientIpAddress();
+requireRateLimit($conn, $clientIp, 'signup_by_ip', 10, 3600); // 10 signups per hour per IP
+requireRateLimit($conn, $email, 'signup_by_email', 5, 3600); // 5 signup attempts per hour per email
 
 if ($firstName === '' || $lastName === '') {
     http_response_code(400);
@@ -133,8 +159,8 @@ try {
         $city = trim((string)($profile['city'] ?? ''));
     }
 
-    $status = $role === 'vendor' ? 'pending_verification' : 'active';
-    $isVerified = $role === 'vendor' ? 0 : 1;
+    $status = $role === 'vendor' ? 'pending_verification' : 'inactive';
+    $isVerified = 0;
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     $insertUser = $conn->prepare(
@@ -203,31 +229,40 @@ try {
         $insertCustomer->close();
     }
 
+    // Create email verification token for every newly created account.
+    $verifyToken = generateSecureToken();
+    $verifyTokenHash = hashAuthToken($verifyToken);
+    $verifyExpiryMinutes = 1440; // 24 hours
+
+    $verifyStmt = $conn->prepare(
+        'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
+    );
+    $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
+    $verifyStmt->execute();
+    $verifyStmt->close();
+
     $conn->commit();
 
-    // Set PHP session variables for server-side authentication
-    $_SESSION['user_id'] = $userId;
-    $_SESSION['email'] = $email;
-    $_SESSION['role'] = $role;
-    $_SESSION['full_name'] = $fullName;
-    $_SESSION['login_time'] = time();
+    $authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
+    $verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
 
-    $dashboardMap = [
-        'admin' => '../admin/dashboard.html',
-        'vendor' => '../vendor/vendorpanel.html',
-        'customer' => '../customer/dashboard.html'
-    ];
+    // Send verification email
+    $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
+    $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
 
     echo json_encode([
         'success' => true,
-        'message' => 'Account created successfully.',
+        'message' => 'Account created. Please verify your email before logging in.',
         'user' => [
             'user_id' => $userId,
             'role' => $role,
             'email' => $email,
             'full_name' => $fullName
         ],
-        'dashboard' => $dashboardMap[$role] ?? '../pages/home.html'
+        'verification_required' => true,
+        'verification_link' => isLocalHostEnvironment() ? $verificationLink : null,
+        'email_sent' => $mailResult['success'],
+        'dashboard' => '../pages/index.html'
     ]);
 } catch (Throwable $e) {
     $conn->rollback();

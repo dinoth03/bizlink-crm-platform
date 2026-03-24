@@ -241,14 +241,24 @@ function cancelLogout(event) {
   document.getElementById('logoutBackdrop').style.display = 'none';
 }
 
+async function performLogout() {
+  try {
+    if (typeof authLogout === 'function') {
+      await authLogout();
+    }
+  } catch (error) {
+    console.warn('Logout request failed, redirecting anyway:', error);
+  }
+
+  window.location.href = '../pages/index.html';
+}
+
 /* DASHBOARD RENDERING */
 async function renderDashboard() {
   // Fetch real stats from database
   try {
-    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_dashboard_stats.php');
-    const json = await res.json();
-    if (json.success) {
-      const s = json.data;
+    const s = await getDashboardStats();
+    if (s) {
       // Update KPI card values and data-count attributes with real data
       const kpiCards = document.querySelectorAll('.kpi-card');
       const kpiData = [
