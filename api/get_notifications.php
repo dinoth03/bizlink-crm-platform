@@ -1,12 +1,21 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
 // Require authentication
 requireAuth();
 
 $userId = getCurrentUser()['user_id'];
-$limit = isset($_GET['limit']) ? max(1, min(20, (int) $_GET['limit'])) : 6;
+$pagination = getPaginationParams($_GET, 10, 50);
+
+$unreadOnly = isset($_GET['unread_only']) ? strtolower(trim((string)$_GET['unread_only'])) : 'false';
+if (!in_array($unreadOnly, ['true', 'false', '1', '0'], true)) {
+    apiError('VALIDATION_ERROR', 'Invalid unread_only value.', 422, [
+        ['field' => 'unread_only', 'message' => 'unread_only must be true or false.']
+    ]);
+}
+$onlyUnread = in_array($unreadOnly, ['true', '1'], true);
 
 $query = "SELECT
     n.notification_id,
@@ -29,11 +38,13 @@ LEFT JOIN notification_reads nr
    AND nr.user_id = ?
 WHERE n.user_id = ?
   AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
+    AND (? = 0 OR (nr.notification_read_id IS NULL AND n.is_read = 0))
 ORDER BY is_read ASC, n.created_at DESC
-LIMIT ?";
+LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param('iii', $userId, $userId, $limit);
+$unreadFlag = $onlyUnread ? 1 : 0;
+$stmt->bind_param('iiiii', $userId, $userId, $unreadFlag, $pagination['limit'], $pagination['offset']);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -58,12 +69,17 @@ $userResult = $userStmt->get_result();
 $user = $userResult->fetch_assoc();
 $userStmt->close();
 
-echo json_encode([
-    'success' => true,
+apiSuccess($notifications, 'Notifications fetched successfully.', 'NOTIFICATIONS_FETCHED', 200, [
     'user' => $user,
-    'data' => $notifications,
-    'count' => count($notifications),
-    'unread_count' => $unreadCount
+    'unread_count' => $unreadCount,
+    'pagination' => [
+        'page' => $pagination['page'],
+        'per_page' => $pagination['per_page'],
+        'returned' => count($notifications)
+    ],
+    'filters' => [
+        'unread_only' => $onlyUnread
+    ]
 ]);
 
 $conn->close();

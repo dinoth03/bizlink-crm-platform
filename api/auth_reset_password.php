@@ -1,29 +1,18 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 require 'auth_token_utils.php';
 require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 // CSRF Protection
@@ -31,14 +20,7 @@ if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
     if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
         logCsrfFailure('auth_reset_password');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'csrf_validation_failed',
-            'message' => 'Invalid or missing CSRF token.'
-        ]);
-        $conn->close();
-        exit;
+        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
     }
 }
 
@@ -46,13 +28,10 @@ $token = trim((string)($payload['token'] ?? ''));
 $newPassword = (string)($payload['password'] ?? '');
 
 if ($token === '' || strlen($newPassword) < 8) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'A valid token and password (min 8 chars) are required.'
+    apiError('VALIDATION_ERROR', 'A valid token and password (min 8 chars) are required.', 422, [
+        ['field' => 'token', 'message' => 'token is required.'],
+        ['field' => 'password', 'message' => 'password must be at least 8 characters.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address for password reset
@@ -73,33 +52,15 @@ $record = $tokenStmt->get_result()->fetch_assoc();
 $tokenStmt->close();
 
 if (!$record) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid reset token.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_RESET_TOKEN', 'Invalid reset token.', 400);
 }
 
 if (!empty($record['used_at'])) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Reset token already used.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('RESET_TOKEN_USED', 'Reset token already used.', 400);
 }
 
 if (strtotime((string)$record['expires_at']) < time()) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Reset token expired. Request a new one.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('RESET_TOKEN_EXPIRED', 'Reset token expired. Request a new one.', 400);
 }
 
 $conn->begin_transaction();
@@ -119,16 +80,11 @@ try {
 
     $conn->commit();
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Password reset successful. Please log in.'
-    ]);
+    apiSuccess(null, 'Password reset successful. Please log in.', 'PASSWORD_RESET_SUCCESS');
 } catch (Throwable $error) {
     $conn->rollback();
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Password reset failed: ' . $error->getMessage()
+    apiError('INTERNAL_ERROR', 'Password reset failed.', 500, [
+        ['field' => 'server', 'message' => $error->getMessage()]
     ]);
 }
 

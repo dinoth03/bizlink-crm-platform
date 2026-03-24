@@ -1,18 +1,15 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 require 'auth_token_utils.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
 
 $token = trim((string)($_GET['verify_token'] ?? $_POST['verify_token'] ?? ''));
 if ($token === '') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Verification token is required.'
+    apiError('VALIDATION_ERROR', 'Verification token is required.', 422, [
+        ['field' => 'verify_token', 'message' => 'verify_token is required.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address for verification attempts
@@ -34,33 +31,15 @@ $row = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$row) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid verification token.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_VERIFICATION_TOKEN', 'Invalid verification token.', 400);
 }
 
 if (!empty($row['used_at'])) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'This verification link has already been used.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('VERIFICATION_TOKEN_USED', 'This verification link has already been used.', 400);
 }
 
 if (strtotime((string)$row['expires_at']) < time()) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Verification link expired. Request a new one.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('VERIFICATION_TOKEN_EXPIRED', 'Verification link expired. Request a new one.', 400);
 }
 
 $conn->begin_transaction();
@@ -86,16 +65,11 @@ try {
 
     $conn->commit();
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Email verified successfully. You can now log in.'
-    ]);
+    apiSuccess(null, 'Email verified successfully. You can now log in.', 'EMAIL_VERIFIED');
 } catch (Throwable $error) {
     $conn->rollback();
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to verify email: ' . $error->getMessage()
+    apiError('INTERNAL_ERROR', 'Failed to verify email.', 500, [
+        ['field' => 'server', 'message' => $error->getMessage()]
     ]);
 }
 

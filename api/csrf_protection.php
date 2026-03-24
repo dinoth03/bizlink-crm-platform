@@ -1,5 +1,7 @@
 <?php
 
+require_once 'api_helpers.php';
+
 /**
  * CSRF Protection Utility
  * Provides cross-site request forgery token generation, validation, and management.
@@ -130,13 +132,7 @@ function requireCsrfToken($conn, ?int $userId = null, bool $exitOnFailure = true
     
     if (!validateCsrfToken($conn, $token, $userId, $sessionId)) {
         if ($exitOnFailure) {
-            http_response_code(403);
-            echo json_encode([
-                'success' => false,
-                'code' => 'csrf_validation_failed',
-                'message' => 'Invalid or missing CSRF token.'
-            ]);
-            exit();
+            apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
         }
         return false;
     }

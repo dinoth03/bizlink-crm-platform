@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 require 'auth_token_utils.php';
 require 'mail_service.php';
 require 'csrf_protection.php';
@@ -7,24 +8,12 @@ require 'rate_limiting.php';
 require 'secure_logging.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 // CSRF Protection
@@ -32,26 +21,15 @@ if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
     if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
         logCsrfFailure('auth_forgot_password');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'csrf_validation_failed',
-            'message' => 'Invalid or missing CSRF token.'
-        ]);
-        $conn->close();
-        exit;
+        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
     }
 }
 
 $email = strtolower(trim((string)($payload['email'] ?? '')));
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please provide a valid email.'
+    apiError('VALIDATION_ERROR', 'Please provide a valid email.', 422, [
+        ['field' => 'email', 'message' => 'Invalid email format.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address for forgot password
@@ -66,12 +44,7 @@ $user = $userStmt->get_result()->fetch_assoc();
 $userStmt->close();
 
 if (!$user) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'If your account exists, a reset link has been generated.'
-    ]);
-    $conn->close();
-    exit;
+    apiSuccess(null, 'If your account exists, a reset link has been generated.', 'PASSWORD_RESET_REQUEST_ACCEPTED');
 }
 
 $invalidateStmt = $conn->prepare('UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL');
@@ -104,12 +77,10 @@ $userName = ($userRecord && $userRecord['full_name']) ? $userRecord['full_name']
 $emailHtmlBody = getPasswordResetEmailHtml($resetLink, $userName);
 $mailResult = sendMail($user['email'], 'Reset Your BizLink CRM Password', $emailHtmlBody);
 
-echo json_encode([
-    'success' => true,
-    'message' => 'If your account exists, a reset link has been generated.',
+apiSuccess([
     'reset_link' => isLocalHostEnvironment() ? $resetLink : null,
     'email_sent' => $mailResult['success']
-]);
+], 'If your account exists, a reset link has been generated.', 'PASSWORD_RESET_REQUEST_ACCEPTED');
 
 $conn->close();
 ?>

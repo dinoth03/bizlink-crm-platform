@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'config.php';
+require_once 'api_helpers.php';
 require 'auth_token_utils.php';
 require 'mail_service.php';
 require 'csrf_protection.php';
@@ -8,24 +9,12 @@ require 'rate_limiting.php';
 require 'secure_logging.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 // CSRF Protection
@@ -33,14 +22,7 @@ if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
     if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
         logCsrfFailure('auth_signup');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'csrf_validation_failed',
-            'message' => 'Invalid or missing CSRF token.'
-        ]);
-        $conn->close();
-        exit;
+        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
     }
 }
 
@@ -54,33 +36,21 @@ $profile = is_array($payload['profile'] ?? null) ? $payload['profile'] : [];
 
 $allowedRoles = ['admin', 'vendor', 'customer'];
 if (!in_array($role, $allowedRoles, true)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid role selected.'
+    apiError('VALIDATION_ERROR', 'Invalid role selected.', 422, [
+        ['field' => 'role', 'message' => 'role must be admin, vendor, or customer.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please provide a valid email address.'
+    apiError('VALIDATION_ERROR', 'Please provide a valid email address.', 422, [
+        ['field' => 'email', 'message' => 'Invalid email format.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if (strlen($password) < 8) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Password must be at least 8 characters.'
+    apiError('VALIDATION_ERROR', 'Password must be at least 8 characters.', 422, [
+        ['field' => 'password', 'message' => 'Minimum length is 8.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address for signup
@@ -89,13 +59,10 @@ requireRateLimit($conn, $clientIp, 'signup_by_ip', 10, 3600); // 10 signups per 
 requireRateLimit($conn, $email, 'signup_by_email', 5, 3600); // 5 signup attempts per hour per email
 
 if ($firstName === '' || $lastName === '') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'First name and last name are required.'
+    apiError('VALIDATION_ERROR', 'First name and last name are required.', 422, [
+        ['field' => 'first_name', 'message' => 'first_name is required.'],
+        ['field' => 'last_name', 'message' => 'last_name is required.']
     ]);
-    $conn->close();
-    exit;
 }
 
 $fullName = trim($firstName . ' ' . $lastName);
@@ -107,13 +74,7 @@ $existing = $checkStmt->get_result()->fetch_assoc();
 $checkStmt->close();
 
 if ($existing) {
-    http_response_code(409);
-    echo json_encode([
-        'success' => false,
-        'message' => 'This email is already registered. Please login instead.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('EMAIL_ALREADY_EXISTS', 'This email is already registered. Please login instead.', 409);
 }
 
 function normalizeProvince(string $value): string {
@@ -250,9 +211,7 @@ try {
     $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
     $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Account created. Please verify your email before logging in.',
+    apiSuccess([
         'user' => [
             'user_id' => $userId,
             'role' => $role,
@@ -263,13 +222,11 @@ try {
         'verification_link' => isLocalHostEnvironment() ? $verificationLink : null,
         'email_sent' => $mailResult['success'],
         'dashboard' => '../pages/index.html'
-    ]);
+    ], 'Account created. Please verify your email before logging in.', 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
     $conn->rollback();
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to create account: ' . $e->getMessage()
+    apiError('INTERNAL_ERROR', 'Failed to create account.', 500, [
+        ['field' => 'server', 'message' => $e->getMessage()]
     ]);
 }
 

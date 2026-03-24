@@ -1,6 +1,7 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
 // Require authentication
 requireAuth();
@@ -22,10 +23,7 @@ $currentUser = $currentUserRes->fetch_assoc();
 $currentUserStmt->close();
 
 if (!$currentUser) {
-    http_response_code(404);
-    echo json_encode(['success' => false, 'message' => 'Current user not found']);
-    $conn->close();
-    exit;
+    apiError('USER_NOT_FOUND', 'Current user not found.', 404);
 }
 
 $convSql = "
@@ -157,8 +155,7 @@ while ($conv = $convRes->fetch_assoc()) {
 }
 $convStmt->close();
 
-echo json_encode([
-    'success' => true,
+apiSuccess([
     'current_user' => [
         'id' => $currentUser['user_id'],
         'name' => $currentUser['full_name'],
@@ -166,7 +163,7 @@ echo json_encode([
     ],
     'contacts' => array_values($contacts),
     'conversations' => $conversations
-]);
+], 'Chat data fetched successfully.', 'CHAT_DATA_FETCHED');
 
 $conn->close();
 ?>

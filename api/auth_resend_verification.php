@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 require 'auth_token_utils.php';
 require 'mail_service.php';
 require 'csrf_protection.php';
@@ -7,24 +8,12 @@ require 'rate_limiting.php';
 require 'secure_logging.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 // CSRF Protection
@@ -32,14 +21,7 @@ if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
     if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
         logCsrfFailure('auth_resend_verification');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'csrf_validation_failed',
-            'message' => 'Invalid or missing CSRF token.'
-        ]);
-        $conn->close();
-        exit;
+        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
     }
 }
 
@@ -47,13 +29,10 @@ $email = strtolower(trim((string)($payload['email'] ?? '')));
 $role = strtolower(trim((string)($payload['role'] ?? '')));
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $role === '') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Valid email and role are required.'
+    apiError('VALIDATION_ERROR', 'Valid email and role are required.', 422, [
+        ['field' => 'email', 'message' => 'Valid email is required.'],
+        ['field' => 'role', 'message' => 'role is required.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address and per email
@@ -68,21 +47,11 @@ $user = $userStmt->get_result()->fetch_assoc();
 $userStmt->close();
 
 if (!$user) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'If your account exists, a verification email has been sent.'
-    ]);
-    $conn->close();
-    exit;
+    apiSuccess(null, 'If your account exists, a verification email has been sent.', 'VERIFICATION_RESEND_ACCEPTED');
 }
 
 if ((int)$user['is_verified'] === 1) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Your email is already verified.'
-    ]);
-    $conn->close();
-    exit;
+    apiSuccess(null, 'Your email is already verified.', 'EMAIL_ALREADY_VERIFIED');
 }
 
 $invalidateStmt = $conn->prepare('UPDATE email_verification_tokens SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL');
@@ -115,12 +84,10 @@ $userName = ($userRecord && $userRecord['full_name']) ? $userRecord['full_name']
 $emailHtmlBody = getVerificationEmailHtml($verificationLink, $userName);
 $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Verification link generated.',
+apiSuccess([
     'verification_link' => isLocalHostEnvironment() ? $verificationLink : null,
     'email_sent' => $mailResult['success']
-]);
+], 'Verification link generated.', 'VERIFICATION_LINK_GENERATED');
 
 $conn->close();
 ?>

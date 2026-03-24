@@ -20,6 +20,30 @@ const API_BASE = (() => {
     return origin + '/api/';
 })();
 
+let csrfTokenCache = null;
+
+function isStateChangingMethod(method) {
+    const m = String(method || 'GET').toUpperCase();
+    return m === 'POST' || m === 'PUT' || m === 'PATCH' || m === 'DELETE';
+}
+
+async function fetchCsrfToken() {
+    const response = await fetch(API_BASE + 'csrf_token.php', { method: 'GET' });
+    const payload = await parseJsonSafely(response);
+    if (payload && payload.success && payload.data && payload.data.token) {
+        csrfTokenCache = payload.data.token;
+        return csrfTokenCache;
+    }
+    return null;
+}
+
+async function ensureCsrfToken() {
+    if (csrfTokenCache) {
+        return csrfTokenCache;
+    }
+    return fetchCsrfToken();
+}
+
 function getLoginPageUrl(reason = 'session_expired') {
     const origin = window.location.origin;
     const host = window.location.hostname;
@@ -60,8 +84,39 @@ async function parseJsonSafely(response) {
 }
 
 async function apiRequest(path, options = {}, shouldRedirectOnAuthFailure = true) {
-    const response = await fetch(API_BASE + path, options);
+    const requestOptions = {
+        method: (options.method || 'GET').toUpperCase(),
+        ...options
+    };
+
+    if (!requestOptions.headers) {
+        requestOptions.headers = {};
+    }
+
+    if (isStateChangingMethod(requestOptions.method)) {
+        const csrfToken = await ensureCsrfToken();
+        if (csrfToken) {
+            requestOptions.headers['X-CSRF-Token'] = csrfToken;
+        }
+    }
+
+    const response = await fetch(API_BASE + path, requestOptions);
     const data = await parseJsonSafely(response);
+
+    if (response.status === 403 && data && data.code === 'CSRF_VALIDATION_FAILED' && isStateChangingMethod(requestOptions.method)) {
+        csrfTokenCache = null;
+        const retryToken = await ensureCsrfToken();
+        if (retryToken) {
+            requestOptions.headers['X-CSRF-Token'] = retryToken;
+            const retryResponse = await fetch(API_BASE + path, requestOptions);
+            const retryData = await parseJsonSafely(retryResponse);
+            return {
+                ok: retryResponse.ok,
+                status: retryResponse.status,
+                data: retryData
+            };
+        }
+    }
 
     if ((response.status === 401 || response.status === 429) && shouldRedirectOnAuthFailure) {
         handleAuthFailure(response.status, data || {});
@@ -75,6 +130,29 @@ async function apiRequest(path, options = {}, shouldRedirectOnAuthFailure = true
     };
 }
 
+function flattenEnvelope(envelope) {
+    if (!envelope || typeof envelope !== 'object') {
+        return envelope;
+    }
+
+    const flattened = {
+        success: !!envelope.success,
+        code: envelope.code || '',
+        message: envelope.message || '',
+        errors: Array.isArray(envelope.errors) ? envelope.errors : [],
+        meta: envelope.meta || {}
+    };
+
+    if (envelope.data !== undefined) {
+        flattened.data = envelope.data;
+        if (envelope.data && typeof envelope.data === 'object' && !Array.isArray(envelope.data)) {
+            Object.assign(flattened, envelope.data);
+        }
+    }
+
+    return flattened;
+}
+
 // Auth Signup
 async function authSignup(payload) {
     try {
@@ -86,7 +164,7 @@ async function authSignup(payload) {
             body: JSON.stringify(payload || {})
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Signup failed.' }) : { success: false, message: 'Signup failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Signup failed.' }) : { success: false, message: 'Signup failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -107,7 +185,7 @@ async function authLogin(payload) {
             body: JSON.stringify(payload || {})
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Login failed.' }) : { success: false, message: 'Login failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Login failed.' }) : { success: false, message: 'Login failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -123,7 +201,7 @@ async function authLogout() {
             method: 'POST'
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Logout failed.' }) : { success: false, message: 'Logout failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Logout failed.' }) : { success: false, message: 'Logout failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -143,7 +221,7 @@ async function authForgotPassword(payload) {
             body: JSON.stringify(payload || {})
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Request failed.' }) : { success: false, message: 'Request failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Request failed.' }) : { success: false, message: 'Request failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -163,7 +241,7 @@ async function authResetPassword(payload) {
             body: JSON.stringify(payload || {})
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Reset failed.' }) : { success: false, message: 'Reset failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Reset failed.' }) : { success: false, message: 'Reset failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -181,7 +259,7 @@ async function authVerifyEmail(payload) {
             method: 'GET'
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Verification failed.' }) : { success: false, message: 'Verification failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Verification failed.' }) : { success: false, message: 'Verification failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {
@@ -201,7 +279,7 @@ async function authResendVerification(payload) {
             body: JSON.stringify(payload || {})
         }, false);
 
-        return result ? (result.data || { success: false, message: 'Resend failed.' }) : { success: false, message: 'Resend failed.' };
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Resend failed.' }) : { success: false, message: 'Resend failed.' };
     } catch (error) {
         console.error('API Error:', error);
         return {

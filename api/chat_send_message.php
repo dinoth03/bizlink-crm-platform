@@ -1,15 +1,13 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
 // Require authentication
 requireAuth();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -20,10 +18,16 @@ $messageContent = trim($input['message_content'] ?? '');
 $senderId = getCurrentUser()['user_id'];
 
 if ($conversationId <= 0 || $messageContent === '') {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'conversation_id and message_content are required']);
-    $conn->close();
-    exit;
+    apiError('VALIDATION_ERROR', 'conversation_id and message_content are required.', 422, [
+        ['field' => 'conversation_id', 'message' => 'conversation_id must be > 0.'],
+        ['field' => 'message_content', 'message' => 'message_content cannot be empty.']
+    ]);
+}
+
+if (strlen($messageContent) > 2000) {
+    apiError('VALIDATION_ERROR', 'message_content is too long.', 422, [
+        ['field' => 'message_content', 'message' => 'Maximum 2000 characters allowed.']
+    ]);
 }
 
 // Verify sender is a participant in this conversation
@@ -33,10 +37,7 @@ $participantStmt->bind_param('ii', $conversationId, $senderId);
 $participantStmt->execute();
 $participantRes = $participantStmt->get_result();
 if ($participantRes->num_rows === 0) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'You are not a participant in this conversation']);
-    $conn->close();
-    exit;
+    apiError('FORBIDDEN', 'You are not a participant in this conversation.', 403);
 }
 $participantStmt->close();
 
@@ -54,10 +55,7 @@ $receiverRow = $receiverRes->fetch_assoc();
 $receiverStmt->close();
 
 if (!$receiverRow) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'No active receiver found for this conversation']);
-    $conn->close();
-    exit;
+    apiError('RECEIVER_NOT_FOUND', 'No active receiver found for this conversation.', 404);
 }
 $receiverId = (int)$receiverRow['user_id'];
 
@@ -72,10 +70,7 @@ $messageId = $insertStmt->insert_id;
 $insertStmt->close();
 
 if (!$ok) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to send message']);
-    $conn->close();
-    exit;
+    apiError('DB_WRITE_ERROR', 'Failed to send message.', 500);
 }
 
 $touchStmt = $conn->prepare('UPDATE conversations SET last_message_date = NOW() WHERE conversation_id = ?');
@@ -88,17 +83,14 @@ $readSelfStmt->bind_param('ii', $messageId, $senderId);
 $readSelfStmt->execute();
 $readSelfStmt->close();
 
-echo json_encode([
-    'success' => true,
-    'data' => [
+apiSuccess([
         'message_id' => $messageId,
         'conversation_id' => $conversationId,
         'sender_id' => $senderId,
         'receiver_id' => $receiverId,
         'message_content' => $messageContent,
         'created_at' => date('Y-m-d H:i:s')
-    ]
-]);
+], 'Message sent successfully.', 'MESSAGE_SENT', 201);
 
 $conn->close();
 ?>

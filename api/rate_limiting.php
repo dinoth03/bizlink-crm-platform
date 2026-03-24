@@ -1,5 +1,7 @@
 <?php
 
+require_once 'api_helpers.php';
+
 /**
  * Rate Limiting Service
  * Enforces per-IP and per-account rate limits on sensitive endpoints.
@@ -115,14 +117,15 @@ function requireRateLimit(
     $result = checkRateLimit($conn, $identifier, $endpoint, $maxAttempts, $windowSeconds);
     
     if (!$result->allowed) {
-        http_response_code(429);
-        echo json_encode([
-            'success' => false,
-            'code' => 'rate_limited',
-            'message' => 'Too many requests. Please try again later.',
-            'retry_after' => $result->retryAfterSeconds
-        ]);
-        exit();
+        header('Retry-After: ' . $result->retryAfterSeconds);
+        apiError(
+            'RATE_LIMITED',
+            'Too many requests. Please try again later.',
+            429,
+            [],
+            null,
+            ['retry_after' => $result->retryAfterSeconds]
+        );
     }
     
     return $result;

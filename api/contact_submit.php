@@ -1,25 +1,14 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
-$payload = json_decode(file_get_contents('php://input'), true);
+$payload = readJsonPayload();
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 $role = strtolower(trim((string)($payload['role'] ?? 'customer')));
@@ -29,43 +18,27 @@ $message = trim((string)($payload['message'] ?? ''));
 
 $allowedRoles = ['admin', 'vendor', 'customer'];
 if (!in_array($role, $allowedRoles, true)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid role selection.'
+    apiError('VALIDATION_ERROR', 'Invalid role selection.', 422, [
+        ['field' => 'role', 'message' => 'role must be admin, vendor, or customer.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if ($name === '' || strlen($name) < 2) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please enter your full name.'
+    apiError('VALIDATION_ERROR', 'Please enter your full name.', 422, [
+        ['field' => 'name', 'message' => 'name must be at least 2 characters.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please enter a valid email address.'
+    apiError('VALIDATION_ERROR', 'Please enter a valid email address.', 422, [
+        ['field' => 'email', 'message' => 'Invalid email format.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if ($message === '' || strlen($message) < 10) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please enter a message with at least 10 characters.'
+    apiError('VALIDATION_ERROR', 'Please enter a message with at least 10 characters.', 422, [
+        ['field' => 'message', 'message' => 'message must be at least 10 characters.']
     ]);
-    $conn->close();
-    exit;
 }
 
 $createTableSql = "
@@ -87,13 +60,9 @@ CREATE TABLE IF NOT EXISTS contact_inquiries (
 ";
 
 if (!$conn->query($createTableSql)) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to prepare contact storage: ' . $conn->error
+    apiError('DB_QUERY_ERROR', 'Failed to prepare contact storage.', 500, [
+        ['field' => 'database', 'message' => $conn->error]
     ]);
-    $conn->close();
-    exit;
 }
 
 $sourcePage = trim((string)($payload['source_page'] ?? '/pages/contact.html'));
@@ -104,24 +73,17 @@ $stmt = $conn->prepare('INSERT INTO contact_inquiries (full_name, email, target_
 $stmt->bind_param('sssssss', $name, $email, $role, $message, $sourcePage, $ipAddress, $userAgent);
 
 if (!$stmt->execute()) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to submit your inquiry: ' . $stmt->error
+    apiError('DB_WRITE_ERROR', 'Failed to submit your inquiry.', 500, [
+        ['field' => 'database', 'message' => $stmt->error]
     ]);
-    $stmt->close();
-    $conn->close();
-    exit;
 }
 
 $inquiryId = (int)$stmt->insert_id;
 $stmt->close();
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Your message has been sent successfully.',
+apiSuccess([
     'inquiry_id' => $inquiryId
-]);
+], 'Your message has been sent successfully.', 'CONTACT_SUBMITTED', 201);
 
 $conn->close();
 ?>

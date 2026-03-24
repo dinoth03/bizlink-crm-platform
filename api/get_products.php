@@ -1,11 +1,39 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
-// Authentication required for sensitive operations
 $isAuthenticated = isLoggedIn();
 $userRole = isLoggedIn() ? getUserRole() : null;
 $userId = isLoggedIn() ? getCurrentUser()['user_id'] : null;
+
+$pagination = getPaginationParams($_GET, 24, 100);
+$filters = [
+    'category' => isset($_GET['category']) ? sanitizeString((string)$_GET['category'], 100) : '',
+    'search' => isset($_GET['search']) ? sanitizeString((string)$_GET['search'], 100) : '',
+    'min_price' => isset($_GET['min_price']) ? (float)$_GET['min_price'] : null,
+    'max_price' => isset($_GET['max_price']) ? (float)$_GET['max_price'] : null,
+    'status' => isset($_GET['status']) ? strtolower(trim((string)$_GET['status'])) : '',
+    'vendor_id' => isset($_GET['vendor_id']) ? (int)$_GET['vendor_id'] : 0
+];
+
+$validationErrors = [];
+if ($filters['status'] !== '' && !in_array($filters['status'], ['active', 'inactive'], true)) {
+    $validationErrors[] = ['field' => 'status', 'message' => 'status must be active or inactive.'];
+}
+if ($filters['min_price'] !== null && $filters['min_price'] < 0) {
+    $validationErrors[] = ['field' => 'min_price', 'message' => 'min_price cannot be negative.'];
+}
+if ($filters['max_price'] !== null && $filters['max_price'] < 0) {
+    $validationErrors[] = ['field' => 'max_price', 'message' => 'max_price cannot be negative.'];
+}
+if ($filters['min_price'] !== null && $filters['max_price'] !== null && $filters['min_price'] > $filters['max_price']) {
+    $validationErrors[] = ['field' => 'price_range', 'message' => 'min_price cannot exceed max_price.'];
+}
+
+if (!empty($validationErrors)) {
+    apiError('VALIDATION_ERROR', 'Invalid query parameters.', 422, $validationErrors);
+}
 
 $baseQuery = "SELECT 
     p.product_id,
@@ -20,38 +48,91 @@ $baseQuery = "SELECT
 FROM products p
 LEFT JOIN vendors v ON p.vendor_id = v.vendor_id";
 
-// Role-based filtering
+$whereClause = ' WHERE 1=1';
+$params = [];
+$types = [];
+
 if ($isAuthenticated && $userRole === 'vendor') {
-    // Vendors see their own products + other active products for marketplace
-    $whereClause = "WHERE (v.user_id = $userId OR p.is_active = 1)";
+    $whereClause .= ' AND (v.user_id = ? OR p.is_active = 1)';
+    $params[] = $userId;
+    $types[] = 'i';
 } else {
-    // Public or customers see only active products
-    $whereClause = "WHERE p.is_active = 1";
+    $whereClause .= ' AND p.is_active = 1';
 }
 
-$query = $baseQuery . " " . $whereClause . " 
+if ($filters['category'] !== '') {
+    appendSqlCondition($whereClause, $params, $types, 'LOWER(p.category) = ?', strtolower($filters['category']), 's');
+}
+if ($filters['search'] !== '') {
+    $searchTerm = '%' . $filters['search'] . '%';
+    $whereClause .= ' AND (p.product_name LIKE ? OR v.business_name LIKE ?)';
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $types[] = 's';
+    $types[] = 's';
+}
+if ($filters['min_price'] !== null) {
+    appendSqlCondition($whereClause, $params, $types, 'p.price >= ?', $filters['min_price'], 'd');
+}
+if ($filters['max_price'] !== null) {
+    appendSqlCondition($whereClause, $params, $types, 'p.price <= ?', $filters['max_price'], 'd');
+}
+if ($filters['status'] !== '') {
+    appendSqlCondition($whereClause, $params, $types, 'p.is_active = ?', $filters['status'] === 'active' ? 1 : 0, 'i');
+}
+if ($filters['vendor_id'] > 0) {
+    appendSqlCondition($whereClause, $params, $types, 'p.vendor_id = ?', $filters['vendor_id'], 'i');
+}
+
+$countSql = 'SELECT COUNT(*) AS total FROM products p LEFT JOIN vendors v ON p.vendor_id = v.vendor_id' . $whereClause;
+$countStmt = $conn->prepare($countSql);
+if (!$countStmt) {
+    apiError('DB_QUERY_ERROR', 'Failed to prepare products count query.', 500);
+}
+bindDynamicParams($countStmt, $types, $params);
+$countStmt->execute();
+$total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+$countStmt->close();
+
+$query = $baseQuery . $whereClause . " 
 ORDER BY p.created_at DESC
-LIMIT 100";
+LIMIT ? OFFSET ?";
 
-$result = $conn->query($query);
-
-if ($result) {
-    $products = array();
-    while($row = $result->fetch_assoc()) {
-        $products[] = $row;
-    }
-    echo json_encode([
-        'success' => true,
-        'data' => $products,
-        'count' => count($products)
-    ]);
-} else {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error fetching products: ' . $conn->error
-    ]);
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+    apiError('DB_QUERY_ERROR', 'Failed to prepare products query.', 500);
 }
+$finalParams = $params;
+$finalTypes = $types;
+$finalParams[] = $pagination['limit'];
+$finalParams[] = $pagination['offset'];
+$finalTypes[] = 'i';
+$finalTypes[] = 'i';
+bindDynamicParams($stmt, $finalTypes, $finalParams);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$products = [];
+while ($row = $result->fetch_assoc()) {
+    $products[] = $row;
+}
+$stmt->close();
+
+apiSuccess(
+    $products,
+    'Products fetched successfully.',
+    'PRODUCTS_FETCHED',
+    200,
+    [
+        'pagination' => [
+            'page' => $pagination['page'],
+            'per_page' => $pagination['per_page'],
+            'total' => $total,
+            'total_pages' => $pagination['per_page'] > 0 ? (int)ceil($total / $pagination['per_page']) : 0
+        ],
+        'filters' => $filters
+    ]
+);
 
 $conn->close();
 ?>

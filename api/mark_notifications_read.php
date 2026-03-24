@@ -1,6 +1,7 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
 // Require authentication
 requireAuth();
@@ -27,26 +28,16 @@ $user = $userResult->fetch_assoc();
 $userStmt->close();
 
 if (!$user) {
-    http_response_code(404);
-    echo json_encode([
-        'success' => false,
-        'message' => 'User not found.'
-    ]);
-    $conn->close();
-    exit();
+    apiError('USER_NOT_FOUND', 'User not found.', 404);
 }
 
 $markAll = !empty($payload['mark_all']);
 $notificationId = isset($payload['notification_id']) ? (int) $payload['notification_id'] : 0;
 
 if (!$markAll && $notificationId <= 0) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Provide notification_id or set mark_all=true.'
+    apiError('VALIDATION_ERROR', 'Provide notification_id or set mark_all=true.', 422, [
+        ['field' => 'notification_id', 'message' => 'notification_id must be > 0 when mark_all is false.']
     ]);
-    $conn->close();
-    exit();
 }
 
 $conn->begin_transaction();
@@ -88,17 +79,14 @@ try {
 
     $conn->commit();
 
-    echo json_encode([
-        'success' => true,
+    apiSuccess([
         'user' => $user,
         'affected_rows' => $affectedRows
-    ]);
+    ], 'Notifications marked as read.', 'NOTIFICATIONS_MARKED');
 } catch (Throwable $error) {
     $conn->rollback();
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to mark notifications as read: ' . $error->getMessage()
+    apiError('INTERNAL_ERROR', 'Failed to mark notifications as read.', 500, [
+        ['field' => 'server', 'message' => $error->getMessage()]
     ]);
 }
 

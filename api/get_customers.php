@@ -1,14 +1,29 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
-// Require authentication
 requireAuth();
 
 $userRole = getUserRole();
 $userId = getCurrentUser()['user_id'];
 
-// Build base query
+$pagination = getPaginationParams($_GET, 20, 100);
+$filters = [
+    'status' => isset($_GET['status']) ? strtolower(trim((string)$_GET['status'])) : '',
+    'city' => isset($_GET['city']) ? sanitizeString((string)$_GET['city'], 100) : '',
+    'search' => isset($_GET['search']) ? sanitizeString((string)$_GET['search'], 120) : ''
+];
+
+$validationErrors = [];
+if ($filters['status'] !== '' && !in_array($filters['status'], ['active', 'inactive', 'suspended', 'pending_verification'], true)) {
+    $validationErrors[] = ['field' => 'status', 'message' => 'Invalid status filter.'];
+}
+
+if (!empty($validationErrors)) {
+    apiError('VALIDATION_ERROR', 'Invalid query parameters.', 422, $validationErrors);
+}
+
 $baseQuery = "SELECT 
     c.customer_id,
     u.user_id,
@@ -26,12 +41,12 @@ FROM customers c
 LEFT JOIN users u ON c.user_id = u.user_id
 LEFT JOIN orders o ON c.customer_id = o.customer_id";
 
-// Add role-based filtering
+$whereClause = ' WHERE 1=1';
+$params = [];
+$types = [];
+
 if ($userRole === 'admin') {
-    // Admins see all customers
-    $whereClause = "WHERE 1=1";
 } elseif ($userRole === 'vendor') {
-    // Vendors see customers who have purchased from them
     $baseQuery = "SELECT DISTINCT
         c.customer_id,
         u.user_id,
@@ -49,40 +64,89 @@ FROM customers c
 LEFT JOIN users u ON c.user_id = u.user_id
 LEFT JOIN orders o ON c.customer_id = o.customer_id
 LEFT JOIN vendors v ON o.vendor_id = v.vendor_id";
-    $whereClause = "WHERE v.user_id = $userId OR o.order_id IS NULL";
+    $whereClause .= ' AND (v.user_id = ? OR o.order_id IS NULL)';
+    $params[] = $userId;
+    $types[] = 'i';
 } elseif ($userRole === 'customer') {
-    // Customers only see their own info
-    $whereClause = "WHERE u.user_id = $userId";
+    $whereClause .= ' AND u.user_id = ?';
+    $params[] = $userId;
+    $types[] = 'i';
 } else {
-    http_response_code(403);
-    echo json_encode(['error' => 'Invalid role']);
-    exit;
+    apiError('FORBIDDEN', 'Invalid role.', 403);
 }
 
-$query = $baseQuery . " " . $whereClause . " 
+if ($filters['status'] !== '') {
+    appendSqlCondition($whereClause, $params, $types, 'LOWER(u.account_status) = ?', $filters['status'], 's');
+}
+if ($filters['city'] !== '') {
+    appendSqlCondition($whereClause, $params, $types, 'LOWER(u.city) = ?', strtolower($filters['city']), 's');
+}
+if ($filters['search'] !== '') {
+    $search = '%' . $filters['search'] . '%';
+    $whereClause .= ' AND (u.full_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $types[] = 's';
+    $types[] = 's';
+    $types[] = 's';
+}
+
+$countSql = 'SELECT COUNT(DISTINCT c.customer_id) AS total FROM customers c LEFT JOIN users u ON c.user_id = u.user_id LEFT JOIN orders o ON c.customer_id = o.customer_id';
+if ($userRole === 'vendor') {
+    $countSql .= ' LEFT JOIN vendors v ON o.vendor_id = v.vendor_id';
+}
+$countSql .= $whereClause;
+
+$countStmt = $conn->prepare($countSql);
+if (!$countStmt) {
+    apiError('DB_QUERY_ERROR', 'Failed to prepare customers count query.', 500);
+}
+bindDynamicParams($countStmt, $types, $params);
+$countStmt->execute();
+$total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+$countStmt->close();
+
+$query = $baseQuery . $whereClause . " 
 GROUP BY c.customer_id
 ORDER BY c.created_at DESC
-LIMIT 100";
+LIMIT ? OFFSET ?";
 
-$result = $conn->query($query);
-
-if ($result) {
-    $customers = array();
-    while($row = $result->fetch_assoc()) {
-        $customers[] = $row;
-    }
-    echo json_encode([
-        'success' => true,
-        'data' => $customers,
-        'count' => count($customers)
-    ]);
-} else {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error fetching customers: ' . $conn->error
-    ]);
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+    apiError('DB_QUERY_ERROR', 'Failed to prepare customers query.', 500);
 }
+$finalParams = $params;
+$finalTypes = $types;
+$finalParams[] = $pagination['limit'];
+$finalParams[] = $pagination['offset'];
+$finalTypes[] = 'i';
+$finalTypes[] = 'i';
+bindDynamicParams($stmt, $finalTypes, $finalParams);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$customers = [];
+while ($row = $result->fetch_assoc()) {
+    $customers[] = $row;
+}
+$stmt->close();
+
+apiSuccess(
+    $customers,
+    'Customers fetched successfully.',
+    'CUSTOMERS_FETCHED',
+    200,
+    [
+        'pagination' => [
+            'page' => $pagination['page'],
+            'per_page' => $pagination['per_page'],
+            'total' => $total,
+            'total_pages' => $pagination['per_page'] > 0 ? (int)ceil($total / $pagination['per_page']) : 0
+        ],
+        'filters' => $filters
+    ]
+);
 
 $conn->close();
 ?>

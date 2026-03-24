@@ -1,6 +1,7 @@
 <?php
 require 'auth_middleware.php';
 require 'config.php';
+require_once 'api_helpers.php';
 
 // Require authentication
 requireAuth();
@@ -10,9 +11,7 @@ $userId = getCurrentUser()['user_id'];
 
 // If customer role is requesting stats, deny them
 if ($userRole === 'customer') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Customers do not have access to dashboard stats']);
-    exit;
+    apiError('FORBIDDEN', 'Customers do not have access to dashboard stats.', 403);
 }
 
 $stats = [];
@@ -123,12 +122,7 @@ if ($userRole === 'admin') {
     $stmt->close();
 }
 
-header('Content-Type: application/json');
-echo json_encode([
-    'success' => true,
-    'data' => $stats,
-    'timestamp' => date('Y-m-d H:i:s')
-]);
+apiSuccess($stats, 'Dashboard stats fetched successfully.', 'DASHBOARD_STATS_FETCHED');
 
 $conn->close();
 ?>

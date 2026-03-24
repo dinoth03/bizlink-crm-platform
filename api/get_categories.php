@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+require_once 'api_helpers.php';
 
 $query = "SELECT 
     category_id,
@@ -12,23 +13,16 @@ ORDER BY sort_order ASC";
 
 $result = $conn->query($query);
 
-if ($result) {
-    $categories = array();
-    while($row = $result->fetch_assoc()) {
-        $categories[] = $row;
-    }
-    echo json_encode([
-        'success' => true,
-        'data' => $categories,
-        'count' => count($categories)
-    ]);
-} else {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error fetching categories: ' . $conn->error
-    ]);
+if (!$result) {
+    apiError('DB_QUERY_ERROR', 'Error fetching categories.', 500, [['field' => 'database', 'message' => $conn->error]]);
 }
+
+$categories = [];
+while($row = $result->fetch_assoc()) {
+    $categories[] = $row;
+}
+
+apiSuccess($categories, 'Categories fetched successfully.', 'CATEGORIES_FETCHED');
 
 $conn->close();
 ?>

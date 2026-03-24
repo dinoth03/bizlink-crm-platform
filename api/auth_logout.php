@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'api_helpers.php';
 
 // Destroy session
 session_destroy();
@@ -18,9 +19,5 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-http_response_code(200);
-echo json_encode([
-    'success' => true,
-    'message' => 'Logged out successfully.'
-]);
+apiSuccess(null, 'Logged out successfully.', 'LOGOUT_SUCCESS');
 ?>

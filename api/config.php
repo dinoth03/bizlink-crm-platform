@@ -1,4 +1,5 @@
 <?php
+require_once 'api_helpers.php';
 // ============================================
 // DATABASE CONFIGURATION
 // ============================================
@@ -35,11 +36,9 @@ if (DB_SOCKET !== '') {
 
 // Check Connection
 if ($conn->connect_error) {
-    http_response_code(500);
-    die(json_encode([
-        'success' => false,
-        'message' => 'Database connection failed: ' . $conn->connect_error
-    ]));
+    apiError('DB_CONNECTION_ERROR', 'Database connection failed.', 500, [
+        ['field' => 'database', 'message' => $conn->connect_error]
+    ]);
 }
 
 // Set Character Set (important for Unicode)

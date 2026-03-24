@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'config.php';
+require_once 'api_helpers.php';
 require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
@@ -76,24 +77,12 @@ function getLockoutInfo(mysqli $conn, string $email, string $role, int $windowMi
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed. Use POST.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON payload.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
 }
 
 // CSRF Protection
@@ -101,14 +90,7 @@ if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
     if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
         logCsrfFailure('auth_login');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'csrf_validation_failed',
-            'message' => 'Invalid or missing CSRF token.'
-        ]);
-        $conn->close();
-        exit;
+        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
     }
 }
 
@@ -119,23 +101,16 @@ $password = (string)($payload['password'] ?? '');
 $allowedRoles = ['admin', 'vendor', 'customer'];
 if (!in_array($role, $allowedRoles, true)) {
     logFailedLoginAttempt($conn, null, $email, $role, 'invalid_role', $requestIpAddress, $requestUserAgent);
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid role selected.'
+    apiError('VALIDATION_ERROR', 'Invalid role selected.', 422, [
+        ['field' => 'role', 'message' => 'role must be admin, vendor, or customer.']
     ]);
-    $conn->close();
-    exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Email and password are required.'
+    apiError('VALIDATION_ERROR', 'Email and password are required.', 422, [
+        ['field' => 'email', 'message' => 'Valid email is required.'],
+        ['field' => 'password', 'message' => 'password is required.']
     ]);
-    $conn->close();
-    exit;
 }
 
 // Rate Limiting - per IP address and per email/role combination
@@ -147,18 +122,13 @@ $lockout = getLockoutInfo($conn, $email, $role, $lockoutWindowMinutes, $maxFaile
 if ($lockout['is_locked']) {
     $remainingSeconds = (int)$lockout['remaining_seconds'];
     $remainingMinutes = (int)ceil($remainingSeconds / 60);
-    http_response_code(429);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Too many failed login attempts. Try again in ' . $remainingMinutes . ' minute(s).',
+    apiError('LOGIN_LOCKED', 'Too many failed login attempts. Try again in ' . $remainingMinutes . ' minute(s).', 429, [], null, [
         'lockout' => [
             'max_attempts' => $maxFailedAttempts,
             'window_minutes' => $lockoutWindowMinutes,
-            'remaining_seconds' => $remainingSeconds,
-        ],
+            'remaining_seconds' => $remainingSeconds
+        ]
     ]);
-    $conn->close();
-    exit;
 }
 
 $stmt = $conn->prepare(
@@ -171,37 +141,18 @@ $stmt->close();
 
 if (!$user) {
     logFailedLoginAttempt($conn, null, $email, $role, 'invalid_credentials_or_role', $requestIpAddress, $requestUserAgent);
-    http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid credentials or role mismatch.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_CREDENTIALS', 'Invalid credentials or role mismatch.', 401);
 }
 
 $status = strtolower((string)$user['account_status']);
 if ((int)($user['is_verified'] ?? 0) !== 1) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'email_not_verified', $requestIpAddress, $requestUserAgent);
-    http_response_code(403);
-    echo json_encode([
-        'success' => false,
-        'code' => 'email_not_verified',
-        'message' => 'Please verify your email before logging in.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('EMAIL_NOT_VERIFIED', 'Please verify your email before logging in.', 403);
 }
 
 if (in_array($status, ['inactive', 'suspended'], true)) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'account_not_active', $requestIpAddress, $requestUserAgent);
-    http_response_code(403);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Your account is not active. Please contact support.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('ACCOUNT_NOT_ACTIVE', 'Your account is not active. Please contact support.', 403);
 }
 
 $storedHash = (string)$user['password_hash'];
@@ -214,13 +165,7 @@ if (!$isValid && hash_equals($storedHash, $password)) {
 
 if (!$isValid) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'incorrect_password', $requestIpAddress, $requestUserAgent);
-    http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Incorrect password.'
-    ]);
-    $conn->close();
-    exit;
+    apiError('INVALID_CREDENTIALS', 'Incorrect password.', 401);
 }
 
 $updateStmt = $conn->prepare('UPDATE users SET last_login = NOW() WHERE user_id = ?');
@@ -251,9 +196,7 @@ $dashboardMap = [
     'customer' => '../customer/dashboard.html'
 ];
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Login successful.',
+apiSuccess([
     'user' => [
         'user_id' => (int)$user['user_id'],
         'role' => $user['role'],
@@ -261,7 +204,7 @@ echo json_encode([
         'full_name' => $user['full_name']
     ],
     'dashboard' => $dashboardMap[$role] ?? '../pages/home.html'
-]);
+], 'Login successful.', 'LOGIN_SUCCESS');
 
 $conn->close();
 ?>

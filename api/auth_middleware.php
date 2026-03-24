@@ -5,42 +5,25 @@
  */
 
 session_start();
+require_once 'api_helpers.php';
 
 define('SESSION_TIMEOUT_SECONDS', 3600);
 
 // Auth check function
 function requireAuth($allowedRoles = []) {
     if (!isset($_SESSION['user_id'])) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'code' => 'unauthorized',
-            'message' => 'Unauthorized - please login'
-        ]);
-        exit();
+        apiError('UNAUTHORIZED', 'Unauthorized - please login.', 401);
     }
 
     if (isset($_SESSION['login_time']) && (time() - (int)$_SESSION['login_time']) > SESSION_TIMEOUT_SECONDS) {
         session_unset();
         session_destroy();
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'code' => 'session_expired',
-            'message' => 'Your session expired. Please sign in again.'
-        ]);
-        exit();
+        apiError('SESSION_EXPIRED', 'Your session expired. Please sign in again.', 401);
     }
 
     // If specific roles required, check them
     if (!empty($allowedRoles) && !in_array($_SESSION['role'], $allowedRoles)) {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'code' => 'forbidden',
-            'message' => 'Forbidden - insufficient permissions'
-        ]);
-        exit();
+        apiError('FORBIDDEN', 'Forbidden - insufficient permissions.', 403);
     }
 
     return true;
