@@ -16,6 +16,16 @@ const adminDashboardCache = {
   orders: []
 };
 
+function renderTableState(tbody, colCount, text) {
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center;padding:20px;color:#888;">${text}</td></tr>`;
+}
+
+function renderBlockState(container, text) {
+  if (!container) return;
+  container.innerHTML = `<div class="widget-state empty">${text}</div>`;
+}
+
 /* NAVIGATION */
 function navigate(page, el) {
   // Hide all pages
@@ -255,6 +265,10 @@ async function performLogout() {
 
 /* DASHBOARD RENDERING */
 async function renderDashboard() {
+  renderTableState(document.getElementById('ordersBody'), 6, 'Loading recent orders...');
+  renderBlockState(document.getElementById('approvalList'), 'Loading pending approvals...');
+  renderBlockState(document.getElementById('topVendors'), 'Loading top vendors...');
+
   // Fetch real stats from database
   try {
     const s = await getDashboardStats();
@@ -462,7 +476,7 @@ async function renderRecentOrders() {
   }
   
   // Show empty-state row when API is unavailable
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">No orders found in database</td></tr>';
+  renderTableState(tbody, 6, 'No orders found in database');
 }
 
 function getTimeAgo(dateStr) {
@@ -613,7 +627,7 @@ async function renderVendorsTable() {
     console.warn('Could not fetch vendors from API:', e);
   }
   
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No vendors found in database</td></tr>';
+  renderTableState(tbody, 9, 'No vendors found in database');
 }
 
 function filterVendorTable(query) {
@@ -662,7 +676,7 @@ async function renderCustomersTable() {
     console.warn('Could not fetch customers from API:', e);
   }
   
-  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#888;">No customers found in database</td></tr>';
+  renderTableState(tbody, 8, 'No customers found in database');
 }
 
 /* ORDERS TABLE */
@@ -697,7 +711,7 @@ async function renderOrdersTable() {
     console.warn('Could not fetch orders from API:', e);
   }
   
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No orders found in database</td></tr>';
+  renderTableState(tbody, 9, 'No orders found in database');
 }
 
 /* ANALYTICS */
@@ -730,8 +744,12 @@ async function renderCustomerGrowthChart() {
     monthlyCounts[createdAt.getMonth()] += 1;
   });
 
-  const fallback = [120, 180, 250, 340, 420, 520, 640, 780, 920, 1040, 1180, 1480];
-  const data = monthlyCounts.some((n) => n > 0) ? monthlyCounts : fallback;
+  if (!monthlyCounts.some((n) => n > 0)) {
+    renderBlockState(container, 'No customer growth data available yet.');
+    return;
+  }
+
+  const data = monthlyCounts;
   const max = Math.max(...data);
   
   const labelsContainer = document.getElementById('customerGrowthLabels');
@@ -787,13 +805,12 @@ async function renderProvinceList() {
     .map(([name, users]) => ({ name, users }));
   const maxUsers = provinces.length ? provinces[0].users : 1;
 
-  const finalProvinces = provinces.length > 0
-    ? provinces.map((p) => ({ ...p, pct: Math.max(8, Math.round((p.users / maxUsers) * 100)) }))
-    : [
-      { name: 'Western', users: 0, pct: 100 },
-      { name: 'Central', users: 0, pct: 75 },
-      { name: 'Southern', users: 0, pct: 55 }
-    ];
+  if (provinces.length === 0) {
+    renderBlockState(container, 'No province distribution data available yet.');
+    return;
+  }
+
+  const finalProvinces = provinces.map((p) => ({ ...p, pct: Math.max(8, Math.round((p.users / maxUsers) * 100)) }));
 
   container.innerHTML = finalProvinces.map(p => `
     <div class="prov-item">

@@ -25,7 +25,7 @@
         <a href="userprofile.html" class="btn-customer">Profile</a>
         <button type="button" class="btn-ghost" onclick="customerLogout()">Sign Out</button>
       </div>
-      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
@@ -83,7 +83,7 @@
       <div class="card notifications-card">
         <div class="notifications-head">
           <div class="card-title" style="margin-bottom:0;">🔔 Notifications</div>
-          <button class="notif-mark-all" onclick="markAllCustomerNotificationsRead()">Mark all read</button>
+          <button class="notif-mark-all" type="button" aria-label="Mark all notifications as read" onclick="markAllCustomerNotificationsRead()">Mark all read</button>
         </div>
         <div id="customerNotificationsList">
           <div class="customer-notif-item">

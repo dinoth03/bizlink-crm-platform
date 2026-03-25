@@ -72,7 +72,7 @@
   <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-left">
-      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle sidebar" onclick="toggleSidebar()">
         <span></span><span></span><span></span>
       </button>
       <div class="page-title" id="pageTitle">Dashboard</div>
@@ -83,13 +83,13 @@
         <input type="text" placeholder="Search anything…" />
       </div>
       <div class="notif-wrap">
-        <button class="notif-bell" onclick="toggleNotif()">
+        <button class="notif-bell" type="button" aria-label="Open notifications" onclick="toggleNotif()">
           🔔<span class="notif-dot"></span>
         </button>
         <div class="notif-panel" id="notifPanel">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
             <div class="notif-title" style="margin-bottom:0;">Notifications</div>
-            <button onclick="markVendorNotificationsRead()" style="background:none;border:none;color:var(--vendor-color);font-weight:700;cursor:pointer;padding:0;">Mark all read</button>
+            <button type="button" aria-label="Mark all notifications as read" onclick="markVendorNotificationsRead()" style="background:none;border:none;color:var(--vendor-color);font-weight:700;cursor:pointer;padding:0;">Mark all read</button>
           </div>
           <div id="vendorNotifList"></div>
         </div>

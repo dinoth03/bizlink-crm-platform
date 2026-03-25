@@ -101,6 +101,26 @@ const customerDashboardState = {
   notifications: []
 };
 
+function setCustomerLoadingStates() {
+  const recentOrdersList = document.getElementById('recentOrdersList');
+  const allOrdersList = document.getElementById('allOrdersList');
+  const recommendedVendorsList = document.getElementById('recommendedVendorsList');
+  const customerNotificationsList = document.getElementById('customerNotificationsList');
+
+  if (recentOrdersList) {
+    recentOrdersList.innerHTML = '<div class="order-item"><span>Loading recent orders...</span><span class="order-status">Loading</span></div>';
+  }
+  if (allOrdersList) {
+    allOrdersList.innerHTML = '<div class="all-order-row"><div><strong>Loading order history...</strong><span>Fetching your latest purchases.</span></div><span class="order-status">Loading</span></div>';
+  }
+  if (recommendedVendorsList) {
+    recommendedVendorsList.innerHTML = '<div class="vendor-mini">Loading recommended vendors...</div>';
+  }
+  if (customerNotificationsList) {
+    customerNotificationsList.innerHTML = '<div class="customer-notif-item"><div class="customer-notif-icon">🔔</div><div><strong>Loading notifications...</strong><p>Fetching your latest updates.</p></div></div>';
+  }
+}
+
 function applyCustomerChatLinks() {
   const chatUrl = '../pages/chat.html';
 
@@ -155,7 +175,7 @@ function renderCustomerNotifications(notifications) {
   list.innerHTML = notifications
     .map(
       (notification) => `
-      <div class="customer-notif-item ${notification.is_read ? 'read' : 'unread'}" onclick="markCustomerNotificationRead(${Number(notification.notification_id || 0)})">
+      <div class="customer-notif-item ${notification.is_read ? 'read' : 'unread'}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();markCustomerNotificationRead(${Number(notification.notification_id || 0)});}" onclick="markCustomerNotificationRead(${Number(notification.notification_id || 0)})">
         <div class="customer-notif-icon">${getCustomerNotificationIcon(notification)}</div>
         <div>
           <strong>${notification.title}</strong>
@@ -347,6 +367,7 @@ function updateCustomerSummary(customer, orders, vendors) {
 }
 
 async function loadCustomerDashboardData() {
+  setCustomerLoadingStates();
   customerDashboardState.customerEmail = '';
   customerDashboardState.customerId = null;
   customerDashboardState.customerName = 'Customer';

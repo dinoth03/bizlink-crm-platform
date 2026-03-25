@@ -230,6 +230,27 @@ function initAnalyticsCharts() {
   if (chartsCreated.analytics) return;
   chartsCreated.analytics = true;
 
+  const monthlyTotals = new Array(12).fill(0);
+  dashboardData.rawOrders.forEach((order) => {
+    const date = new Date(order.date || order.createdAt || '');
+    if (Number.isNaN(date.getTime()) || order.status === 'cancelled') return;
+    monthlyTotals[date.getMonth()] += Number(order.amount || 0);
+  });
+
+  const districtTotals = {};
+  dashboardData.rawOrders.forEach((order) => {
+    const key = order.district || 'Sri Lanka';
+    districtTotals[key] = (districtTotals[key] || 0) + 1;
+  });
+
+  const topDistricts = Object.entries(districtTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+  const districtLabels = topDistricts.map(([name]) => name);
+  const districtCounts = topDistricts.map(([, count]) => count);
+  const districtMax = districtCounts.length ? Math.max(...districtCounts) : 1;
+  const districtPercents = districtCounts.map((count) => Math.round((count / districtMax) * 100));
+
   const mCtx = document.getElementById('monthlyChart');
   if (mCtx) {
     new Chart(mCtx, {
@@ -238,7 +259,7 @@ function initAnalyticsCharts() {
         labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
         datasets: [{
           label: 'Revenue (Rs.)',
-          data: [620000,892400,0,0,0,0,0,0,0,0,0,0],
+          data: monthlyTotals,
           backgroundColor: 'rgba(80,200,120,0.2)',
           borderColor: VENDOR_GREEN,
           borderWidth: 1.5,
@@ -259,9 +280,9 @@ function initAnalyticsCharts() {
     new Chart(distCtx, {
       type: 'bar',
       data: {
-        labels: ['Colombo','Gampaha','Kandy','Galle','Matara','Jaffna'],
+        labels: districtLabels,
         datasets: [{
-          data: [42,22,14,9,7,6],
+          data: districtPercents,
           backgroundColor: [VENDOR_GREEN,'rgba(80,200,120,0.6)','rgba(80,200,120,0.45)','rgba(80,200,120,0.35)','rgba(80,200,120,0.25)','rgba(80,200,120,0.15)'],
           borderWidth: 0,
           borderRadius: 6
@@ -331,16 +352,6 @@ const CUSTOMER_PHOTOS = [
 const AVATAR_COLORS = ['#50C878','#4f8cff','#FF8C00','#a29bfe','#fd79a8','#74b9ff','#55efc4','#fdcb6e','#e17055','#81ecec','#636e72','#b2bec3'];
 
 const ORDER_STATUSES = ['pending','processing','shipped','delivered','cancelled'];
-const SAMPLE_ORDERS = Array.from({length:22}, (_, i) => ({
-  id: 'LK-' + String(900 - i).padStart(5,'0'),
-  customer: CUSTOMER_NAMES[i % CUSTOMER_NAMES.length],
-  district: DISTRICTS[i % DISTRICTS.length],
-  items: Math.floor(Math.random() * 5) + 1,
-  amount: Math.floor(Math.random() * 15000) + 500,
-  payment: i % 4 === 0 ? 'unpaid' : 'paid',
-  status: ORDER_STATUSES[i % ORDER_STATUSES.length],
-  date: `2026-02-${String(Math.max(1, 24 - i)).padStart(2,'0')}`
-}));
 
 const dashboardData = {
   vendors: [],
@@ -352,6 +363,11 @@ const dashboardData = {
   notifications: [],
   loadedFromApi: false
 };
+
+function renderWidgetState(container, text, tone = 'empty') {
+  if (!container) return;
+  container.innerHTML = `<div class="widget-state ${tone}">${text}</div>`;
+}
 
 function getVendorNotificationIcon(notification) {
   const type = notification.notification_type || 'system';
@@ -587,6 +603,13 @@ function updateVendorIdentity(activeVendor) {
 }
 
 async function loadVendorDashboardData() {
+  const recentOrdersBody = document.getElementById('recentOrdersBody');
+  const ordersTableBody = document.getElementById('ordersTableBody');
+  const productsGrid = document.getElementById('productsGrid');
+  renderWidgetState(recentOrdersBody, 'Loading recent orders...', 'loading');
+  renderWidgetState(ordersTableBody, 'Loading order list...', 'loading');
+  renderWidgetState(productsGrid, 'Loading products...', 'loading');
+
   try {
     const [vendors, orders, products, customers] = await Promise.all([getVendors(), getOrders(), getProducts(), getCustomers()]);
     if (vendors && orders && products) {
@@ -621,10 +644,11 @@ async function loadVendorDashboardData() {
     console.error('Vendor dashboard API load failed:', error);
   }
 
-  dashboardData.orders = [...SAMPLE_ORDERS];
-  dashboardData.rawOrders = [...dashboardData.orders];
-  dashboardData.products = [...PRODUCTS];
+  dashboardData.orders = [];
+  dashboardData.rawOrders = [];
+  dashboardData.products = [];
   dashboardData.customers = [];
+  dashboardData.activeVendor = null;
   dashboardData.loadedFromApi = false;
   setCounterTargets(computeStats(dashboardData.orders));
 }
@@ -634,6 +658,12 @@ async function loadVendorDashboardData() {
 function renderRecentOrders() {
   const tbody = document.getElementById('recentOrdersBody');
   if (!tbody || tbody.children.length) return;
+
+  if (!dashboardData.orders.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No recent orders available.</td></tr>';
+    return;
+  }
+
   tbody.innerHTML = dashboardData.orders.slice(0,7).map(o => `
     <tr>
       <td style="font-family:'Playfair Display',serif;font-size:0.78rem;color:var(--vendor-color);font-weight:700">${o.id}</td>
@@ -651,8 +681,9 @@ function renderRecentOrders() {
 function renderOrders(filter) {
   const tbody = document.getElementById('ordersTableBody');
   if (!tbody) return;
-  const source = dashboardData.orders.length ? dashboardData.orders : SAMPLE_ORDERS;
-  const data = filter === 'all' ? source : source.filter(o => o.status === filter);
+  const data = filter === 'all'
+    ? dashboardData.orders
+    : dashboardData.orders.filter((o) => o.status === filter);
 
   if (data.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">No orders found.</td></tr>';
@@ -761,16 +792,7 @@ function getCustomerCardData() {
     });
   }
 
-  return CUSTOMER_NAMES.map((name, i) => ({
-    name,
-    district: DISTRICTS[i % DISTRICTS.length],
-    tag: ['vip', 'frequent', 'new', 'frequent', 'vip', 'new', 'frequent', 'new', 'vip', 'frequent', 'new', 'frequent'][i],
-    purchases: Math.floor(Math.random() * 60) + 2,
-    totalSpent: (Math.floor(Math.random() * 60) + 2) * 1800,
-    initials: name.split(' ').map((n) => n[0]).join(''),
-    photo: CUSTOMER_PHOTOS[i % CUSTOMER_PHOTOS.length],
-    color: AVATAR_COLORS[i % AVATAR_COLORS.length]
-  }));
+  return [];
 }
 
 function renderCustomers() {
@@ -778,6 +800,11 @@ function renderCustomers() {
   if (!grid) return;
 
   const customers = getCustomerCardData();
+  if (customers.length === 0) {
+    renderWidgetState(grid, 'No customer insights available yet.', 'empty');
+    return;
+  }
+
   grid.innerHTML = customers.map((c) => {
     const tagClass = c.tag === 'vip' ? 't-vip' : c.tag === 'frequent' ? 't-frequent' : 't-new';
     const tagLabel = c.tag === 'vip' ? '👑 VIP' : c.tag === 'frequent' ? '🔄 Frequent Buyer' : '🆕 New Customer';
@@ -811,12 +838,7 @@ function renderCustomers() {
 // RENDER TRANSACTIONS
 function deriveTransactions() {
   if (dashboardData.rawOrders.length === 0) {
-    return [
-      { id: 'TXN-8841', type: 'Sale', amount: '+Rs. 4,800', method: 'Card', date: '2026-02-24', status: 'delivered' },
-      { id: 'TXN-8840', type: 'Withdrawal', amount: '-Rs. 25,000', method: 'Bank Transfer', date: '2026-02-23', status: 'processing' },
-      { id: 'TXN-8839', type: 'Sale', amount: '+Rs. 1,200', method: 'eZ Cash', date: '2026-02-23', status: 'delivered' },
-      { id: 'TXN-8838', type: 'Refund', amount: '-Rs. 850', method: 'Card', date: '2026-02-22', status: 'cancelled' }
-    ];
+    return [];
   }
 
   const sales = dashboardData.rawOrders.slice(0, 8).map((order, index) => {
@@ -838,6 +860,11 @@ function renderTransactions() {
   const tbody = document.getElementById('txnBody');
   if (!tbody) return;
   const transactions = deriveTransactions();
+
+  if (transactions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No payment transactions available yet.</td></tr>';
+    return;
+  }
 
   tbody.innerHTML = transactions.map((t) => {
     const isPos = t.amount.startsWith('+');
@@ -867,13 +894,7 @@ function renderTransactions() {
 // BEST SELLERS
 function deriveBestSellers() {
   if (dashboardData.rawOrders.length === 0) {
-    return [
-      { name: 'Ceylon Black Tea 500g', emoji: '🍵', sales: 'Rs. 102,000', pct: 90 },
-      { name: 'Ayurvedic Body Oil', emoji: '🧴', sales: 'Rs. 88,000', pct: 78 },
-      { name: 'Handmade Batik Sarong', emoji: '🎨', sales: 'Rs. 75,500', pct: 67 },
-      { name: 'Wooden Elephant Carving', emoji: '🐘', sales: 'Rs. 62,400', pct: 55 },
-      { name: 'Coconut Oil 1L', emoji: '🥥', sales: 'Rs. 48,000', pct: 42 }
-    ];
+    return [];
   }
 
   const totals = {};
@@ -903,6 +924,12 @@ function renderBestSellers() {
   const el = document.getElementById('bestSellersList');
   if (!el) return;
   const bestSellers = deriveBestSellers();
+
+  if (bestSellers.length === 0) {
+    renderWidgetState(el, 'No sales data yet to rank best sellers.', 'empty');
+    return;
+  }
+
   el.innerHTML = bestSellers.map((b,i) => `
     <div class="bs-item">
       <span class="bs-rank">#${i+1}</span>
@@ -926,12 +953,7 @@ function renderBestSellers() {
 // REVIEWS (derived from live order/customer data)
 function deriveReviews() {
   if (dashboardData.rawOrders.length === 0) {
-    return [
-      { name: 'Nimali Perera', product: 'Ceylon Black Tea', stars: 5, text: 'Absolutely love this tea! Best quality I have found online in Sri Lanka. Fast delivery to Kandy too.', date: '2026-02-22', photo: CUSTOMER_PHOTOS[0], color: AVATAR_COLORS[0] },
-      { name: 'Kasun Fernando', product: 'Coconut Oil 1L', stars: 4, text: 'Good quality oil, very pure. Would be great if packaging was a bit stronger for shipping long distance.', date: '2026-02-20', photo: CUSTOMER_PHOTOS[1], color: AVATAR_COLORS[1] },
-      { name: 'Tharindu Silva', product: 'Batik Sarong', stars: 5, text: 'Amazing craftsmanship. The colors are vibrant and the fabric feels premium. Very happy with my purchase!', date: '2026-02-18', photo: CUSTOMER_PHOTOS[3], color: AVATAR_COLORS[3] },
-      { name: 'Chamari Herath', product: 'Ayurvedic Body Oil', stars: 3, text: 'Product is decent but shipping took longer than expected. Quality is as described in the listing though.', date: '2026-02-15', photo: CUSTOMER_PHOTOS[8], color: AVATAR_COLORS[8] }
-    ];
+    return [];
   }
 
   const templates = {
@@ -961,6 +983,15 @@ function renderReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
   const reviews = deriveReviews();
+
+  if (reviews.length === 0) {
+    renderWidgetState(el, 'No customer reviews yet.', 'empty');
+    const ratingBig = document.querySelector('#page-reviews .rating-big');
+    const ratingCount = document.querySelector('#page-reviews .rating-count');
+    if (ratingBig) ratingBig.textContent = '0.0';
+    if (ratingCount) ratingCount.textContent = 'Based on 0 reviews';
+    return;
+  }
 
   el.innerHTML = reviews.map(r => `
     <div class="review-card">
@@ -1147,7 +1178,7 @@ window.addEventListener('load', async () => {
   document.body.style.opacity = '1';
   await loadVendorDashboardData();
   await loadVendorNotifications(dashboardData.activeVendor);
-  allProducts = dashboardData.products.length ? [...dashboardData.products] : [...PRODUCTS];
+  allProducts = [...dashboardData.products];
   onPageActivate('dashboard');
 });
 
