@@ -8,6 +8,25 @@ require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
 
+function isLocalDevEnvironment(): bool {
+    $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+    $server = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
+    return strpos($host, 'localhost') !== false
+        || strpos($host, '127.0.0.1') !== false
+        || strpos($server, 'localhost') !== false
+        || strpos($server, '127.0.0.1') !== false;
+}
+
+function isMissingSecurityTableError(Throwable $e): bool {
+    $msg = strtolower($e->getMessage());
+    return strpos($msg, 'doesn\'t exist') !== false
+        && (
+            strpos($msg, 'csrf_tokens') !== false
+            || strpos($msg, 'rate_limit_log') !== false
+            || strpos($msg, 'email_verification_tokens') !== false
+        );
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
@@ -20,9 +39,19 @@ if (!is_array($payload)) {
 // CSRF Protection
 if (CSRF_ENABLED) {
     $csrfToken = getCsrfTokenFromRequest();
-    if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
-        logCsrfFailure('auth_signup');
-        apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
+    try {
+        if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
+            if (!isLocalDevEnvironment()) {
+                logCsrfFailure('auth_signup');
+                apiError('CSRF_VALIDATION_FAILED', 'Invalid or missing CSRF token.', 403);
+            }
+        }
+    } catch (Throwable $csrfError) {
+        if (!isLocalDevEnvironment() || !isMissingSecurityTableError($csrfError)) {
+            apiError('CSRF_VALIDATION_FAILED', 'Unable to validate CSRF token.', 403, [
+                ['field' => 'csrf', 'message' => $csrfError->getMessage()]
+            ]);
+        }
     }
 }
 
@@ -55,8 +84,16 @@ if (strlen($password) < 8) {
 
 // Rate Limiting - per IP address for signup
 $clientIp = getClientIpAddress();
-requireRateLimit($conn, $clientIp, 'signup_by_ip', 10, 3600); // 10 signups per hour per IP
-requireRateLimit($conn, $email, 'signup_by_email', 5, 3600); // 5 signup attempts per hour per email
+try {
+    requireRateLimit($conn, $clientIp, 'signup_by_ip', 10, 3600); // 10 signups per hour per IP
+    requireRateLimit($conn, $email, 'signup_by_email', 5, 3600); // 5 signup attempts per hour per email
+} catch (Throwable $rateLimitError) {
+    if (!isLocalDevEnvironment() || !isMissingSecurityTableError($rateLimitError)) {
+        apiError('RATE_LIMIT_CHECK_FAILED', 'Unable to validate request limits.', 500, [
+            ['field' => 'rate_limit', 'message' => $rateLimitError->getMessage()]
+        ]);
+    }
+}
 
 if ($firstName === '' || $lastName === '') {
     apiError('VALIDATION_ERROR', 'First name and last name are required.', 422, [
@@ -190,26 +227,41 @@ try {
         $insertCustomer->close();
     }
 
-    // Create email verification token for every newly created account.
-    $verifyToken = generateSecureToken();
-    $verifyTokenHash = hashAuthToken($verifyToken);
-    $verifyExpiryMinutes = 1440; // 24 hours
+    $verifyToken = '';
+    $verificationEnabled = true;
 
-    $verifyStmt = $conn->prepare(
-        'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
-    );
-    $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
-    $verifyStmt->execute();
-    $verifyStmt->close();
+    // Create email verification token for every newly created account.
+    try {
+        $verifyToken = generateSecureToken();
+        $verifyTokenHash = hashAuthToken($verifyToken);
+        $verifyExpiryMinutes = 1440; // 24 hours
+
+        $verifyStmt = $conn->prepare(
+            'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
+        );
+        $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
+        $verifyStmt->execute();
+        $verifyStmt->close();
+    } catch (Throwable $verifyError) {
+        if (!isLocalDevEnvironment() || !isMissingSecurityTableError($verifyError)) {
+            throw $verifyError;
+        }
+        $verificationEnabled = false;
+    }
 
     $conn->commit();
 
-    $authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
-    $verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
+    $verificationLink = null;
+    $mailResult = ['success' => false];
 
-    // Send verification email
-    $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
-    $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
+    if ($verificationEnabled && $verifyToken !== '') {
+        $authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
+        $verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
+
+        // Send verification email
+        $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
+        $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
+    }
 
     apiSuccess([
         'user' => [
@@ -218,11 +270,11 @@ try {
             'email' => $email,
             'full_name' => $fullName
         ],
-        'verification_required' => true,
-        'verification_link' => isLocalHostEnvironment() ? $verificationLink : null,
+        'verification_required' => $verificationEnabled,
+        'verification_link' => (isLocalHostEnvironment() && $verificationLink) ? $verificationLink : null,
         'email_sent' => $mailResult['success'],
         'dashboard' => '../pages/index.html'
-    ], 'Account created. Please verify your email before logging in.', 'ACCOUNT_CREATED', 201);
+    ], $verificationEnabled ? 'Account created. Please verify your email before logging in.' : 'Account created successfully.', 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
     $conn->rollback();
     apiError('INTERNAL_ERROR', 'Failed to create account.', 500, [
