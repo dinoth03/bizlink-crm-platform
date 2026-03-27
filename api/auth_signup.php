@@ -145,6 +145,10 @@ function createStoreSlug(mysqli $conn, string $businessName): string {
     }
 }
 
+function generateVerificationCode(): string {
+    return str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
 try {
     $conn->begin_transaction();
 
@@ -232,24 +236,26 @@ try {
         $insertCustomer->close();
     }
 
-    $verifyToken = '';
+    $verifyCode = '';
     $verificationEnabled = false;
     $requiresAdminApproval = false;
+    $verificationMethod = null;
 
     // Email verification: ONLY for admins
     if ($role === 'admin') {
         try {
-            $verifyToken = generateSecureToken();
-            $verifyTokenHash = hashAuthToken($verifyToken);
-            $verifyExpiryMinutes = 1440; // 24 hours
+            $verifyCode = generateVerificationCode();
+            $verifyCodeHash = hashAuthToken($verifyCode);
+            $verifyExpiryMinutes = 15;
 
             $verifyStmt = $conn->prepare(
                 'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
             );
-            $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
+            $verifyStmt->bind_param('isi', $userId, $verifyCodeHash, $verifyExpiryMinutes);
             $verifyStmt->execute();
             $verifyStmt->close();
             $verificationEnabled = true;
+            $verificationMethod = 'code';
         } catch (Throwable $verifyError) {
             if (!isLocalDevEnvironment() || !isMissingSecurityTableError($verifyError)) {
                 throw $verifyError;
@@ -265,18 +271,19 @@ try {
     $verificationLink = null;
     $mailResult = ['success' => false];
 
-    // Send verification email only for admins
-    if ($verificationEnabled && $verifyToken !== '') {
-        $authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
-        $verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
-
-        $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
-        $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
+    // Send admin verification code email
+    if ($verificationEnabled && $verifyCode !== '') {
+        $emailHtmlBody = getAdminVerificationCodeEmailHtml($verifyCode, $firstName ?: 'Admin');
+        $mailResult = sendMail($email, 'Your BizLink Admin Verification Code', $emailHtmlBody, 'Your verification code is: ' . $verifyCode);
     }
 
     $successMessage = '';
     if ($verificationEnabled) {
-        $successMessage = 'Account created. Please verify your email before logging in.';
+        if (!empty($mailResult['success'])) {
+            $successMessage = 'Account created. Enter the 6-digit admin email verification code before logging in.';
+        } else {
+            $successMessage = 'Account created, but OTP email was not sent. Please check SMTP settings and use resend code.';
+        }
     } elseif ($requiresAdminApproval) {
         $successMessage = 'Account created. Please wait for admin approval before logging in.';
     } else {
@@ -291,7 +298,9 @@ try {
             'full_name' => $fullName
         ],
         'verification_required' => $verificationEnabled,
+        'verification_method' => $verificationMethod,
         'verification_link' => (isLocalHostEnvironment() && $verificationLink) ? $verificationLink : null,
+        'verification_code' => (isLocalHostEnvironment() && $verificationEnabled) ? $verifyCode : null,
         'email_sent' => $mailResult['success'],
         'requires_admin_approval' => $requiresAdminApproval,
         'dashboard' => '../pages/index.html'

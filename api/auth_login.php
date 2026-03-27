@@ -145,13 +145,16 @@ if (!$user) {
 }
 
 $status = strtolower((string)$user['account_status']);
-if ((int)($user['is_verified'] ?? 0) !== 1) {
+if ($role === 'admin' && (int)($user['is_verified'] ?? 0) !== 1) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'email_not_verified', $requestIpAddress, $requestUserAgent);
-    apiError('EMAIL_NOT_VERIFIED', 'Please verify your email before logging in.', 403);
+    apiError('EMAIL_NOT_VERIFIED', 'Please verify your admin email code before logging in.', 403);
 }
 
 if (in_array($status, ['inactive', 'suspended'], true)) {
     logFailedLoginAttempt($conn, (int)$user['user_id'], $email, $role, 'account_not_active', $requestIpAddress, $requestUserAgent);
+    if ($role === 'vendor' || $role === 'customer') {
+        apiError('ACCOUNT_PENDING_APPROVAL', 'Your account is pending admin approval.', 403);
+    }
     apiError('ACCOUNT_NOT_ACTIVE', 'Your account is not active. Please contact support.', 403);
 }
 

@@ -7,6 +7,10 @@ require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
 
+function generateVerificationCode(): string {
+    return str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
@@ -54,24 +58,25 @@ if ((int)$user['is_verified'] === 1) {
     apiSuccess(null, 'Your email is already verified.', 'EMAIL_ALREADY_VERIFIED');
 }
 
+if ($role !== 'admin') {
+    apiSuccess(null, 'This account type is reviewed by admin approval and does not use email code verification.', 'ADMIN_APPROVAL_REQUIRED');
+}
+
 $invalidateStmt = $conn->prepare('UPDATE email_verification_tokens SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL');
 $invalidateStmt->bind_param('i', $user['user_id']);
 $invalidateStmt->execute();
 $invalidateStmt->close();
 
-$verifyToken = generateSecureToken();
-$verifyTokenHash = hashAuthToken($verifyToken);
-$verifyExpiryMinutes = 1440;
+$verifyCode = generateVerificationCode();
+$verifyCodeHash = hashAuthToken($verifyCode);
+$verifyExpiryMinutes = 15;
 
 $insertStmt = $conn->prepare(
     'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
 );
-$insertStmt->bind_param('isi', $user['user_id'], $verifyTokenHash, $verifyExpiryMinutes);
+$insertStmt->bind_param('isi', $user['user_id'], $verifyCodeHash, $verifyExpiryMinutes);
 $insertStmt->execute();
 $insertStmt->close();
-
-$authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
-$verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
 
 // Send verification email
 $userStmtForName = $conn->prepare('SELECT full_name FROM users WHERE user_id = ? LIMIT 1');
@@ -81,13 +86,14 @@ $userRecord = $userStmtForName->get_result()->fetch_assoc();
 $userStmtForName->close();
 $userName = ($userRecord && $userRecord['full_name']) ? $userRecord['full_name'] : 'User';
 
-$emailHtmlBody = getVerificationEmailHtml($verificationLink, $userName);
-$mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
+$emailHtmlBody = getAdminVerificationCodeEmailHtml($verifyCode, $userName ?: 'Admin');
+$mailResult = sendMail($email, 'Your BizLink Admin Verification Code', $emailHtmlBody, 'Your verification code is: ' . $verifyCode);
 
 apiSuccess([
-    'verification_link' => isLocalHostEnvironment() ? $verificationLink : null,
+    'verification_method' => 'code',
+    'verification_code' => isLocalHostEnvironment() ? $verifyCode : null,
     'email_sent' => $mailResult['success']
-], 'Verification link generated.', 'VERIFICATION_LINK_GENERATED');
+], 'Verification code sent.', 'VERIFICATION_CODE_SENT');
 
 $conn->close();
 ?>

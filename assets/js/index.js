@@ -40,6 +40,23 @@ function selectLoginRole(role, el) {
 
   // Colour submit button
   applyRoleColour(document.getElementById('loginSubmitBtn'), role);
+
+  const adminCodeField = document.getElementById('adminCodeField');
+  if (adminCodeField) {
+    const codeInput = document.getElementById('adminVerifyCode');
+    const resendLink = adminCodeField.querySelector('a');
+    const isAdmin = role === 'admin';
+    adminCodeField.style.opacity = isAdmin ? '1' : '0.6';
+    if (codeInput) {
+      codeInput.disabled = !isAdmin;
+      if (!isAdmin) {
+        codeInput.value = '';
+      }
+    }
+    if (resendLink) {
+      resendLink.style.pointerEvents = isAdmin ? 'auto' : 'none';
+    }
+  }
 }
 
 /*SIGNUP – ROLE BIG CARDS*/
@@ -286,7 +303,13 @@ async function handleSignup() {
   successEl.classList.remove('hidden');
 
   // Update success screen
-  document.getElementById('successMsg').innerHTML = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Please verify your email before login.`;
+  let successMsg = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Account created successfully.`;
+  if (role === 'admin' && signupResult.verification_required) {
+    successMsg = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Please check your email and enter the 6-digit admin verification code before login.`;
+  } else if (signupResult.requires_admin_approval) {
+    successMsg = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Your account is pending admin approval. You can login after approval.`;
+  }
+  document.getElementById('successMsg').innerHTML = successMsg;
 
   const roleTagMap = {
     admin:    { text: '👑 Administrator', style: 'background:var(--admin-gradient);color:#fff;' },
@@ -309,7 +332,7 @@ async function handleSignup() {
     if (line) line.classList.add('done');
   });
 
-  showToast('Account created. Please verify your email.', 'success');
+  showToast((signupResult && signupResult.message) || 'Account created.', 'success');
   scrollToTop();
 
   const redirectLink = '../pages/index.html';
@@ -323,7 +346,11 @@ async function handleSignup() {
     };
   }
 
-  if (signupResult.verification_link) {
+  if (role === 'admin' && signupResult.verification_method === 'code') {
+    if (signupResult.verification_code) {
+      window.prompt('Local development admin verification code:', signupResult.verification_code);
+    }
+  } else if (signupResult.verification_link) {
     window.prompt('Local development verification link:', signupResult.verification_link);
   }
 
@@ -362,18 +389,33 @@ async function handleLogin(e) {
   btn.disabled = false;
 
   if (!result || !result.success) {
-    if (result && result.code === 'email_not_verified') {
-      const resend = confirm('Your email is not verified yet. Send a new verification link?');
-      if (resend && typeof authResendVerification === 'function') {
-        const resendResult = await authResendVerification({ role: state.loginRole, email: loginEmail });
-        if (resendResult && resendResult.success) {
-          showToast('Verification link sent. Check your email.', 'info');
-          if (resendResult.verification_link) {
-            window.prompt('Local development verification link:', resendResult.verification_link);
-          }
-          return;
-        }
+    const errorCode = String(result && result.code ? result.code : '').toUpperCase();
+
+    if (errorCode === 'EMAIL_NOT_VERIFIED' && state.loginRole === 'admin') {
+      const codeInput = (document.getElementById('adminVerifyCode')?.value || '').trim();
+      if (!/^\d{6}$/.test(codeInput)) {
+        showToast('Enter your 6-digit admin verification code in the code field.', 'warn');
+        return;
       }
+
+      if (typeof authVerifyAdminCode === 'function') {
+        const verifyResult = await authVerifyAdminCode({ email: loginEmail, code: codeInput });
+        if (verifyResult && verifyResult.success) {
+          showToast('Admin verified. Sign in once more to continue.', 'success');
+          const codeEl = document.getElementById('adminVerifyCode');
+          if (codeEl) {
+            codeEl.value = '';
+          }
+        } else {
+          showToast((verifyResult && verifyResult.message) || 'Verification failed.', 'warn');
+        }
+        return;
+      }
+    }
+
+    if (errorCode === 'ACCOUNT_PENDING_APPROVAL') {
+      showToast('Your account is waiting for admin approval.', 'info');
+      return;
     }
 
     showToast((result && result.message) || 'Login failed. Please check backend API.', 'warn');
@@ -386,6 +428,34 @@ async function handleLogin(e) {
   setTimeout(() => {
     window.location.href = dashboardLink;
   }, 900);
+}
+
+async function resendAdminCodeFromLogin(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  if (state.loginRole !== 'admin') {
+    showToast('Select Admin role first.', 'warn');
+    return;
+  }
+
+  const loginEmail = (document.getElementById('loginEmail')?.value || '').trim().toLowerCase();
+  if (!isValidEmail(loginEmail)) {
+    showToast('Enter admin email first, then resend code.', 'warn');
+    return;
+  }
+
+  if (typeof authResendVerification !== 'function') {
+    showToast('Resend service unavailable.', 'warn');
+    return;
+  }
+
+  const resendResult = await authResendVerification({ role: 'admin', email: loginEmail });
+  showToast((resendResult && resendResult.message) || 'Verification code resend requested.', 'info');
+  if (resendResult && resendResult.verification_code) {
+    window.prompt('Local development admin verification code:', resendResult.verification_code);
+  }
 }
 
 /*PASSWORD STRENGTH*/
