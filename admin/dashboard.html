@@ -55,11 +55,13 @@
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Vendors
         <span class="nav-count">320</span>
+        <span class="nav-badge" id="pendingVendorsBadge" style="display:none;"></span>
       </a>
       <a class="sb-nav-item" data-page="customers" onclick="navigate('customers',this)">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Customers
         <span class="nav-count">12.4k</span>
+        <span class="nav-badge" id="pendingCustomersBadge" style="display:none;"></span>
       </a>
       <a class="sb-nav-item" data-page="orders" onclick="navigate('orders',this)">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -190,9 +192,15 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
           </button>
-          <button class="btn-primary" onclick="showNewVendorModal()">
+          <button class="btn-primary" onclick="showApprovalModal('vendor')" style="position:relative;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Vendor
+            <span class="btn-badge" id="vendorBadge" style="display:none;position:absolute;top:-8px;right:-8px;background:#ff2d55;color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;"></span>
+          </button>
+          <button class="btn-primary" onclick="showApprovalModal('customer')" style="position:relative;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Customer
+            <span class="btn-badge" id="customerBadge" style="display:none;position:absolute;top:-8px;right:-8px;background:#ff2d55;color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;"></span>
           </button>
         </div>
       </div>
@@ -737,7 +745,192 @@
   </div>
 </div>
 
+<!-- ═══ APPROVAL QUEUE MODAL ═══ -->
+<div class="modal-backdrop" id="approvalBackdrop" style="display:none" onclick="closeApprovalModal(event)">
+  <div class="modal-box" style="max-width:700px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 id="approvalTitle" style="margin:0;">Pending Vendors</h3>
+      <button onclick="closeApprovalModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+    </div>
+    <div id="approvalList" style="max-height:500px;overflow-y:auto;"></div>
+  </div>
+</div>
+
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/panel.js"></script>
+<script>
+// Admin Approval System
+let pendingVendors = [];
+let pendingCustomers = [];
+
+async function loadPendingCounts() {
+  try {
+    // Get pending vendors
+    const vendorsRes = await fetch('../api/admin_get_pending_vendors.php');
+    const vendorsData = await vendorsRes.json();
+    if (vendorsData.success) {
+      pendingVendors = vendorsData.data || [];
+      const badge = document.getElementById('vendorBadge');
+      const navBadge = document.getElementById('pendingVendorsBadge');
+      if (pendingVendors.length > 0) {
+        badge.textContent = pendingVendors.length;
+        badge.style.display = 'flex';
+        navBadge.textContent = pendingVendors.length;
+        navBadge.style.display = 'inline-block';
+        navBadge.style.background = '#ff2d55';
+        navBadge.style.color = 'white';
+        navBadge.style.borderRadius = '10px';
+        navBadge.style.padding = '2px 6px';
+        navBadge.style.fontSize = '10px';
+        navBadge.style.fontWeight = 'bold';
+        navBadge.style.marginLeft = '8px';
+      }
+    }
+
+    // Get pending customers
+    const customersRes = await fetch('../api/admin_get_pending_customers.php');
+    const customersData = await customersRes.json();
+    if (customersData.success) {
+      pendingCustomers = customersData.data || [];
+      const badge = document.getElementById('customerBadge');
+      const navBadge = document.getElementById('pendingCustomersBadge');
+      if (pendingCustomers.length > 0) {
+        badge.textContent = pendingCustomers.length;
+        badge.style.display = 'flex';
+        navBadge.textContent = pendingCustomers.length;
+        navBadge.style.display = 'inline-block';
+        navBadge.style.background = '#ff2d55';
+        navBadge.style.color = 'white';
+        navBadge.style.borderRadius = '10px';
+        navBadge.style.padding = '2px 6px';
+        navBadge.style.fontSize = '10px';
+        navBadge.style.fontWeight = 'bold';
+        navBadge.style.marginLeft = '8px';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading pending counts:', error);
+  }
+}
+
+function showApprovalModal(type) {
+  const backdrop = document.getElementById('approvalBackdrop');
+  const title = document.getElementById('approvalTitle');
+  const list = document.getElementById('approvalList');
+  let items = [];
+
+  if (type === 'vendor') {
+    title.textContent = `Pending Vendors (${pendingVendors.length})`;
+    items = pendingVendors;
+  } else {
+    title.textContent = `Pending Customers (${pendingCustomers.length})`;
+    items = pendingCustomers;
+  }
+
+  if (items.length === 0) {
+    list.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">No pending ' + type + 's to review.</p>';
+    backdrop.style.display = 'flex';
+    return;
+  }
+
+  let html = '';
+  items.forEach((item, index) => {
+    html += `
+      <div style="border:1px solid #e0e0e0;border-radius:8px;padding:15px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div style="flex:1;">
+            <h4 style="margin:0 0 8px 0;">${escapeHtml(type === 'vendor' ? item.business_name : item.full_name)}</h4>
+            <p style="margin:4px 0;color:#666;font-size:13px;">
+              <strong>Email:</strong> ${escapeHtml(item.email)}<br>
+              <strong>Phone:</strong> ${escapeHtml(item.phone)}<br>
+              <strong>Signed up:</strong> ${new Date(item.created_at).toLocaleDateString()}
+            </p>
+            ${type === 'vendor' ? `
+              <p style="margin:4px 0;color:#666;font-size:13px;">
+                <strong>Business Type:</strong> ${escapeHtml(item.business_type)}<br>
+                <strong>Category:</strong> ${escapeHtml(item.business_category)}<br>
+                <strong>Reg #:</strong> ${escapeHtml(item.business_registration_number)}
+              </p>
+            ` : ''}
+          </div>
+          <div style="margin-left:10px;">
+            <button onclick="approveEntry('${type}', ${item[type === 'vendor' ? 'vendor_id' : 'customer_id']})" style="background:#4CAF50;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-bottom:5px;width:100%;">Approve</button>
+            <button onclick="rejectEntry('${type}', ${item[type === 'vendor' ? 'vendor_id' : 'customer_id']})" style="background:#f44336;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;width:100%;">Reject</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  list.innerHTML = html;
+  backdrop.style.display = 'flex';
+}
+
+function closeApprovalModal(event) {
+  if (event && event.target.id !== 'approvalBackdrop') return;
+  document.getElementById('approvalBackdrop').style.display = 'none';
+}
+
+async function approveEntry(type, id) {
+  const endpoint = type === 'vendor' ? 'admin_approve_vendor.php' : 'admin_approve_customer.php';
+  const paramName = type === 'vendor' ? 'vendor_id' : 'customer_id';
+  
+  try {
+    const res = await fetch(`../api/${endpoint}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({[paramName]: id})
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} approved successfully!`);
+      loadPendingCounts();
+      showApprovalModal(type);
+    } else {
+      alert('Error approving ' + type);
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function rejectEntry(type, id) {
+  const reason = prompt('Enter rejection reason (optional):');
+  const endpoint = type === 'vendor' ? 'admin_reject_vendor.php' : 'admin_reject_customer.php';
+  const paramName = type === 'vendor' ? 'vendor_id' : 'customer_id';
+  
+  try {
+    const payload = {[paramName]: id};
+    if (type === 'vendor' && reason) {
+      payload.reason = reason;
+    }
+    
+    const res = await fetch(`../api/${endpoint}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} rejected successfully!`);
+      loadPendingCounts();
+      showApprovalModal(type);
+    } else {
+      alert('Error rejecting ' + type);
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Load pending counts on page load
+document.addEventListener('DOMContentLoaded', loadPendingCounts);
+</script>
 </body>
 </html>

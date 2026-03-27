@@ -157,7 +157,12 @@ try {
         $city = trim((string)($profile['city'] ?? ''));
     }
 
-    $status = $role === 'vendor' ? 'pending_verification' : 'inactive';
+    // Admins need email verification, vendors/customers wait for admin approval
+    if ($role === 'admin') {
+        $status = 'pending_verification'; // Will be 'active' after email verification
+    } else {
+        $status = 'inactive'; // Will be 'active' after admin approval
+    }
     $isVerified = 0;
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
@@ -228,25 +233,31 @@ try {
     }
 
     $verifyToken = '';
-    $verificationEnabled = true;
+    $verificationEnabled = false;
+    $requiresAdminApproval = false;
 
-    // Create email verification token for every newly created account.
-    try {
-        $verifyToken = generateSecureToken();
-        $verifyTokenHash = hashAuthToken($verifyToken);
-        $verifyExpiryMinutes = 1440; // 24 hours
+    // Email verification: ONLY for admins
+    if ($role === 'admin') {
+        try {
+            $verifyToken = generateSecureToken();
+            $verifyTokenHash = hashAuthToken($verifyToken);
+            $verifyExpiryMinutes = 1440; // 24 hours
 
-        $verifyStmt = $conn->prepare(
-            'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
-        );
-        $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
-        $verifyStmt->execute();
-        $verifyStmt->close();
-    } catch (Throwable $verifyError) {
-        if (!isLocalDevEnvironment() || !isMissingSecurityTableError($verifyError)) {
-            throw $verifyError;
+            $verifyStmt = $conn->prepare(
+                'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
+            );
+            $verifyStmt->bind_param('isi', $userId, $verifyTokenHash, $verifyExpiryMinutes);
+            $verifyStmt->execute();
+            $verifyStmt->close();
+            $verificationEnabled = true;
+        } catch (Throwable $verifyError) {
+            if (!isLocalDevEnvironment() || !isMissingSecurityTableError($verifyError)) {
+                throw $verifyError;
+            }
         }
-        $verificationEnabled = false;
+    } else {
+        // Vendors and customers require admin approval (no email verification)
+        $requiresAdminApproval = true;
     }
 
     $conn->commit();
@@ -254,13 +265,22 @@ try {
     $verificationLink = null;
     $mailResult = ['success' => false];
 
+    // Send verification email only for admins
     if ($verificationEnabled && $verifyToken !== '') {
         $authPagePath = isLocalHostEnvironment() ? 'bizlink-crm-platform/pages/index.html' : 'pages/index.html';
         $verificationLink = buildPublicUrl($authPagePath, ['verify_token' => $verifyToken]);
 
-        // Send verification email
         $emailHtmlBody = getVerificationEmailHtml($verificationLink, $firstName ?: 'User');
         $mailResult = sendMail($email, 'Verify Your BizLink CRM Email Address', $emailHtmlBody);
+    }
+
+    $successMessage = '';
+    if ($verificationEnabled) {
+        $successMessage = 'Account created. Please verify your email before logging in.';
+    } elseif ($requiresAdminApproval) {
+        $successMessage = 'Account created. Please wait for admin approval before logging in.';
+    } else {
+        $successMessage = 'Account created successfully.';
     }
 
     apiSuccess([
@@ -273,8 +293,9 @@ try {
         'verification_required' => $verificationEnabled,
         'verification_link' => (isLocalHostEnvironment() && $verificationLink) ? $verificationLink : null,
         'email_sent' => $mailResult['success'],
+        'requires_admin_approval' => $requiresAdminApproval,
         'dashboard' => '../pages/index.html'
-    ], $verificationEnabled ? 'Account created. Please verify your email before logging in.' : 'Account created successfully.', 'ACCOUNT_CREATED', 201);
+    ], $successMessage, 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
     $conn->rollback();
     apiError('INTERNAL_ERROR', 'Failed to create account.', 500, [
