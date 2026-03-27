@@ -6,7 +6,10 @@
  */
 
 // SMTP Configuration (populated from environment or config)
-define('MAIL_DRIVER', getenv('MAIL_DRIVER') ?: 'php');  // 'php', 'smtp', or 'dev'
+// For localhost development: set to 'dev' to log emails instead of sending
+// For production with SMTP: set to 'smtp' with credentials
+// For production with sendmail: set to 'php'
+define('MAIL_DRIVER', getenv('MAIL_DRIVER') ?: 'dev');  // 'php', 'smtp', or 'dev'
 define('MAIL_FROM_ADDRESS', getenv('MAIL_FROM_ADDRESS') ?: 'noreply@bizlink.local');
 define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: 'BizLink CRM');
 
