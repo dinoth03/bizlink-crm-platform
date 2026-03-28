@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink — The Future of CRM</title>
+  <link rel="stylesheet" href="../assets/css/future.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ═══ GLOBAL AMBIENT BACKGROUND ═══ -->
+<div class="global-grid"></div>
+<div class="global-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+<canvas id="neuralCanvas"></canvas>
+
+<!-- ═══ CURSOR TRAIL ═══ -->
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!--NAVBAR-->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Biz<strong>Link</strong></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#why-sl">Why BizLink</a>
+      <a href="marketplace.html">Marketplace</a>
+      <a href="sustainability.html">Sustainability</a>
+      <a href="future.html" class="nav-active">The Future</a>
+    </div>
+    <div class="nav-cta">
+      <a href="auth.html" class="btn-ghost">Login</a>
+      <a href="auth.html" class="btn-primary">Get Started Free</a>
+    </div>
+    <button class="hamburger" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu hidden" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="sustainability.html">Sustainability</a>
+    <a href="future.html" class="nav-active">The Future</a>
+    <a href="auth.html" class="btn-primary" style="text-align:center">Get Started</a>
+  </div>
+</nav>
+
+<!--SECTION 1 — HERO: THE FUTURE STARTS HERE-->
+<section class="hero-section" id="hero">
+  <div class="hero-inner container">
+    <div class="hero-content">
+
+      <div class="hero-eyebrow scroll-reveal">
+        <span class="eyebrow-dot"></span>
+        <span class="eyebrow-mono">BizLink 3.0 · Arriving 2026–2030</span>
+      </div>
+
+      <h1 class="hero-title scroll-reveal delay-1">
+        The Future of<br/>
+        <span class="gradient-text">Business Relationship</span><br/>
+        Intelligence
+      </h1>
+
+      <p class="hero-sin scroll-reveal delay-2">
+        අනාගතයේ ව්‍යාපාරය — BizLink AI CRM
+      </p>
+
+      <p class="hero-desc scroll-reveal delay-3">
+        Fully autonomous AI agents. Predictive deal intelligence. A native mobile ecosystem. An immersive web platform that works <em>for</em> you — 24/7, without prompting. This is BizLink reimagined for 2030.
+      </p>
+
+      <div class="hero-actions scroll-reveal delay-4">
+        <a href="#ai-core" class="btn-hero-primary">
+          <span>Explore the Vision</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="#mobile" class="btn-hero-outline">See the Mobile App</a>
+      </div>
+
+      <!-- Live stat strip -->
+      <div class="hero-stats-strip scroll-reveal delay-5">
+        <div class="hss-item">
+          <span class="hss-num" id="stat1">0</span><span class="hss-sfx">B</span>
+          <span class="hss-label">CRM Market by 2032 (USD)</span>
+        </div>
+        <div class="hss-sep"></div>
+        <div class="hss-item">
+          <span class="hss-num" id="stat2">0</span><span class="hss-sfx">×</span>
+          <span class="hss-label">Faster Deal Cycles with AI Agents</span>
+        </div>
+        <div class="hss-sep"></div>
+        <div class="hss-item">
+          <span class="hss-num" id="stat3">0</span><span class="hss-sfx">%</span>
+          <span class="hss-label">Enterprises Adopting AI Agents by 2026</span>
+        </div>
+        <div class="hss-sep"></div>
+        <div class="hss-item">
+          <span class="hss-num" id="stat4">0</span><span class="hss-sfx">B</span>
+          <span class="hss-label">Global AI Spending in 2026 (USD)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HERO VISUAL: Holographic UI orb -->
+    <div class="hero-visual scroll-reveal delay-2">
+      <div class="hv-orb-outer">
+        <div class="hv-orb-ring ring-a"></div>
+        <div class="hv-orb-ring ring-b"></div>
+        <div class="hv-orb-ring ring-c"></div>
+        <div class="hv-core">
+          <div class="hv-core-inner">
+            <span class="hv-logo-hex">⬡</span>
+            <span class="hv-label">BizLink<br/>AI Core</span>
+          </div>
+        </div>
+        <!-- Floating data nodes -->
+        <div class="data-node dn-1"><span>🤖</span><small>AI Agent</small></div>
+        <div class="data-node dn-2"><span>📊</span><small>Predict</small></div>
+        <div class="data-node dn-3"><span>💬</span><small>Chat</small></div>
+        <div class="data-node dn-4"><span>📱</span><small>Mobile</small></div>
+        <div class="data-node dn-5"><span>🌐</span><small>Web 3.0</small></div>
+        <div class="data-node dn-6"><span>⚡</span><small>Realtime</small></div>
+        <!-- Connecting lines -->
+        <svg class="hv-lines" viewBox="0 0 400 400">
+          <line x1="200" y1="200" x2="200" y2="40"  stroke="rgba(80,200,120,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="200" y1="200" x2="350" y2="130" stroke="rgba(79,140,255,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="200" y1="200" x2="350" y2="280" stroke="rgba(255,140,0,0.15)"  stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="200" y1="200" x2="200" y2="360" stroke="rgba(80,200,120,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="200" y1="200" x2="50"  y2="280" stroke="rgba(79,140,255,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="200" y1="200" x2="50"  y2="130" stroke="rgba(255,140,0,0.15)"  stroke-width="1" stroke-dasharray="4 4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <div class="scroll-cue">
+    <span>Scroll to explore</span>
+    <div class="sc-arrow"><span></span><span></span></div>
+  </div>
+</section>
+
+<!--SECTION 2 — AI CORE ENGINE-->
+<section class="section ai-core-section" id="ai-core">
+  <div class="container">
+
+    <div class="sec-eyebrow scroll-reveal">AUTONOMOUS INTELLIGENCE</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      Meet <span class="gradient-text">BizLink AI</span><br/>Your Autonomous CRM Brain
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      Beyond copilots and autocomplete. BizLink AI operates as a full autonomous agent — qualifying leads, writing outreach, updating records, and closing deals while you sleep.
+    </p>
+
+    <!-- AI Terminal mockup -->
+    <div class="ai-terminal scroll-reveal delay-3">
+      <div class="terminal-bar">
+        <div class="t-dots"><span class="td-r"></span><span class="td-y"></span><span class="td-g"></span></div>
+        <span class="t-title">BizLink AI Agent — Live Feed</span>
+        <span class="t-status">● ACTIVE</span>
+      </div>
+      <div class="terminal-body" id="terminalBody">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <!-- 3 core AI capabilities -->
+    <div class="ai-cards-grid">
+
+      <div class="ai-cap-card scroll-reveal" style="--d:0s">
+        <div class="acc-top">
+          <div class="acc-icon ai-blue">🧠</div>
+          <span class="acc-tag">Autonomous</span>
+        </div>
+        <h3>Agentic Deal Intelligence</h3>
+        <p>AI agents autonomously research leads, score opportunities, draft personalised outreach, and update pipeline stages — completing multi-step sales tasks without any human prompting.</p>
+        <div class="acc-metric">
+          <span class="acm-num">40%</span>
+          <span class="acm-label">faster deal cycles with autonomous AI agents</span>
+        </div>
+        <div class="acc-glow glow-blue"></div>
+      </div>
+
+      <div class="ai-cap-card scroll-reveal" style="--d:0.1s">
+        <div class="acc-top">
+          <div class="acc-icon ai-green">🔮</div>
+          <span class="acc-tag">Predictive</span>
+        </div>
+        <h3>Predictive Customer Analytics</h3>
+        <p>Machine learning models trained on 12,000+ customer interactions identify churn risk, buying intent, and cross-sell windows — delivering next-best-action alerts in real time.</p>
+        <div class="acc-metric">
+          <span class="acm-num">83%</span>
+          <span class="acm-label">higher sales growth for AI-enabled teams</span>
+        </div>
+        <div class="acc-glow glow-green"></div>
+      </div>
+
+      <div class="ai-cap-card scroll-reveal" style="--d:0.2s">
+        <div class="acc-top">
+          <div class="acc-icon ai-orange">💬</div>
+          <span class="acc-tag">Generative</span>
+        </div>
+        <h3>Generative Communication AI</h3>
+        <p>Write vendor proposals, customer emails, and marketing campaigns in seconds. Sentiment analysis reads customer tone in real time so your team always responds with perfect context.</p>
+        <div class="acc-metric">
+          <span class="acm-num">1T+</span>
+          <span class="acm-label">predictive analyses processed per week</span>
+        </div>
+        <div class="acc-glow glow-orange"></div>
+      </div>
+
+    </div>
+
+    <!-- AI Flow diagram -->
+    <div class="ai-flow scroll-reveal delay-3">
+      <div class="flow-title">How BizLink AI Thinks</div>
+      <div class="flow-steps">
+        <div class="fs-step">
+          <div class="fss-icon">📥</div>
+          <div class="fss-label">Signal Detected</div>
+          <div class="fss-sub">New lead visits pricing page 3×</div>
+        </div>
+        <div class="flow-arrow"><div class="fa-line"></div><div class="fa-head"></div></div>
+        <div class="fs-step">
+          <div class="fss-icon">🧬</div>
+          <div class="fss-label">Intent Scored</div>
+          <div class="fss-sub">94% purchase probability</div>
+        </div>
+        <div class="flow-arrow"><div class="fa-line"></div><div class="fa-head"></div></div>
+        <div class="fs-step">
+          <div class="fss-icon">✍️</div>
+          <div class="fss-label">Outreach Drafted</div>
+          <div class="fss-sub">Personalised email generated</div>
+        </div>
+        <div class="flow-arrow"><div class="fa-line"></div><div class="fa-head"></div></div>
+        <div class="fs-step">
+          <div class="fss-icon">🚀</div>
+          <div class="fss-label">Action Taken</div>
+          <div class="fss-sub">Sent, CRM updated, follow-up scheduled</div>
+        </div>
+        <div class="flow-arrow"><div class="fa-line"></div><div class="fa-head"></div></div>
+        <div class="fs-step active-step">
+          <div class="fss-icon">🏆</div>
+          <div class="fss-label">Deal Closed</div>
+          <div class="fss-sub">Zero human input required</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!--SECTION 3 — FUTURE WEB PLATFORM-->
+<section class="section web-platform-section" id="web">
+  <div class="wpf-bg"></div>
+  <div class="container">
+
+    <div class="sec-eyebrow scroll-reveal">NEXT-GEN WEB PLATFORM</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      <span class="gradient-text">BizLink Web 3.0</span><br/>
+      Fully Automated. Always On.
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      The next generation of bizlink.lk — an AI-native web experience that adapts to every user in real time. No clicks. Just intelligence.
+    </p>
+
+    <!-- Web browser mockup -->
+    <div class="browser-mockup scroll-reveal delay-2">
+      <div class="bm-chrome">
+        <div class="bm-dots"><i></i><i></i><i></i></div>
+        <div class="bm-url-bar">
+          <span class="bm-lock">🔒</span>
+          <span class="bm-url">bizlink.lk</span>
+          <span class="bm-ai-badge">AI</span>
+        </div>
+        <div class="bm-actions"><i></i><i></i></div>
+      </div>
+      <div class="bm-screen">
+        <!-- Simulated adaptive UI inside browser -->
+        <div class="bms-sidebar">
+          <div class="bms-logo">⬡ BL</div>
+          <div class="bms-nav-items">
+            <div class="bms-ni active">📊 Dashboard</div>
+            <div class="bms-ni">🤖 AI Agent</div>
+            <div class="bms-ni">💬 Messages</div>
+            <div class="bms-ni">📦 Orders</div>
+            <div class="bms-ni">🌿 ESG</div>
+          </div>
+          <div class="bms-user">KP</div>
+        </div>
+        <div class="bms-main">
+          <div class="bms-topbar">
+            <div class="bms-greeting">Good morning, Kasun 👋</div>
+            <div class="bms-ai-chip">🤖 AI Agent: 3 tasks running</div>
+          </div>
+          <div class="bms-cards">
+            <div class="bms-card green-pulse">
+              <span class="bmc-icon">💰</span>
+              <span class="bmc-val">Rs. 4.82M</span>
+              <span class="bmc-lbl">Revenue</span>
+              <div class="bmc-spark">
+                <span style="height:40%"></span><span style="height:60%"></span>
+                <span style="height:50%"></span><span style="height:75%"></span>
+                <span style="height:65%"></span><span style="height:90%"></span>
+                <span style="height:80%"></span><span style="height:100%"></span>
+              </div>
+            </div>
+            <div class="bms-card blue-pulse">
+              <span class="bmc-icon">👥</span>
+              <span class="bmc-val">12,480</span>
+              <span class="bmc-lbl">Customers</span>
+            </div>
+            <div class="bms-card orange-pulse">
+              <span class="bmc-icon">🤖</span>
+              <span class="bmc-val">AI Active</span>
+              <span class="bmc-lbl">Agents Running</span>
+              <div class="bmc-agent-dots">
+                <span class="ad active"></span>
+                <span class="ad active"></span>
+                <span class="ad active"></span>
+                <span class="ad"></span>
+                <span class="ad"></span>
+              </div>
+            </div>
+          </div>
+          <!-- AI chat overlay -->
+          <div class="bms-ai-chat">
+            <div class="bac-header">🤖 BizLink AI Assistant</div>
+            <div class="bac-msg ai-msg">I've identified 3 high-intent leads. Shall I send personalised outreach?</div>
+            <div class="bac-msg user-msg">Yes, proceed automatically.</div>
+            <div class="bac-msg ai-msg typing-anim">Sending to Amara Perera, Suresh Nimal, and 1 more<span class="t-dot"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Web platform features -->
+    <div class="web-features-grid">
+      <div class="wf-card scroll-reveal" style="--d:0s">
+        <div class="wfc-ico">🎯</div>
+        <h4>Adaptive UI</h4>
+        <p>The interface reshapes itself based on your role, usage patterns, and AI recommendations — no configuration required.</p>
+      </div>
+      <div class="wf-card scroll-reveal" style="--d:0.08s">
+        <div class="wfc-ico">🌐</div>
+        <h4>Voice-First Navigation</h4>
+        <p>Say "Show me this week's top vendors" or "Create an invoice for order #BL-9941" and it's done instantly.</p>
+      </div>
+      <div class="wf-card scroll-reveal" style="--d:0.16s">
+        <div class="wfc-ico">⚡</div>
+        <h4>Real-Time Everything</h4>
+        <p>Inventory, orders, customer signals, and market data stream live — updated every second, no page refresh.</p>
+      </div>
+      <div class="wf-card scroll-reveal" style="--d:0.24s">
+        <div class="wfc-ico">🔐</div>
+        <h4>Zero-Trust Security</h4>
+        <p>Biometric authentication, AI anomaly detection, and encrypted data vaults — enterprise-grade for every Sri Lankan SME.</p>
+      </div>
+      <div class="wf-card scroll-reveal" style="--d:0.32s">
+        <div class="wfc-ico">🌍</div>
+        <h4>Multi-Language AI</h4>
+        <p>Full Sinhala, Tamil, and English support across every interface — powered by BizLink's localised language model.</p>
+      </div>
+      <div class="wf-card scroll-reveal" style="--d:0.4s">
+        <div class="wfc-ico">📡</div>
+        <h4>IoT Data Integration</h4>
+        <p>Connect warehouse sensors, POS terminals, and smart logistics devices — feeding live data directly into your CRM.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!--SECTION 4 — MOBILE APP-->
+<section class="section mobile-section" id="mobile">
+  <div class="container">
+
+    <div class="sec-eyebrow scroll-reveal">NATIVE MOBILE ECOSYSTEM</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      BizLink <span class="gradient-text">Mobile</span><br/>
+      Your CRM in Your Pocket
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      iOS and Android. Sinhala, Tamil, English. Offline-first. AI-powered. The most powerful CRM app ever built for Sri Lankan businesses.
+    </p>
+
+    <div class="mobile-showcase">
+
+      <!-- Left: feature list -->
+      <div class="ms-features">
+        <div class="msf-item scroll-reveal" style="--d:0s">
+          <div class="msfi-icon msfi-green">📲</div>
+          <div class="msfi-body">
+            <h4>Offline-First Architecture</h4>
+            <p>Works perfectly in low-connectivity areas across Sri Lanka. All your data syncs automatically when you're back online.</p>
+          </div>
+        </div>
+        <div class="msf-item scroll-reveal" style="--d:0.1s">
+          <div class="msfi-icon msfi-blue">🎙️</div>
+          <div class="msfi-body">
+            <h4>Sinhala Voice Commands</h4>
+            <p>Speak naturally in Sinhala, Tamil, or English. Update orders, send messages, and check dashboards — entirely hands-free.</p>
+          </div>
+        </div>
+        <div class="msf-item scroll-reveal" style="--d:0.2s">
+          <div class="msfi-icon msfi-orange">🔔</div>
+          <div class="msfi-body">
+            <h4>AI-Driven Push Intelligence</h4>
+            <p>Smart notifications that only alert you when it actually matters — not noise, just high-value signals from your AI agent.</p>
+          </div>
+        </div>
+        <div class="msf-item scroll-reveal" style="--d:0.3s">
+          <div class="msfi-icon msfi-green">📸</div>
+          <div class="msfi-body">
+            <h4>Camera-to-CRM</h4>
+            <p>Photograph a business card, invoice, or product — BizLink AI extracts all data and creates records instantly.</p>
+          </div>
+        </div>
+        <div class="msf-item scroll-reveal" style="--d:0.4s">
+          <div class="msfi-icon msfi-blue">💳</div>
+          <div class="msfi-body">
+            <h4>Mobile Payments & Invoicing</h4>
+            <p>Send LKR invoices, accept card or QR payments, and get instant payment confirmations — all within the app.</p>
+          </div>
+        </div>
+        <div class="msf-item scroll-reveal" style="--d:0.5s">
+          <div class="msfi-icon msfi-orange">📍</div>
+          <div class="msfi-body">
+            <h4>Geo-Smart Vendor Map</h4>
+            <p>View all active vendors, nearby customers, and delivery routes on an interactive Sri Lanka map with real-time traffic.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Centre: phone mockup -->
+      <div class="phone-mockup-wrap scroll-reveal delay-2">
+        <div class="phone-mockup">
+          <div class="pm-notch"></div>
+          <div class="pm-screen">
+            <!-- Status bar -->
+            <div class="pms-statusbar">
+              <span>9:41</span>
+              <div class="pms-icons">
+                <span>●●●</span><span>WiFi</span><span>100%</span>
+              </div>
+            </div>
+            <!-- App header -->
+            <div class="pms-header">
+              <div class="pmsh-left">
+                <span class="pmsh-logo">⬡ BizLink</span>
+              </div>
+              <div class="pmsh-ai">AI ●</div>
+            </div>
+            <!-- Greeting -->
+            <div class="pms-greet">Good morning 👋<br/><span>Kasun, 3 AI tasks done</span></div>
+            <!-- Cards -->
+            <div class="pms-cards">
+              <div class="pmsc-card pmsc-green">
+                <span>💰</span>
+                <div>
+                  <strong>Rs. 4.82M</strong>
+                  <small>Revenue ↑12%</small>
+                </div>
+              </div>
+              <div class="pmsc-card pmsc-blue">
+                <span>🤖</span>
+                <div>
+                  <strong>3 Agents</strong>
+                  <small>Running now</small>
+                </div>
+              </div>
+            </div>
+            <!-- AI chat bubble -->
+            <div class="pms-ai-bubble">
+              <span class="pab-icon">🤖</span>
+              <div class="pab-msg">
+                <strong>BizLink AI</strong>
+                <span>Found 5 hot leads. Should I reach out?</span>
+              </div>
+            </div>
+            <!-- Quick actions -->
+            <div class="pms-actions">
+              <div class="pmsa-btn">📦 Orders</div>
+              <div class="pmsa-btn">💬 Chat</div>
+              <div class="pmsa-btn">📊 Stats</div>
+              <div class="pmsa-btn">🗺️ Map</div>
+            </div>
+            <!-- Bottom nav -->
+            <div class="pms-bottomnav">
+              <span class="bnav active">🏠</span>
+              <span class="bnav">📊</span>
+              <span class="bnav">🤖</span>
+              <span class="bnav">💬</span>
+              <span class="bnav">👤</span>
+            </div>
+          </div>
+          <div class="pm-home-btn"></div>
+        </div>
+        <!-- Floating feature chips around phone -->
+        <div class="phone-chip chip-1">Offline Mode ✓</div>
+        <div class="phone-chip chip-2">🇱🇰 Sinhala AI</div>
+        <div class="phone-chip chip-3">Biometric Login</div>
+        <div class="phone-chip chip-4">QR Payments</div>
+      </div>
+
+      <!-- Right: specs / availability -->
+      <div class="ms-specs">
+        <div class="mss-card scroll-reveal" style="--d:0s">
+          <div class="mssc-icon">📱</div>
+          <h4>iOS App</h4>
+          <p>iOS 16+ · iPhone & iPad · Apple Watch companion app · Siri shortcuts integration</p>
+          <div class="mssc-badge">Available 2026</div>
+        </div>
+        <div class="mss-card scroll-reveal" style="--d:0.12s">
+          <div class="mssc-icon">🤖</div>
+          <h4>Android App</h4>
+          <p>Android 12+ · Phones, tablets & foldables · Material You design · Google Assistant integration</p>
+          <div class="mssc-badge">Available 2026</div>
+        </div>
+        <div class="mss-card scroll-reveal" style="--d:0.24s">
+          <div class="mssc-icon">⌚</div>
+          <h4>Wearable CRM</h4>
+          <p>Apple Watch & Wear OS. Glanceable dashboards, voice reply to customers, and deal alerts on your wrist.</p>
+          <div class="mssc-badge mssc-soon">Coming 2027</div>
+        </div>
+        <div class="mss-card scroll-reveal" style="--d:0.36s">
+          <div class="mssc-icon">🥽</div>
+          <h4>Mixed Reality</h4>
+          <p>Apple Vision Pro & Meta Quest integration. View your CRM data spatially — overlay analytics in the real world.</p>
+          <div class="mssc-badge mssc-future">Vision 2028+</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!--SECTION 5 — TECH STACK & ARCHITECTURE-->
+<section class="section tech-section" id="tech">
+  <div class="tech-bg"></div>
+  <div class="container">
+
+    <div class="sec-eyebrow scroll-reveal">UNDER THE HOOD</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      Built on the<br/><span class="gradient-text">Technology of Tomorrow</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      Every layer of BizLink 3.0 is engineered for the next decade — built with the tools defining the future of software.
+    </p>
+
+    <!-- Hexagonal tech grid -->
+    <div class="tech-hex-grid scroll-reveal delay-2">
+      <div class="thg-item" style="--c:#50C878">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🧠</span>
+          <span class="thgi-name">LLM AI Core</span>
+          <span class="thgi-sub">Custom SL Language Model</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#4f8cff">
+        <div class="thgi-inner">
+          <span class="thgi-icon">⚡</span>
+          <span class="thgi-name">Edge Computing</span>
+          <span class="thgi-sub">Sub-10ms response globally</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#FF8C00">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🔗</span>
+          <span class="thgi-name">Blockchain Audit</span>
+          <span class="thgi-sub">Immutable transaction records</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#a855f7">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🥽</span>
+          <span class="thgi-name">XR Interface</span>
+          <span class="thgi-sub">Spatial CRM dashboards</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#50C878">
+        <div class="thgi-inner">
+          <span class="thgi-icon">📡</span>
+          <span class="thgi-name">IoT Integration</span>
+          <span class="thgi-sub">10,000+ device endpoints</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#4f8cff">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🛡️</span>
+          <span class="thgi-name">Zero-Trust Security</span>
+          <span class="thgi-sub">Post-quantum encryption</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#FF8C00">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🌐</span>
+          <span class="thgi-name">Web3 Ready</span>
+          <span class="thgi-sub">Decentralised identity layer</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#ec4899">
+        <div class="thgi-inner">
+          <span class="thgi-icon">🧬</span>
+          <span class="thgi-name">Digital Twin</span>
+          <span class="thgi-sub">Virtualise your entire business</span>
+        </div>
+      </div>
+      <div class="thg-item" style="--c:#50C878">
+        <div class="thgi-inner">
+          <span class="thgi-icon">☁️</span>
+          <span class="thgi-name">Green Cloud</span>
+          <span class="thgi-sub">100% renewable by 2027</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture diagram -->
+    <div class="arch-diagram scroll-reveal delay-3">
+      <div class="arch-title">BizLink 3.0 Architecture</div>
+      <div class="arch-layers">
+        <div class="arch-layer layer-top">
+          <span class="al-label">Presentation Layer</span>
+          <div class="al-items">
+            <div class="ali">Web 3.0</div>
+            <div class="ali">iOS App</div>
+            <div class="ali">Android</div>
+            <div class="ali">XR/AR</div>
+            <div class="ali">Wearables</div>
+          </div>
+        </div>
+        <div class="arch-connector"><div class="ac-line"></div><span>API Gateway · GraphQL · WebSocket</span></div>
+        <div class="arch-layer layer-mid">
+          <span class="al-label">AI Intelligence Layer</span>
+          <div class="al-items">
+            <div class="ali ali-ai">Agent Core</div>
+            <div class="ali ali-ai">LLM Engine</div>
+            <div class="ali ali-ai">Prediction ML</div>
+            <div class="ali ali-ai">NLP / Sinhala</div>
+          </div>
+        </div>
+        <div class="arch-connector"><div class="ac-line"></div><span>Event Stream · Kafka · Real-time Sync</span></div>
+        <div class="arch-layer layer-data">
+          <span class="al-label">Data &amp; Infrastructure Layer</span>
+          <div class="al-items">
+            <div class="ali">CRM DB</div>
+            <div class="ali">Vector Store</div>
+            <div class="ali">IoT Hub</div>
+            <div class="ali">Blockchain</div>
+            <div class="ali">Green Cloud</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!--SECTION 6 — ROADMAP TIMELINE-->
+<section class="section roadmap-section" id="roadmap">
+  <div class="container">
+    <div class="sec-eyebrow scroll-reveal">THE JOURNEY</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      BizLink <span class="gradient-text">Roadmap</span><br/>
+      2025 → 2030
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      From today's powerful CRM to tomorrow's fully autonomous business intelligence platform — every milestone mapped.
+    </p>
+
+    <div class="roadmap-track">
+      <!-- Progress line -->
+      <div class="rt-progress-line">
+        <div class="rtpl-fill"></div>
+      </div>
+
+      <div class="rm-items">
+
+        <div class="rm-item rm-done scroll-reveal">
+          <div class="rm-dot rm-dot-done"></div>
+          <div class="rm-year">2024</div>
+          <div class="rm-card">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-done">✓ Live</span>
+              <span class="rmc-phase">Phase 1</span>
+            </div>
+            <h4>BizLink CRM Foundation</h4>
+            <p>Full CRM platform, marketplace, chat system, admin panel, vendor & customer management. 320+ vendors onboarded.</p>
+            <div class="rmc-tags">
+              <span>CRM Core</span><span>Marketplace</span><span>Admin Panel</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rm-item rm-active scroll-reveal" style="--d:0.1s">
+          <div class="rm-dot rm-dot-active"></div>
+          <div class="rm-year">2025</div>
+          <div class="rm-card">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-active">⚡ In Progress</span>
+              <span class="rmc-phase">Phase 2</span>
+            </div>
+            <h4>AI Integration & Sustainability</h4>
+            <p>AI-powered analytics, ESG reporting dashboard, Green Vendor Certification, predictive customer insights, and automated email outreach.</p>
+            <div class="rmc-tags">
+              <span>AI Analytics</span><span>Green CRM</span><span>Auto-Email</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rm-item rm-future scroll-reveal" style="--d:0.2s">
+          <div class="rm-dot rm-dot-future"></div>
+          <div class="rm-year">2026</div>
+          <div class="rm-card">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-future">⏳ Planned</span>
+              <span class="rmc-phase">Phase 3</span>
+            </div>
+            <h4>Mobile App + Autonomous AI Agents</h4>
+            <p>Native iOS & Android apps. BizLink AI Agents launched — qualifying leads, booking meetings, and updating records autonomously.</p>
+            <div class="rmc-tags">
+              <span>iOS App</span><span>Android App</span><span>AI Agents</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rm-item rm-future scroll-reveal" style="--d:0.3s">
+          <div class="rm-dot rm-dot-future"></div>
+          <div class="rm-year">2027</div>
+          <div class="rm-card">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-future">⏳ Planned</span>
+              <span class="rmc-phase">Phase 4</span>
+            </div>
+            <h4>Voice CRM + IoT Integration</h4>
+            <p>Full voice navigation in Sinhala, Tamil & English. IoT integration for warehouse and logistics. Wearable CRM companion apps.</p>
+            <div class="rmc-tags">
+              <span>Voice AI</span><span>IoT Hub</span><span>Wearables</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rm-item rm-future scroll-reveal" style="--d:0.4s">
+          <div class="rm-dot rm-dot-future"></div>
+          <div class="rm-year">2028</div>
+          <div class="rm-card">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-future">🔭 Vision</span>
+              <span class="rmc-phase">Phase 5</span>
+            </div>
+            <h4>Spatial CRM + Digital Twin</h4>
+            <p>Apple Vision Pro integration. Mixed reality dashboards overlaid on the real world. Digital twin of your entire business operation.</p>
+            <div class="rmc-tags">
+              <span>AR/VR</span><span>Digital Twin</span><span>Spatial UI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rm-item rm-future scroll-reveal" style="--d:0.5s">
+          <div class="rm-dot rm-dot-future rm-dot-star"></div>
+          <div class="rm-year">2030</div>
+          <div class="rm-card rmc-final">
+            <div class="rmc-header">
+              <span class="rmc-badge rmc-gold">🌟 Vision 2030</span>
+              <span class="rmc-phase">Phase 6</span>
+            </div>
+            <h4>Fully Autonomous Business Intelligence</h4>
+            <p>Zero-touch CRM — AI manages the entire customer lifecycle autonomously. Net zero infrastructure. Sri Lanka's #1 business OS.</p>
+            <div class="rmc-tags">
+              <span>Full Autonomy</span><span>Net Zero</span><span>Sri Lanka #1</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7 — FEATURES COMPARISON-->
+<section class="section compare-section" id="compare">
+  <div class="container">
+    <div class="sec-eyebrow scroll-reveal">TODAY vs TOMORROW</div>
+    <h2 class="section-title scroll-reveal delay-1">
+      BizLink <span class="gradient-text">Now vs Future</span>
+    </h2>
+    <p class="section-desc scroll-reveal delay-2">
+      See exactly how BizLink evolves from a powerful CRM into a fully autonomous business intelligence platform.
+    </p>
+
+    <div class="compare-table scroll-reveal delay-3">
+      <div class="ct-header">
+        <div class="cth-feature">Feature</div>
+        <div class="cth-now">BizLink Today</div>
+        <div class="cth-future">BizLink 2030</div>
+      </div>
+      <div class="ct-rows" id="compareRows">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!--SECTION 8 — VISION CTA-->
+<section class="section vision-cta-section" id="vision">
+  <div class="vcta-bg-orbs">
+    <div class="vcta-orb vcta-orb-1"></div>
+    <div class="vcta-orb vcta-orb-2"></div>
+    <div class="vcta-orb vcta-orb-3"></div>
+  </div>
+  <div class="container">
+    <div class="vcta-inner scroll-reveal">
+      <div class="vcta-eyebrow">
+        <span class="eyebrow-dot"></span>
+        <span>The Future Starts Today</span>
+      </div>
+      <h2 class="vcta-title">
+        Join 320+ Businesses<br/>
+        <span class="gradient-text">Building Tomorrow Now</span>
+      </h2>
+      <p class="vcta-sin">අනාගත BizLink — ඔබ සමඟ ගොඩ නගනු ලැබේ</p>
+      <p class="vcta-desc">
+        Every vendor and customer on BizLink today is shaping the AI-powered platform of 2030. Join early, grow with us, and be part of Sri Lanka's digital transformation story.
+      </p>
+
+      <!-- Feature pills -->
+      <div class="vcta-pills">
+        <span class="vcp">🤖 AI Agents Coming 2026</span>
+        <span class="vcp">📱 Mobile App Beta 2026</span>
+        <span class="vcp">🌿 Green CRM Active Now</span>
+        <span class="vcp">🔮 Predictive Analytics 2025</span>
+        <span class="vcp">🥽 XR Interface 2028</span>
+      </div>
+
+      <div class="vcta-actions">
+        <a href="auth.html" class="btn-vcta-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Get Started Free Today
+        </a>
+        <a href="index.html#contact" class="btn-vcta-outline">Talk to Our Team</a>
+      </div>
+
+      <!-- Floating stat badges -->
+      <div class="vcta-floaters">
+        <div class="vcf-badge" style="--dx:-20px;--dy:-30px">
+          <span class="vcfb-icon">💰</span>
+          <div><strong>Rs. 4.82M</strong><small>Monthly GMV</small></div>
+        </div>
+        <div class="vcf-badge" style="--dx:30px;--dy:-10px">
+          <span class="vcfb-icon">🤖</span>
+          <div><strong>AI Ready</strong><small>2026</small></div>
+        </div>
+        <div class="vcf-badge" style="--dx:-10px;--dy:20px">
+          <span class="vcfb-icon">🇱🇰</span>
+          <div><strong>320+</strong><small>Vendors</small></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER-->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">Biz<strong>Link</strong></span>
+        </a>
+        <p class="ft-tagline">අනාගතයේ ව්‍යාපාරය — ශ්‍රී ලංකාව</p>
+        <p class="ft-desc">Sri Lanka's most advanced business CRM — built today, designed for 2030.</p>
+        <div class="ft-socials">
+          <a href="#" class="fts-btn">𝕏</a>
+          <a href="#" class="fts-btn">in</a>
+          <a href="#" class="fts-btn">f</a>
+          <a href="#" class="fts-btn">▶</a>
+        </div>
+      </div>
+      <div class="footer-links-grid">
+        <div class="flg-col">
+          <h5>Platform</h5>
+          <a href="index.html">Home</a>
+          <a href="marketplace.html">Marketplace</a>
+          <a href="chat.html">Messages</a>
+          <a href="admin.html">Admin</a>
+        </div>
+        <div class="flg-col">
+          <h5>The Future</h5>
+          <a href="#ai-core">AI Core</a>
+          <a href="#web">Web 3.0</a>
+          <a href="#mobile">Mobile App</a>
+          <a href="#roadmap">Roadmap</a>
+        </div>
+        <div class="flg-col">
+          <h5>Company</h5>
+          <a href="sustainability.html">Sustainability</a>
+          <a href="#">About Us</a>
+          <a href="#">Careers</a>
+          <a href="#">Press</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 BizLink CRM · Built in Sri Lanka 🇱🇰 · Designed for 2030</p>
+      <div class="fb-links">
+        <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Security</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script src="../assets/js/future.js"></script>
+</body>
+</html>
