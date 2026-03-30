@@ -4,18 +4,31 @@
  * Include this at the top of protected endpoints
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    ini_set('session.use_strict_mode', '1');
+    session_start();
+}
 require_once 'api_helpers.php';
 
 define('SESSION_TIMEOUT_SECONDS', 3600);
 
 // Auth check function
 function requireAuth($allowedRoles = []) {
-    if (!isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['user_id'], $_SESSION['role'], $_SESSION['email'])) {
         apiError('UNAUTHORIZED', 'Unauthorized - please login.', 401);
     }
 
-    if (isset($_SESSION['login_time']) && (time() - (int)$_SESSION['login_time']) > SESSION_TIMEOUT_SECONDS) {
+    $referenceTime = isset($_SESSION['last_activity']) ? (int)$_SESSION['last_activity'] : (int)($_SESSION['login_time'] ?? 0);
+    if ($referenceTime > 0 && (time() - $referenceTime) > SESSION_TIMEOUT_SECONDS) {
         session_unset();
         session_destroy();
         apiError('SESSION_EXPIRED', 'Your session expired. Please sign in again.', 401);
@@ -25,6 +38,8 @@ function requireAuth($allowedRoles = []) {
     if (!empty($allowedRoles) && !in_array($_SESSION['role'], $allowedRoles)) {
         apiError('FORBIDDEN', 'Forbidden - insufficient permissions.', 403);
     }
+
+    $_SESSION['last_activity'] = time();
 
     return true;
 }

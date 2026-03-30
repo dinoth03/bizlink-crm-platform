@@ -361,7 +361,8 @@ const dashboardData = {
   customers: [],
   activeVendor: null,
   notifications: [],
-  loadedFromApi: false
+  loadedFromApi: false,
+  sessionUser: null
 };
 
 function renderWidgetState(container, text, tone = 'empty') {
@@ -505,6 +506,15 @@ function mapApiProduct(row, index) {
 function pickActiveVendor(vendors, orders) {
   if (!vendors || vendors.length === 0) return null;
 
+  const sessionEmail = String(dashboardData.sessionUser?.email || '').trim().toLowerCase();
+  const sessionUserId = Number(dashboardData.sessionUser?.user_id || 0);
+  const exact = vendors.find((v) => {
+    const vendorEmail = String(v.email || v.business_email || '').trim().toLowerCase();
+    const vendorUserId = Number(v.user_id || 0);
+    return (sessionEmail && vendorEmail === sessionEmail) || (sessionUserId > 0 && vendorUserId === sessionUserId);
+  });
+  if (exact) return exact;
+
   const counts = {};
   orders.forEach((o) => {
     counts[o.vendor] = (counts[o.vendor] || 0) + 1;
@@ -536,7 +546,7 @@ function filterVendorOrders(orders, activeVendor) {
     filtered = orders.filter((o) => o.vendorEmail === vendorEmail);
   }
 
-  return filtered.length > 0 ? filtered : orders;
+  return filtered.length > 0 ? filtered : [];
 }
 
 function computeStats(orders) {
@@ -557,11 +567,14 @@ function computeStats(orders) {
 }
 
 function updateVendorIdentity(activeVendor) {
-  if (!activeVendor) return;
-  const firstName = (activeVendor.vendor_name || '').split(' ')[0] || 'Vendor';
+  const sessionUser = dashboardData.sessionUser || {};
+  const displayName = String(sessionUser.full_name || activeVendor?.vendor_name || 'Vendor').trim();
+  const firstName = displayName.split(' ')[0] || 'Vendor';
+  const displayEmail = String(sessionUser.email || activeVendor?.email || activeVendor?.business_email || '').trim().toLowerCase();
   const profileName = document.querySelector('.profile-name');
   const profileRole = document.querySelector('.profile-role');
   const profileAvatar = document.querySelector('.profile-avatar');
+  const profileEmail = document.getElementById('vendorProfileEmail');
   const welcomeName = document.querySelector('.vendor-text');
   const welcomeSub = document.querySelector('.welcome-sub');
   const settingsBusinessName = document.getElementById('settingsBusinessName');
@@ -570,7 +583,7 @@ function updateVendorIdentity(activeVendor) {
   const searchInput = document.querySelector('.search-bar input');
   const supportGreeting = document.querySelector('#chatMessages .chat-bubble.bot');
 
-  const initials = (activeVendor.vendor_name || 'V')
+  const initials = (displayName || 'V')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
@@ -583,18 +596,19 @@ function updateVendorIdentity(activeVendor) {
     month: 'long',
     year: 'numeric'
   });
-  const category = activeVendor.business_category || 'Business';
+  const category = activeVendor?.business_category || 'Business';
 
-  if (profileName) profileName.textContent = activeVendor.vendor_name;
-  if (profileRole) profileRole.textContent = `Vendor ${activeVendor.vendor_status === 'verified' ? '✅ Verified' : '• Pending Verification'}`;
+  if (profileName) profileName.textContent = displayName || 'Vendor';
+  if (profileRole) profileRole.textContent = `Vendor ${activeVendor?.vendor_status === 'verified' ? '✅ Verified' : '• Pending Verification'}`;
+  if (profileEmail) profileEmail.textContent = displayEmail || '-';
   if (profileAvatar) profileAvatar.textContent = initials;
   if (welcomeName) welcomeName.textContent = firstName;
   if (welcomeSub) welcomeSub.textContent = `${todayText} · ${category} Seller`;
-  if (settingsBusinessName) settingsBusinessName.value = activeVendor.vendor_name || '';
-  if (settingsOwnerName) settingsOwnerName.value = activeVendor.vendor_name || '';
-  if (settingsEmail) settingsEmail.value = activeVendor.email || '';
-  if (searchInput && activeVendor.email) {
-    searchInput.value = activeVendor.email;
+  if (settingsBusinessName) settingsBusinessName.value = activeVendor?.vendor_name || displayName || '';
+  if (settingsOwnerName) settingsOwnerName.value = displayName || '';
+  if (settingsEmail) settingsEmail.value = displayEmail || '';
+  if (searchInput && displayEmail) {
+    searchInput.value = displayEmail;
     searchInput.readOnly = true;
   }
   if (supportGreeting) {
@@ -611,6 +625,30 @@ async function loadVendorDashboardData() {
   renderWidgetState(productsGrid, 'Loading products...', 'loading');
 
   try {
+    if (typeof authMe !== 'function') {
+      window.location.href = '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    const identity = await authMe();
+    if (!identity || !identity.user) {
+      window.location.href = '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    if (String(identity.user.role || '').toLowerCase() !== 'vendor') {
+      const role = String(identity.user.role || '').toLowerCase();
+      const redirectMap = {
+        admin: '../admin/dashboard.html',
+        vendor: '../vendor/vendorpanel.html',
+        customer: '../customer/dashboard.html'
+      };
+      window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    dashboardData.sessionUser = identity.user;
+
     const [vendors, orders, products, customers] = await Promise.all([getVendors(), getOrders(), getProducts(), getCustomers()]);
     if (vendors && orders && products) {
       dashboardData.vendors = vendors;

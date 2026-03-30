@@ -64,7 +64,7 @@ FROM customers c
 LEFT JOIN users u ON c.user_id = u.user_id
 LEFT JOIN orders o ON c.customer_id = o.customer_id
 LEFT JOIN vendors v ON o.vendor_id = v.vendor_id";
-    $whereClause .= ' AND (v.user_id = ? OR o.order_id IS NULL)';
+    $whereClause .= ' AND v.user_id = ?';
     $params[] = $userId;
     $types[] = 'i';
 } elseif ($userRole === 'customer') {

@@ -211,6 +211,21 @@ async function authLogout() {
     }
 }
 
+async function authMe() {
+    try {
+        const result = await apiRequest('auth_me.php');
+        if (!result) return null;
+        const data = result.data || {};
+        if (data.success && data.data) {
+            return data.data;
+        }
+        return null;
+    } catch (error) {
+        console.error('API Error:', error);
+        return null;
+    }
+}
+
 async function authForgotPassword(payload) {
     try {
         const result = await apiRequest('auth_forgot_password.php', {

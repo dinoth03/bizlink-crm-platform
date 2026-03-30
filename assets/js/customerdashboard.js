@@ -96,10 +96,40 @@ function normalizeStatus(status) {
 
 const customerDashboardState = {
   customerId: null,
+  userId: null,
   customerEmail: '',
   customerName: 'Customer',
-  notifications: []
+  notifications: [],
+  role: 'customer'
 };
+
+function applyCustomerIdentity(identity) {
+  if (!identity) return;
+  const user = identity.user || {};
+  const role = String(user.role || 'customer');
+  const fullName = String(user.full_name || customerDashboardState.customerName || 'Customer').trim();
+  const email = String(user.email || customerDashboardState.customerEmail || '').trim().toLowerCase();
+
+  customerDashboardState.userId = Number(user.user_id || 0) || null;
+  customerDashboardState.customerName = fullName || 'Customer';
+  customerDashboardState.customerEmail = email;
+  customerDashboardState.role = role;
+
+  const nameEl = document.getElementById('customerName');
+  if (nameEl) {
+    nameEl.textContent = (fullName.split(' ')[0] || 'Customer');
+  }
+
+  const roleEmailEl = document.getElementById('customerRoleEmail');
+  if (roleEmailEl) {
+    roleEmailEl.textContent = `Role: ${role.charAt(0).toUpperCase() + role.slice(1)} · Email: ${email || '-'}`;
+  }
+
+  const profileFullName = document.getElementById('profileFullName');
+  const profileEmail = document.getElementById('profileEmail');
+  if (profileFullName) profileFullName.textContent = fullName || 'Customer';
+  if (profileEmail) profileEmail.textContent = email || '-';
+}
 
 function setCustomerLoadingStates() {
   const recentOrdersList = document.getElementById('recentOrdersList');
@@ -371,9 +401,34 @@ async function loadCustomerDashboardData() {
   customerDashboardState.customerEmail = '';
   customerDashboardState.customerId = null;
   customerDashboardState.customerName = 'Customer';
+  customerDashboardState.userId = null;
   applyCustomerChatLinks();
 
   try {
+    if (typeof authMe !== 'function') {
+      window.location.href = '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    const identity = await authMe();
+    if (!identity || !identity.user) {
+      window.location.href = '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    if (String(identity.user.role || '').toLowerCase() !== 'customer') {
+      const role = String(identity.user.role || '').toLowerCase();
+      const redirectMap = {
+        admin: '../admin/dashboard.html',
+        vendor: '../vendor/vendorpanel.html',
+        customer: '../customer/dashboard.html'
+      };
+      window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+      return;
+    }
+
+    applyCustomerIdentity(identity);
+
     const [customers, orders, vendors] = await Promise.all([getCustomers(), getOrders(), getVendors()]);
 
     if (!customers || customers.length === 0) {
@@ -390,12 +445,12 @@ async function loadCustomerDashboardData() {
     }
 
     const selectedCustomer =
-      customers.find((c) => customerDashboardState.customerId && Number(c.user_id) === Number(customerDashboardState.customerId)) ||
+      customers.find((c) => customerDashboardState.userId && Number(c.user_id) === Number(customerDashboardState.userId)) ||
       customers.find((c) => (c.email || '').toLowerCase() === customerDashboardState.customerEmail) ||
       customers[0];
 
     customerDashboardState.customerEmail = (selectedCustomer.email || customerDashboardState.customerEmail || '').toLowerCase();
-    customerDashboardState.customerId = selectedCustomer.user_id ? Number(selectedCustomer.user_id) : customerDashboardState.customerId;
+    customerDashboardState.customerId = selectedCustomer.customer_id ? Number(selectedCustomer.customer_id) : customerDashboardState.customerId;
     customerDashboardState.customerName = selectedCustomer.full_name || customerDashboardState.customerName;
     applyCustomerChatLinks();
 

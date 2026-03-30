@@ -1,5 +1,17 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    ini_set('session.use_strict_mode', '1');
+    session_start();
+}
 require 'config.php';
 require_once 'api_helpers.php';
 require 'csrf_protection.php';
@@ -187,11 +199,13 @@ if ($auditStmt = $conn->prepare('INSERT INTO login_activity (user_id, login_at, 
 }
 
 // Set PHP session variables for server-side authentication
+session_regenerate_id(true);
 $_SESSION['user_id'] = (int)$user['user_id'];
 $_SESSION['email'] = $user['email'];
 $_SESSION['role'] = $user['role'];
 $_SESSION['full_name'] = $user['full_name'];
 $_SESSION['login_time'] = time();
+$_SESSION['last_activity'] = time();
 
 $dashboardMap = [
     'admin' => '../admin/dashboard.html',
