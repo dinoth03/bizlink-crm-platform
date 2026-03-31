@@ -7,8 +7,84 @@ const state = {
   sidebarOpen: true,
   theme: localStorage.getItem('adminTheme') || 'light',
   notifications: [],
-  notificationUserEmail: 'kasun@bizlink.lk'
+  notificationUserEmail: ''
 };
+
+function buildInitials(fullName, fallback = 'A') {
+  return String(fullName || fallback)
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || fallback;
+}
+
+function applyAdminIdentity(user, profile = {}) {
+  const fullName = String(user?.full_name || 'Admin').trim() || 'Admin';
+  const firstName = fullName.split(' ')[0] || 'Admin';
+  const email = String(user?.email || '').trim().toLowerCase();
+  const phone = String(user?.phone || '').trim();
+  const role = String(user?.role || 'admin').trim().toLowerCase();
+  const adminLevel = String(profile?.admin_level || '').trim();
+  const roleLabel = adminLevel || (role.charAt(0).toUpperCase() + role.slice(1));
+  const businessName = 'BizLink CRM';
+  const initials = buildInitials(fullName, 'A');
+
+  state.notificationUserEmail = email;
+
+  document.querySelectorAll('.sb-avatar, .tb-avatar, .um-avatar').forEach((el) => {
+    el.textContent = initials;
+  });
+
+  const sidebarName = document.querySelector('.sb-user-name');
+  const sidebarRole = document.querySelector('.sb-user-role');
+  const userMenuName = document.querySelector('.um-profile strong');
+  const userMenuEmail = document.querySelector('.um-profile span');
+  const welcomeTitle = document.querySelector('.page-header .page-title');
+
+  if (sidebarName) sidebarName.textContent = fullName;
+  if (sidebarRole) sidebarRole.textContent = `${roleLabel} · ${businessName}`;
+  if (userMenuName) userMenuName.textContent = fullName;
+  if (userMenuEmail) userMenuEmail.textContent = email || '-';
+  if (welcomeTitle && welcomeTitle.textContent.includes('Good morning')) {
+    welcomeTitle.textContent = `Good morning, ${firstName} 👋`;
+  }
+
+  const settingsFullName = document.getElementById('adminSettingsFullName');
+  const settingsEmail = document.getElementById('adminSettingsEmail');
+  const settingsPhone = document.getElementById('adminSettingsPhone');
+  const settingsRole = document.getElementById('adminSettingsRole');
+  const settingsBusiness = document.getElementById('adminSettingsBusinessName');
+
+  if (settingsFullName) settingsFullName.value = fullName;
+  if (settingsEmail) settingsEmail.value = email || '';
+  if (settingsPhone) settingsPhone.value = phone || '';
+  if (settingsRole) settingsRole.value = roleLabel;
+  if (settingsBusiness) settingsBusiness.value = businessName;
+}
+
+async function initializeAdminIdentity() {
+  if (typeof authMe !== 'function') return;
+
+  const identity = await authMe();
+  if (!identity || !identity.user) {
+    window.location.href = '../pages/index.html?reason=unauthorized';
+    return;
+  }
+
+  const role = String(identity.user.role || '').toLowerCase();
+  if (role !== 'admin') {
+    const redirectMap = {
+      admin: '../admin/dashboard.html',
+      vendor: '../vendor/vendorpanel.html',
+      customer: '../customer/dashboard.html'
+    };
+    window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+    return;
+  }
+
+  applyAdminIdentity(identity.user, identity.profile || {});
+}
 
 const adminDashboardCache = {
   vendors: [],
@@ -96,6 +172,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (state.theme === 'dark') {
     document.body.classList.add('dark');
   }
+
+  await initializeAdminIdentity();
   updateDate();
   await Promise.all([renderDashboard(), loadAdminNotifications()]);
   initActivityFeed();

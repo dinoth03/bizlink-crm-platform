@@ -10,8 +10,66 @@ const ordersState = {
   selectedOrders: [],
   allOrders: [],
   notifications: [],
-  notificationUserEmail: 'kasun@bizlink.lk'
+  notificationUserEmail: ''
 };
+
+function buildInitials(fullName, fallback = 'A') {
+  return String(fullName || fallback)
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || fallback;
+}
+
+function applyAdminIdentity(user, profile = {}) {
+  const fullName = String(user?.full_name || 'Admin').trim() || 'Admin';
+  const email = String(user?.email || '').trim().toLowerCase();
+  const role = String(user?.role || 'admin').trim().toLowerCase();
+  const adminLevel = String(profile?.admin_level || '').trim();
+  const roleLabel = adminLevel || (role.charAt(0).toUpperCase() + role.slice(1));
+  const businessName = 'BizLink CRM';
+  const initials = buildInitials(fullName, 'A');
+
+  ordersState.notificationUserEmail = email;
+
+  document.querySelectorAll('.sb-avatar, .tb-avatar, .um-avatar').forEach((el) => {
+    el.textContent = initials;
+  });
+
+  const sidebarName = document.querySelector('.sb-user-name');
+  const sidebarRole = document.querySelector('.sb-user-role');
+  const userMenuName = document.querySelector('.um-profile strong');
+  const userMenuEmail = document.querySelector('.um-profile span');
+
+  if (sidebarName) sidebarName.textContent = fullName;
+  if (sidebarRole) sidebarRole.textContent = `${roleLabel} · ${businessName}`;
+  if (userMenuName) userMenuName.textContent = fullName;
+  if (userMenuEmail) userMenuEmail.textContent = email || '-';
+}
+
+async function initializeAdminIdentity() {
+  if (typeof authMe !== 'function') return;
+
+  const identity = await authMe();
+  if (!identity || !identity.user) {
+    window.location.href = '../pages/index.html?reason=unauthorized';
+    return;
+  }
+
+  const role = String(identity.user.role || '').toLowerCase();
+  if (role !== 'admin') {
+    const redirectMap = {
+      admin: '../admin/dashboard.html',
+      vendor: '../vendor/vendorpanel.html',
+      customer: '../customer/dashboard.html'
+    };
+    window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+    return;
+  }
+
+  applyAdminIdentity(identity.user, identity.profile || {});
+}
 
 function normalizeOrderStatus(orderStatus) {
   if (orderStatus === 'delivered') return 'completed';
@@ -121,6 +179,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (ordersState.theme === 'dark') {
     document.body.classList.add('dark');
   }
+
+  await initializeAdminIdentity();
 
   // Render initial data
   updateDate();

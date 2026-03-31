@@ -362,7 +362,8 @@ const dashboardData = {
   activeVendor: null,
   notifications: [],
   loadedFromApi: false,
-  sessionUser: null
+  sessionUser: null,
+  sessionProfile: null
 };
 
 function renderWidgetState(container, text, tone = 'empty') {
@@ -568,7 +569,9 @@ function computeStats(orders) {
 
 function updateVendorIdentity(activeVendor) {
   const sessionUser = dashboardData.sessionUser || {};
-  const displayName = String(sessionUser.full_name || activeVendor?.vendor_name || 'Vendor').trim();
+  const sessionProfile = dashboardData.sessionProfile || {};
+  const businessName = String(activeVendor?.vendor_name || sessionProfile?.business_name || 'Business').trim();
+  const displayName = String(sessionUser.full_name || businessName || 'Vendor').trim();
   const firstName = displayName.split(' ')[0] || 'Vendor';
   const displayEmail = String(sessionUser.email || activeVendor?.email || activeVendor?.business_email || '').trim().toLowerCase();
   const profileName = document.querySelector('.profile-name');
@@ -599,12 +602,12 @@ function updateVendorIdentity(activeVendor) {
   const category = activeVendor?.business_category || 'Business';
 
   if (profileName) profileName.textContent = displayName || 'Vendor';
-  if (profileRole) profileRole.textContent = `Vendor ${activeVendor?.vendor_status === 'verified' ? '✅ Verified' : '• Pending Verification'}`;
+  if (profileRole) profileRole.textContent = `${businessName} ${activeVendor?.vendor_status === 'verified' ? '• ✅ Verified' : '• Pending Verification'}`;
   if (profileEmail) profileEmail.textContent = displayEmail || '-';
   if (profileAvatar) profileAvatar.textContent = initials;
   if (welcomeName) welcomeName.textContent = firstName;
-  if (welcomeSub) welcomeSub.textContent = `${todayText} · ${category} Seller`;
-  if (settingsBusinessName) settingsBusinessName.value = activeVendor?.vendor_name || displayName || '';
+  if (welcomeSub) welcomeSub.textContent = `${todayText} · ${businessName} · ${category} Seller`;
+  if (settingsBusinessName) settingsBusinessName.value = businessName || '';
   if (settingsOwnerName) settingsOwnerName.value = displayName || '';
   if (settingsEmail) settingsEmail.value = displayEmail || '';
   if (searchInput && displayEmail) {
@@ -648,6 +651,7 @@ async function loadVendorDashboardData() {
     }
 
     dashboardData.sessionUser = identity.user;
+    dashboardData.sessionProfile = identity.profile || null;
 
     const [vendors, orders, products, customers] = await Promise.all([getVendors(), getOrders(), getProducts(), getCustomers()]);
     if (vendors && orders && products) {
