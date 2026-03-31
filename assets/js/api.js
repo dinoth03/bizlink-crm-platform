@@ -266,63 +266,6 @@ async function authResetPassword(payload) {
     }
 }
 
-async function authVerifyEmail(payload) {
-    try {
-        const token = (payload && payload.token) ? String(payload.token) : '';
-        const query = new URLSearchParams({ verify_token: token }).toString();
-        const result = await apiRequest('auth_verify_email.php?' + query, {
-            method: 'GET'
-        }, false);
-
-        return result ? flattenEnvelope(result.data || { success: false, message: 'Verification failed.' }) : { success: false, message: 'Verification failed.' };
-    } catch (error) {
-        console.error('API Error:', error);
-        return {
-            success: false,
-            message: 'Unable to connect to verification service.'
-        };
-    }
-}
-
-async function authVerifyAdminCode(payload) {
-    try {
-        const result = await apiRequest('auth_verify_admin_code.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload || {})
-        }, false);
-
-        return result ? flattenEnvelope(result.data || { success: false, message: 'Verification failed.' }) : { success: false, message: 'Verification failed.' };
-    } catch (error) {
-        console.error('API Error:', error);
-        return {
-            success: false,
-            message: 'Unable to connect to verification service.'
-        };
-    }
-}
-
-async function authResendVerification(payload) {
-    try {
-        const result = await apiRequest('auth_resend_verification.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload || {})
-        }, false);
-
-        return result ? flattenEnvelope(result.data || { success: false, message: 'Resend failed.' }) : { success: false, message: 'Resend failed.' };
-    } catch (error) {
-        console.error('API Error:', error);
-        return {
-            success: false,
-            message: 'Unable to connect to verification service.'
-        };
-    }
-}
 
 // Get Dashboard Stats
 async function getDashboardStats() {

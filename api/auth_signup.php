@@ -2,8 +2,6 @@
 session_start();
 require 'config.php';
 require_once 'api_helpers.php';
-require 'auth_token_utils.php';
-require 'mail_service.php';
 require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
@@ -23,7 +21,6 @@ function isMissingSecurityTableError(Throwable $e): bool {
         && (
             strpos($msg, 'csrf_tokens') !== false
             || strpos($msg, 'rate_limit_log') !== false
-            || strpos($msg, 'email_verification_tokens') !== false
         );
 }
 
@@ -145,9 +142,7 @@ function createStoreSlug(mysqli $conn, string $businessName): string {
     }
 }
 
-function generateVerificationCode(): string {
-    return str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-}
+
 
 try {
     $conn->begin_transaction();
@@ -161,13 +156,9 @@ try {
         $city = trim((string)($profile['city'] ?? ''));
     }
 
-    // Admins need email verification, vendors/customers wait for admin approval
-    if ($role === 'admin') {
-        $status = 'pending_verification'; // Will be 'active' after email verification
-    } else {
-        $status = 'inactive'; // Will be 'active' after admin approval
-    }
-    $isVerified = 0;
+    // All users: immediately active (no verification required)
+    $status = 'active';
+    $isVerified = 1;
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     $insertUser = $conn->prepare(
@@ -236,59 +227,9 @@ try {
         $insertCustomer->close();
     }
 
-    $verifyCode = '';
-    $verificationEnabled = false;
-    $requiresAdminApproval = false;
-    $verificationMethod = null;
 
-    // Email verification: ONLY for admins
-    if ($role === 'admin') {
-        try {
-            $verifyCode = generateVerificationCode();
-            $verifyCodeHash = hashAuthToken($verifyCode);
-            $verifyExpiryMinutes = 15;
-
-            $verifyStmt = $conn->prepare(
-                'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
-            );
-            $verifyStmt->bind_param('isi', $userId, $verifyCodeHash, $verifyExpiryMinutes);
-            $verifyStmt->execute();
-            $verifyStmt->close();
-            $verificationEnabled = true;
-            $verificationMethod = 'code';
-        } catch (Throwable $verifyError) {
-            if (!isLocalDevEnvironment() || !isMissingSecurityTableError($verifyError)) {
-                throw $verifyError;
-            }
-        }
-    } else {
-        // Vendors and customers require admin approval (no email verification)
-        $requiresAdminApproval = true;
-    }
 
     $conn->commit();
-
-    $verificationLink = null;
-    $mailResult = ['success' => false];
-
-    // Send admin verification code email
-    if ($verificationEnabled && $verifyCode !== '') {
-        $emailHtmlBody = getAdminVerificationCodeEmailHtml($verifyCode, $firstName ?: 'Admin');
-        $mailResult = sendMail($email, 'Your BizLink Admin Verification Code', $emailHtmlBody, 'Your verification code is: ' . $verifyCode);
-    }
-
-    $successMessage = '';
-    if ($verificationEnabled) {
-        if (!empty($mailResult['success'])) {
-            $successMessage = 'Account created. Enter the 6-digit admin email verification code before logging in.';
-        } else {
-            $successMessage = 'Account created, but OTP email was not sent. Please check SMTP settings and use resend code.';
-        }
-    } elseif ($requiresAdminApproval) {
-        $successMessage = 'Account created. Please wait for admin approval before logging in.';
-    } else {
-        $successMessage = 'Account created successfully.';
-    }
 
     apiSuccess([
         'user' => [
@@ -297,14 +238,8 @@ try {
             'email' => $email,
             'full_name' => $fullName
         ],
-        'verification_required' => $verificationEnabled,
-        'verification_method' => $verificationMethod,
-        'verification_link' => (isLocalHostEnvironment() && $verificationLink) ? $verificationLink : null,
-        'verification_code' => (isLocalHostEnvironment() && $verificationEnabled) ? $verifyCode : null,
-        'email_sent' => $mailResult['success'],
-        'requires_admin_approval' => $requiresAdminApproval,
         'dashboard' => '../pages/index.html'
-    ], $successMessage, 'ACCOUNT_CREATED', 201);
+    ], 'Account created successfully. You can now login.', 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
     $conn->rollback();
     apiError('INTERNAL_ERROR', 'Failed to create account.', 500, [
