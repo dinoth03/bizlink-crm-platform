@@ -142,6 +142,83 @@ function createStoreSlug(mysqli $conn, string $businessName): string {
     }
 }
 
+function createAdminApprovalNotifications(
+    mysqli $conn,
+    string $signupRole,
+    int $newUserId,
+    string $fullName,
+    string $email,
+    array $details = []
+): void {
+    if (!in_array($signupRole, ['vendor', 'customer'], true)) {
+        return;
+    }
+
+    $admins = [];
+    $adminsStmt = $conn->prepare('SELECT user_id FROM users WHERE role = "admin" AND deleted_at IS NULL');
+    if ($adminsStmt) {
+        $adminsStmt->execute();
+        $res = $adminsStmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $admins[] = (int)$row['user_id'];
+        }
+        $adminsStmt->close();
+    }
+
+    if (count($admins) === 0) {
+        return;
+    }
+
+    $entityType = $signupRole;
+    $notificationType = 'system';
+    $priority = 'high';
+    $actionUrl = '/admin/dashboard.html';
+
+    if ($signupRole === 'vendor') {
+        $businessName = trim((string)($details['business_name'] ?? ''));
+        $businessCategory = trim((string)($details['business_category'] ?? ''));
+        $title = 'New vendor approval request';
+        $message = 'Vendor: ' . $fullName
+            . ' (' . $email . ')'
+            . ($businessName !== '' ? ' | Business: ' . $businessName : '')
+            . ($businessCategory !== '' ? ' | Category: ' . $businessCategory : '')
+            . ' | Awaiting approval.';
+    } else {
+        $city = trim((string)($details['city'] ?? ''));
+        $title = 'New customer approval request';
+        $message = 'Customer: ' . $fullName
+            . ' (' . $email . ')'
+            . ($city !== '' ? ' | City: ' . $city : '')
+            . ' | Awaiting approval.';
+    }
+
+    $notifStmt = $conn->prepare(
+        'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    if (!$notifStmt) {
+        return;
+    }
+
+    foreach ($admins as $adminUserId) {
+        $relatedEntityId = $newUserId;
+        $notifStmt->bind_param(
+            'issssiss',
+            $adminUserId,
+            $notificationType,
+            $title,
+            $message,
+            $entityType,
+            $relatedEntityId,
+            $priority,
+            $actionUrl
+        );
+        $notifStmt->execute();
+    }
+
+    $notifStmt->close();
+}
+
 
 
 try {
@@ -156,9 +233,9 @@ try {
         $city = trim((string)($profile['city'] ?? ''));
     }
 
-    // All users: immediately active (no verification required)
-    $status = 'active';
-    $isVerified = 1;
+    // Vendor/customer signups require admin approval before login.
+    $status = in_array($role, ['vendor', 'customer'], true) ? 'inactive' : 'active';
+    $isVerified = in_array($role, ['vendor', 'customer'], true) ? 0 : 1;
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     $insertUser = $conn->prepare(
@@ -213,6 +290,11 @@ try {
         );
         $insertVendor->execute();
         $insertVendor->close();
+
+        createAdminApprovalNotifications($conn, 'vendor', $userId, $fullName, $email, [
+            'business_name' => $businessName,
+            'business_category' => $industry
+        ]);
     }
 
     if ($role === 'customer') {
@@ -225,11 +307,19 @@ try {
         $insertCustomer->bind_param('is', $userId, $preferredLanguage);
         $insertCustomer->execute();
         $insertCustomer->close();
+
+        createAdminApprovalNotifications($conn, 'customer', $userId, $fullName, $email, [
+            'city' => $city
+        ]);
     }
 
 
 
     $conn->commit();
+
+    $responseMessage = in_array($role, ['vendor', 'customer'], true)
+        ? 'Account created successfully. Your account is pending admin approval.'
+        : 'Account created successfully. You can now login.';
 
     apiSuccess([
         'user' => [
@@ -238,8 +328,9 @@ try {
             'email' => $email,
             'full_name' => $fullName
         ],
+        'approval_required' => in_array($role, ['vendor', 'customer'], true),
         'dashboard' => '../pages/index.html'
-    ], 'Account created successfully. You can now login.', 'ACCOUNT_CREATED', 201);
+    ], $responseMessage, 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
     $conn->rollback();
     apiError('INTERNAL_ERROR', 'Failed to create account.', 500, [
