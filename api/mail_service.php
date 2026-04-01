@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Mail Service - Handles email sending via PHPMailer SMTP, PHP mail(), or dev logging.
+ * Mail Service - Handles email sending via SMTP sockets, PHP mail(), or dev logging.
  */
 
 $MAIL_SETTINGS = [];
@@ -44,9 +44,6 @@ define('SMTP_USERNAME', mailSetting('SMTP_USERNAME', ''));
 define('SMTP_PASSWORD', mailSetting('SMTP_PASSWORD', ''));
 define('SMTP_ENCRYPTION', mailSetting('SMTP_ENCRYPTION', 'tls')); // 'tls' or 'ssl'
 
-// PHPMailer source path (download PHPMailer and keep src/ here for production)
-define('PHPMAILER_SRC_PATH', mailSetting('PHPMAILER_SRC_PATH', __DIR__ . '/phpmailer/src'));
-
 /**
  * Send email via configured mail driver.
  * 
@@ -72,96 +69,13 @@ function sendMail(string $to, string $subject, string $htmlBody, ?string $textBo
     $driver = strtolower(trim(MAIL_DRIVER));
     
     if ($driver === 'smtp') {
-        return sendViaSmtpWithPHPMailer($to, $subject, $htmlBody, $textBody, $logId);
+        return sendViaSMTP($to, $subject, $htmlBody, $textBody, $logId);
     } elseif ($driver === 'dev') {
         return sendViaDevMode($to, $subject, $htmlBody, $textBody, $logId);
     } else {
         // Default to PHP mail() function
         return sendViaPhpMail($to, $subject, $htmlBody, $textBody, $logId);
     }
-}
-
-/**
- * Attempt to send using PHPMailer SMTP. Falls back to socket SMTP implementation if PHPMailer is unavailable.
- */
-function sendViaSmtpWithPHPMailer(string $to, string $subject, string $htmlBody, ?string $textBody, string $logId): array {
-    $autoloaded = loadPHPMailerClasses();
-    if (!$autoloaded) {
-        error_log("[Mail Log ID: {$logId}] PHPMailer classes not found at " . PHPMAILER_SRC_PATH . ". Falling back to socket SMTP.");
-        return sendViaSMTP($to, $subject, $htmlBody, $textBody, $logId);
-    }
-
-    if (empty(SMTP_HOST) || empty(SMTP_USERNAME) || empty(SMTP_PASSWORD)) {
-        error_log("[Mail Log ID: {$logId}] SMTP credentials not configured for {$to}");
-        return [
-            'success' => false,
-            'message' => 'SMTP configuration missing.',
-            'logId' => $logId
-        ];
-    }
-
-    try {
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = SMTP_USERNAME;
-        $mail->Password = SMTP_PASSWORD;
-        $mail->Port = SMTP_PORT;
-        $mail->CharSet = 'UTF-8';
-
-        if (strtolower(SMTP_ENCRYPTION) === 'ssl') {
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-        } elseif (strtolower(SMTP_ENCRYPTION) === 'tls') {
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        }
-
-        $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
-        $mail->addAddress($to);
-        $mail->Subject = $subject;
-        $mail->isHTML(true);
-        $mail->Body = $htmlBody;
-        $mail->AltBody = $textBody ?: strip_tags($htmlBody);
-        $mail->send();
-
-        error_log("[Mail Log ID: {$logId}] Email sent via PHPMailer SMTP to {$to}: {$subject}");
-        return [
-            'success' => true,
-            'message' => 'Email sent successfully.',
-            'logId' => $logId
-        ];
-    } catch (Throwable $e) {
-        error_log("[Mail Log ID: {$logId}] PHPMailer send failed for {$to}: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => 'Failed to send email. Please try again later.',
-            'logId' => $logId
-        ];
-    }
-}
-
-function loadPHPMailerClasses(): bool {
-    if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
-        return true;
-    }
-
-    $required = [
-        PHPMAILER_SRC_PATH . '/Exception.php',
-        PHPMAILER_SRC_PATH . '/PHPMailer.php',
-        PHPMAILER_SRC_PATH . '/SMTP.php'
-    ];
-
-    foreach ($required as $file) {
-        if (!is_file($file)) {
-            return false;
-        }
-    }
-
-    foreach ($required as $file) {
-        require_once $file;
-    }
-
-    return class_exists('\\PHPMailer\\PHPMailer\\PHPMailer');
 }
 
 /**
