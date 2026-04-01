@@ -114,7 +114,8 @@ img { max-width: 100%; display: block; }
   padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 48px;
+  justify-content: space-between;
 }
 .logo {
   display: flex;
@@ -133,8 +134,9 @@ img { max-width: 100%; display: block; }
 
 .nav-links {
   display: flex;
-  gap: 8px;
-  margin-left: auto;
+  gap: 16px;
+  flex: 1;
+  justify-content: center;
 }
 .nav-links a {
   padding: 8px 16px;
@@ -149,8 +151,9 @@ img { max-width: 100%; display: block; }
   background: var(--bg-card);
 }
 .nav-cta {
-  display: flex;
-  gap: 12px;
+  displa6px;
+  align-items: center;
+  margin-left: auto
   align-items: center;
 }
 .btn-ghost {
