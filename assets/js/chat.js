@@ -121,7 +121,36 @@ let state = {
   muted: new Set(['conv5']),
 };
 
+let pendingChatRole = null;
+
 let ME_USER_ID = null;
+let isGuestMode = false;
+
+function enableGuestMode(reason = '') {
+  if (!isGuestMode) {
+    showToast('Guest chat mode enabled. Sign in to sync messages.', 'info');
+  }
+
+  isGuestMode = true;
+  ME_USER_ID = null;
+  ME.name = 'Guest User';
+  ME.initials = 'GU';
+  ME.role = 'guest';
+
+  const ruName = document.querySelector('.ru-name');
+  const ruRole = document.querySelector('.ru-role');
+  const ruAvatar = document.querySelector('.ru-avatar');
+  if (ruName) ruName.textContent = ME.name;
+  if (ruRole) ruRole.textContent = 'Guest';
+  if (ruAvatar) {
+    ruAvatar.textContent = ME.initials;
+    ruAvatar.style.background = '#6b7280';
+  }
+
+  if (reason) {
+    console.info('Guest mode reason:', reason);
+  }
+}
 
 function getInitials(name) {
   return (name || '')
@@ -138,9 +167,7 @@ async function loadChatDataFromApi() {
     const payload = await response.json();
 
     if (response.status === 401 || response.status === 429) {
-      if (typeof handleAuthFailure === 'function') {
-        handleAuthFailure(response.status, payload || {});
-      }
+      enableGuestMode('auth_api_unavailable');
       return false;
     }
 
@@ -148,6 +175,7 @@ async function loadChatDataFromApi() {
       return false;
     }
 
+    isGuestMode = false;
     ME_USER_ID = Number(payload.current_user.id);
     ME.name = payload.current_user.name;
     ME.initials = getInitials(payload.current_user.name);
@@ -186,6 +214,14 @@ function conversationDbId(convId) {
 
 /*INIT*/
 document.addEventListener('DOMContentLoaded', async () => {
+  const chatRoleParam = new URLSearchParams(window.location.search).get('chatRole');
+  if (chatRoleParam) {
+    const normalizedRole = chatRoleParam.toLowerCase();
+    if (['admin', 'vendor'].includes(normalizedRole)) {
+      pendingChatRole = normalizedRole;
+    }
+  }
+
   await loadChatDataFromApi();
 
   renderConvoList();
@@ -196,8 +232,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   applyRoleFilterFromUrl();
 
+  if (pendingChatRole) {
+    openNewChat(pendingChatRole);
+  }
+
   // Auto-open first conversation
-  if (CONVERSATIONS.length > 0) {
+  if (!pendingChatRole && CONVERSATIONS.length > 0) {
     setTimeout(() => openConversation(CONVERSATIONS[0].id), 200);
   }
 
@@ -455,9 +495,9 @@ function sendMessage() {
       .then(async (res) => ({ status: res.status, payload: await res.json() }))
       .then(({ status, payload }) => {
         if (status === 401 || status === 429) {
-          if (typeof handleAuthFailure === 'function') {
-            handleAuthFailure(status, payload || {});
-          }
+          enableGuestMode('send_message_requires_auth');
+          msg.status = 'sent';
+          updateMsgStatus(msg.id, 'sent');
           return;
         }
 
@@ -883,7 +923,7 @@ function clearSearch() {
 function filterContacts(val) {
   const filtered = CONTACTS.filter(c =>
     c.name.toLowerCase().includes(val.toLowerCase()) ||
-    c.company.toLowerCase().includes(val.toLowerCase())
+    (c.company || '').toLowerCase().includes(val.toLowerCase())
   );
   renderContactGrid(filtered);
 }
@@ -907,9 +947,13 @@ function renderContactGrid(contacts) {
 }
 
 /* NEW CHAT MODAL */
-function openNewChat() {
+function openNewChat(roleFilter = null) {
   document.getElementById('modalBackdrop').classList.remove('hidden');
   document.getElementById('contactSearch').value = '';
+  if (roleFilter && ['admin', 'vendor'].includes(String(roleFilter).toLowerCase())) {
+    renderContactGrid(CONTACTS.filter((contact) => contact.role === String(roleFilter).toLowerCase()));
+    return;
+  }
   renderContactGrid(CONTACTS);
 }
 function closeNewChat(e) {
@@ -917,22 +961,69 @@ function closeNewChat(e) {
     document.getElementById('modalBackdrop').classList.add('hidden');
 }
 function startNewChat(contactId) {
-  closeNewChat();
-  // Check if conv exists
-  const existing = CONVERSATIONS.find(c => c.contactId === contactId);
-  if (existing) { openConversation(existing.id); return; }
-
-  // Create new
   const contact = getContact(contactId);
-  const newConv = {
-    id: 'conv_' + Date.now(), contactId,
-    pinned:false, muted:false, unread:0,
-    messages:[{ id:'m1', type:'system', text:`Conversation with ${contact.name} started`, time:getCurrentTime(), date:'Today' }],
-    quickReplies:['Hello! How can I help you?','Thank you for contacting us!'],
-  };
-  CONVERSATIONS.unshift(newConv);
-  state.activeConvId = newConv.id;
-  openConversation(newConv.id);
+  const existing = CONVERSATIONS.find(c => c.contactId === contactId);
+
+  if (existing) {
+    closeNewChat();
+    openConversation(existing.id);
+    return;
+  }
+
+  if (!ME_USER_ID || !contact || !contact.userId) {
+    closeNewChat();
+    const fallbackContact = getContact(contactId);
+    const newConv = {
+      id: 'conv_' + Date.now(), contactId,
+      pinned:false, muted:false, unread:0,
+      messages:[{ id:'m1', type:'system', text:`Conversation with ${fallbackContact.name} started`, time:getCurrentTime(), date:'Today' }],
+      quickReplies:['Hello! How can I help you?','Thank you for contacting us!'],
+    };
+    CONVERSATIONS.unshift(newConv);
+    state.activeConvId = newConv.id;
+    openConversation(newConv.id);
+    return;
+  }
+
+  fetch('../api/chat_start_conversation.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target_user_id: contact.userId })
+  })
+    .then(async (res) => ({ status: res.status, payload: await res.json() }))
+    .then(async ({ status, payload }) => {
+      if (status === 401 || status === 429) {
+        enableGuestMode('start_conversation_requires_auth');
+        closeNewChat();
+        const fallbackContact = getContact(contactId);
+        const newConv = {
+          id: 'conv_' + Date.now(), contactId,
+          pinned:false, muted:false, unread:0,
+          messages:[{ id:'m1', type:'system', text:`Conversation with ${fallbackContact.name} started`, time:getCurrentTime(), date:'Today' }],
+          quickReplies:['Hello! How can I help you?','Thank you for contacting us!'],
+        };
+        CONVERSATIONS.unshift(newConv);
+        openConversation(newConv.id);
+        return;
+      }
+
+      if (!payload || !payload.success) {
+        showToast((payload && payload.message) || 'Unable to start conversation.', 'warn');
+        return;
+      }
+
+      const data = payload.data || {};
+      const convId = data.conversation_key || (`conv${data.conversation_id}`);
+      await loadChatDataFromApi();
+      renderConvoList();
+      closeNewChat();
+      openConversation(convId);
+      pendingChatRole = null;
+      showToast(`Chat started with ${contact.name}.`, 'success');
+    })
+    .catch(() => {
+      showToast('Unable to start conversation right now.', 'warn');
+    });
 }
 
 /* CALL SYSTEM */

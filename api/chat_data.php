@@ -26,6 +26,65 @@ if (!$currentUser) {
     apiError('USER_NOT_FOUND', 'Current user not found.', 404);
 }
 
+$allowedContactRolesMap = [
+    'admin' => ['vendor', 'customer'],
+    'vendor' => ['admin', 'customer'],
+    'customer' => ['admin', 'vendor'],
+];
+
+$allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];
+$contacts = [];
+$conversations = [];
+
+if (count($allowedContactRoles) === 2) {
+    $contactSql = "
+    SELECT u.user_id, u.full_name, u.role, u.email, u.phone, u.province, u.account_status, u.created_at,
+           v.business_name
+    FROM users u
+    LEFT JOIN vendors v ON v.user_id = u.user_id
+    WHERE u.user_id <> ?
+      AND u.deleted_at IS NULL
+      AND u.role IN (?, ?)
+      AND (u.account_status IS NULL OR u.account_status IN ('active', 'pending_verification'))
+    ORDER BY u.full_name ASC
+    ";
+    $contactStmt = $conn->prepare($contactSql);
+    $contactStmt->bind_param('iss', $userId, $allowedContactRoles[0], $allowedContactRoles[1]);
+    $contactStmt->execute();
+    $contactRes = $contactStmt->get_result();
+
+    while ($contact = $contactRes->fetch_assoc()) {
+        $contactId = (int)$contact['user_id'];
+        $contactKey = 'u' . $contactId;
+        $initials = '';
+
+        foreach (explode(' ', $contact['full_name']) as $part) {
+            if ($part !== '') {
+                $initials .= strtoupper($part[0]);
+            }
+        }
+
+        $contacts[$contactKey] = [
+            'id' => $contactKey,
+            'userId' => $contactId,
+            'name' => $contact['full_name'],
+            'initials' => substr($initials, 0, 2),
+            'role' => $contact['role'],
+            'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : '#FF8C00'),
+            'status' => mapStatus($contact['account_status']),
+            'company' => $contact['business_name'] ?: '—',
+            'phone' => $contact['phone'] ?: '—',
+            'email' => $contact['email'],
+            'province' => $contact['province'] ?: '—',
+            'joined' => !empty($contact['created_at']) ? (new DateTime($contact['created_at']))->format('M Y') : '—',
+            'conversationId' => null,
+            'hasConversation' => false,
+        ];
+    }
+
+    $contactStmt->close();
+}
+
 $convSql = "
 SELECT DISTINCT c.conversation_id, c.subject, c.last_message_date
 FROM conversations c
@@ -66,6 +125,7 @@ while ($conv = $convRes->fetch_assoc()) {
 
     $contactId = (int)$contact['user_id'];
     $contactKey = 'u' . $contactId;
+    $conversationContactMap[$contactKey] = 'conv' . $conversationId;
 
     if (!isset($contacts[$contactKey])) {
         $initials = '';
@@ -86,8 +146,13 @@ while ($conv = $convRes->fetch_assoc()) {
             'phone' => $contact['phone'] ?: '—',
             'email' => $contact['email'],
             'province' => $contact['province'] ?: '—',
-            'joined' => '2026'
+            'joined' => !empty($contact['created_at']) ? (new DateTime($contact['created_at']))->format('M Y') : '—',
+            'conversationId' => 'conv' . $conversationId,
+            'hasConversation' => true
         ];
+    } else {
+        $contacts[$contactKey]['conversationId'] = 'conv' . $conversationId;
+        $contacts[$contactKey]['hasConversation'] = true;
     }
 
     $unreadSql = "

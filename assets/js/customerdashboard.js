@@ -153,11 +153,12 @@ function setCustomerLoadingStates() {
 
 function applyCustomerChatLinks() {
   const chatUrl = '../pages/chat.html';
+  const adminChatUrl = '../pages/chat.html?chatRole=admin';
 
   const messageCenterLink = document.getElementById('messageCenterLink');
   const supportNavLink = document.getElementById('supportNavLink');
   if (messageCenterLink) messageCenterLink.href = chatUrl;
-  if (supportNavLink) supportNavLink.href = chatUrl;
+  if (supportNavLink) supportNavLink.href = adminChatUrl;
 }
 
 function getCustomerNotificationIcon(notification) {
