@@ -421,6 +421,34 @@ async function handleLogin(e) {
   }, 900);
 }
 
+async function sendAdminCodeToLogin(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  if (state.loginRole !== 'admin') {
+    showToast('Select Admin role first.', 'warn');
+    return;
+  }
+
+  const loginEmail = (document.getElementById('loginEmail')?.value || '').trim().toLowerCase();
+  if (!isValidEmail(loginEmail)) {
+    showToast('Enter admin email first, then send code.', 'warn');
+    return;
+  }
+
+  if (typeof authResendVerification !== 'function') {
+    showToast('Send OTP service unavailable.', 'warn');
+    return;
+  }
+
+  const sendResult = await authResendVerification({ role: 'admin', email: loginEmail });
+  showToast((sendResult && sendResult.message) || 'OTP code sent to your admin email.', 'success');
+  if (sendResult && sendResult.verification_code) {
+    window.prompt('Local development admin OTP code:', sendResult.verification_code);
+  }
+}
+
 async function resendAdminCodeFromLogin(event) {
   if (event) {
     event.preventDefault();
