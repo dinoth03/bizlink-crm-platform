@@ -312,6 +312,16 @@ async function handleSignup() {
 
   showToast((signupResult && signupResult.message) || 'Account created.', 'success');
   scrollToTop();
+
+  const redirectLink = '../pages/index.html';
+  const successBtn = document.querySelector('.success-btn');
+  if (successBtn) {
+    successBtn.href = redirectLink;
+  }
+
+  setTimeout(() => {
+    window.location.href = redirectLink;
+  }, 2500);
 }
 
 /*HANDLE LOGIN SUBMIT*/

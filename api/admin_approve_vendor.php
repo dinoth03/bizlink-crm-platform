@@ -55,11 +55,28 @@ try {
     $updateUser->execute();
     $updateUser->close();
 
+    // Notify vendor so the next login can show a one-time congratulations message.
+    $approvalTitle = 'Congratulations! Vendor approved';
+    $approvalMessage = 'Your vendor account has been approved by admin. You can now log in and access your vendor dashboard.';
+    $entityType = 'vendor';
+    $priority = 'high';
+    $actionUrl = '/vendor/vendorpanel.html';
+    $notifType = 'system';
+    $insertNotif = $conn->prepare(
+        'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    if ($insertNotif) {
+        $insertNotif->bind_param('issssiss', $userId, $notifType, $approvalTitle, $approvalMessage, $entityType, $vendorId, $priority, $actionUrl);
+        $insertNotif->execute();
+        $insertNotif->close();
+    }
+
     $conn->commit();
 
     apiSuccess([
         'vendor_id' => $vendorId,
-        'status' => 'verified'
+        'status' => 'verified',
+        'account_status' => 'active'
     ], 'Vendor approved successfully.', 'VENDOR_APPROVED', 200);
 
 } catch (Throwable $e) {
