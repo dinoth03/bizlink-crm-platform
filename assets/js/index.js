@@ -1,4 +1,4 @@
-/*BIZLINK AUTH – JAVASCRIPT  (auth.js)
+/*BIZLINK AUTH - JAVASCRIPT (auth.js) */
 
 
 /*State*/
@@ -23,7 +23,7 @@ function switchTab(tab) {
   // Reset signup if switching back
   if (tab === 'signup' && state.step > 1) {
     // keep state but re-render current step
-    renderStep(state.step);
+    goStep(state.step);
   }
 }
 
@@ -522,22 +522,12 @@ async function triggerForgotPasswordFlow() {
 async function handleAuthQueryFlows() {
   const params = new URLSearchParams(window.location.search);
   const reason = params.get('reason') || '';
-  const verifyToken = params.get('verify_token') || '';
   const resetToken = params.get('reset_token') || '';
 
   if (reason === 'session_expired' || reason === 'unauthorized') {
     showToast('Your session expired. Please sign in again.', 'info');
   } else if (reason === 'too_many_requests') {
     showToast('Too many requests. Please wait a moment and try again.', 'warn');
-  }
-
-  if (verifyToken && typeof authVerifyEmail === 'function') {
-    const verifyResult = await authVerifyEmail({ token: verifyToken });
-    showToast((verifyResult && verifyResult.message) || 'Verification failed.', verifyResult && verifyResult.success ? 'success' : 'warn');
-    params.delete('verify_token');
-    const nextVerify = params.toString();
-    window.history.replaceState({}, '', nextVerify ? `?${nextVerify}` : window.location.pathname);
-    switchTab('login');
   }
 
   if (resetToken && typeof authResetPassword === 'function') {
