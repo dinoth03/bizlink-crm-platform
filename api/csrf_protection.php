@@ -2,6 +2,29 @@
 
 require_once 'api_helpers.php';
 
+function ensureCsrfTokensTable(mysqli $conn): void {
+    static $ensured = false;
+    if ($ensured) {
+        return;
+    }
+
+    $sql = 'CREATE TABLE IF NOT EXISTS csrf_tokens (
+        csrf_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NULL,
+        session_id VARCHAR(128) NOT NULL,
+        token_hash VARCHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used_at DATETIME NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_token_hash (token_hash),
+        INDEX idx_expires_at (expires_at),
+        INDEX idx_session_id (session_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+
+    $conn->query($sql);
+    $ensured = true;
+}
+
 /**
  * CSRF Protection Utility
  * Provides cross-site request forgery token generation, validation, and management.
@@ -16,6 +39,8 @@ require_once 'api_helpers.php';
  * @return string The generated CSRF token (plaintext for client-side use)
  */
 function generateCsrfToken($conn, ?int $userId = null, string $sessionId = ''): string {
+    ensureCsrfTokensTable($conn);
+
     $token = bin2hex(random_bytes(32));
     $tokenHash = hash('sha256', $token);
     $expiryMinutes = 60; // 1 hour
@@ -46,6 +71,8 @@ function generateCsrfToken($conn, ?int $userId = null, string $sessionId = ''): 
  * @return bool True if token is valid
  */
 function validateCsrfToken($conn, string $token, ?int $userId = null, string $sessionId = ''): bool {
+    ensureCsrfTokensTable($conn);
+
     if (empty($token)) {
         return false;
     }
@@ -147,6 +174,8 @@ function requireCsrfToken($conn, ?int $userId = null, bool $exitOnFailure = true
  * @return int Number of tokens deleted
  */
 function cleanupExpiredCsrfTokens($conn): int {
+    ensureCsrfTokensTable($conn);
+
     try {
         $result = $conn->query('DELETE FROM csrf_tokens WHERE expires_at < NOW()');
         return $conn->affected_rows;

@@ -43,6 +43,7 @@ define('SMTP_PORT', (int)mailSetting('SMTP_PORT', '587'));
 define('SMTP_USERNAME', mailSetting('SMTP_USERNAME', ''));
 define('SMTP_PASSWORD', mailSetting('SMTP_PASSWORD', ''));
 define('SMTP_ENCRYPTION', mailSetting('SMTP_ENCRYPTION', 'tls')); // 'tls' or 'ssl'
+define('PHPMAILER_SRC_PATH', mailSetting('PHPMAILER_SRC_PATH', __DIR__ . '/phpmailer/src'));
 
 /**
  * Send email via configured mail driver.
@@ -69,13 +70,77 @@ function sendMail(string $to, string $subject, string $htmlBody, ?string $textBo
     $driver = strtolower(trim(MAIL_DRIVER));
     
     if ($driver === 'smtp') {
-        return sendViaSMTP($to, $subject, $htmlBody, $textBody, $logId);
+        return sendViaSmtpWithOptionalPHPMailer($to, $subject, $htmlBody, $textBody, $logId);
     } elseif ($driver === 'dev') {
         return sendViaDevMode($to, $subject, $htmlBody, $textBody, $logId);
     } else {
         // Default to PHP mail() function
         return sendViaPhpMail($to, $subject, $htmlBody, $textBody, $logId);
     }
+}
+
+function sendViaSmtpWithOptionalPHPMailer(string $to, string $subject, string $htmlBody, ?string $textBody, string $logId): array {
+    if (loadPHPMailerClasses()) {
+        try {
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = SMTP_USERNAME;
+            $mail->Password = SMTP_PASSWORD;
+            $mail->Port = SMTP_PORT;
+            $mail->CharSet = 'UTF-8';
+
+            if (strtolower(SMTP_ENCRYPTION) === 'ssl') {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            } elseif (strtolower(SMTP_ENCRYPTION) === 'tls') {
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            }
+
+            $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
+            $mail->addAddress($to);
+            $mail->Subject = $subject;
+            $mail->isHTML(true);
+            $mail->Body = $htmlBody;
+            $mail->AltBody = $textBody ?: strip_tags($htmlBody);
+            $mail->send();
+
+            error_log("[Mail Log ID: {$logId}] Email sent via PHPMailer SMTP to {$to}: {$subject}");
+            return [
+                'success' => true,
+                'message' => 'Email sent successfully.',
+                'logId' => $logId
+            ];
+        } catch (Throwable $e) {
+            error_log("[Mail Log ID: {$logId}] PHPMailer send failed for {$to}: " . $e->getMessage());
+        }
+    }
+
+    return sendViaSMTP($to, $subject, $htmlBody, $textBody, $logId);
+}
+
+function loadPHPMailerClasses(): bool {
+    if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
+        return true;
+    }
+
+    $required = [
+        PHPMAILER_SRC_PATH . '/Exception.php',
+        PHPMAILER_SRC_PATH . '/PHPMailer.php',
+        PHPMAILER_SRC_PATH . '/SMTP.php'
+    ];
+
+    foreach ($required as $file) {
+        if (!is_file($file)) {
+            return false;
+        }
+    }
+
+    foreach ($required as $file) {
+        require_once $file;
+    }
+
+    return class_exists('\\PHPMailer\\PHPMailer\\PHPMailer');
 }
 
 /**
@@ -124,54 +189,85 @@ function sendViaSMTP(string $to, string $subject, string $htmlBody, ?string $tex
     }
 
     try {
-        $encryptionPrefix = SMTP_ENCRYPTION === 'ssl' ? 'ssl://' : '';
+        $isSsl = strtolower(SMTP_ENCRYPTION) === 'ssl';
+        $isTls = strtolower(SMTP_ENCRYPTION) === 'tls';
+        $encryptionPrefix = $isSsl ? 'ssl://' : '';
         $socket = @fsockopen($encryptionPrefix . SMTP_HOST, SMTP_PORT, $errno, $errstr, 10);
 
         if (!$socket) {
             throw new Exception("SMTP connection failed: {$errstr}");
         }
 
-        // Enable TLS if needed
-        if (SMTP_ENCRYPTION === 'tls') {
-            fgets($socket);
-            fputs($socket, "EHLO " . SMTP_HOST . "\r\n");
-            fgets($socket);
-            fputs($socket, "STARTTLS\r\n");
-            fgets($socket);
-            stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+        stream_set_timeout($socket, 15);
+
+        $banner = fgets($socket);
+        if ($banner === false || strpos($banner, '220') !== 0) {
+            throw new Exception('SMTP server did not return greeting.');
         }
 
-        // SMTP handshake
-        fgets($socket); // Welcome message
         fputs($socket, "EHLO " . SMTP_HOST . "\r\n");
-        fgets($socket);
+        smtpReadMultilineResponse($socket);
+
+        if ($isTls) {
+            fputs($socket, "STARTTLS\r\n");
+            $startTlsResponse = fgets($socket);
+            if ($startTlsResponse === false || strpos($startTlsResponse, '220') !== 0) {
+                throw new Exception('SMTP STARTTLS not accepted by server.');
+            }
+
+            $cryptoEnabled = @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            if ($cryptoEnabled !== true) {
+                throw new Exception('Unable to enable TLS encryption for SMTP connection.');
+            }
+
+            fputs($socket, "EHLO " . SMTP_HOST . "\r\n");
+            smtpReadMultilineResponse($socket);
+        }
 
         // Authenticate
-        $auth = base64_encode(SMTP_USERNAME . ':' . SMTP_PASSWORD);
         fputs($socket, "AUTH LOGIN\r\n");
-        fgets($socket);
+        $authLogin = fgets($socket);
+        if ($authLogin === false || strpos($authLogin, '334') !== 0) {
+            throw new Exception('SMTP AUTH LOGIN command rejected.');
+        }
+
         fputs($socket, base64_encode(SMTP_USERNAME) . "\r\n");
-        fgets($socket);
+        $userResponse = fgets($socket);
+        if ($userResponse === false || strpos($userResponse, '334') !== 0) {
+            throw new Exception('SMTP username rejected.');
+        }
+
         fputs($socket, base64_encode(SMTP_PASSWORD) . "\r\n");
         $authResponse = fgets($socket);
 
-        if (strpos($authResponse, '235') === false) {
+        if ($authResponse === false || strpos($authResponse, '235') !== 0) {
             throw new Exception('SMTP authentication failed');
         }
 
         // Send email
         fputs($socket, "MAIL FROM: <" . MAIL_FROM_ADDRESS . ">\r\n");
-        fgets($socket);
+        $mailFromResponse = fgets($socket);
+        if ($mailFromResponse === false || strpos($mailFromResponse, '250') !== 0) {
+            throw new Exception('SMTP MAIL FROM rejected.');
+        }
+
         fputs($socket, "RCPT TO: <{$to}>\r\n");
-        fgets($socket);
+        $rcptResponse = fgets($socket);
+        if ($rcptResponse === false || (strpos($rcptResponse, '250') !== 0 && strpos($rcptResponse, '251') !== 0)) {
+            throw new Exception('SMTP RCPT TO rejected.');
+        }
+
         fputs($socket, "DATA\r\n");
-        fgets($socket);
+        $dataResponse = fgets($socket);
+        if ($dataResponse === false || strpos($dataResponse, '354') !== 0) {
+            throw new Exception('SMTP DATA command rejected.');
+        }
 
         $emailBody = buildEmailMessage($to, $subject, $htmlBody, $textBody);
         fputs($socket, $emailBody . "\r\n.\r\n");
         $response = fgets($socket);
 
-        if (strpos($response, '250') === false) {
+        if ($response === false || strpos($response, '250') !== 0) {
             throw new Exception('SMTP message rejected');
         }
 
@@ -192,6 +288,18 @@ function sendViaSMTP(string $to, string $subject, string $htmlBody, ?string $tex
             'logId' => $logId
         ];
     }
+}
+
+function smtpReadMultilineResponse($socket): string {
+    $response = '';
+    while (($line = fgets($socket)) !== false) {
+        $response .= $line;
+        // SMTP multiline replies use code + '-' for continuation and code + space for final line.
+        if (preg_match('/^\d{3}\s/', $line)) {
+            break;
+        }
+    }
+    return $response;
 }
 
 /**

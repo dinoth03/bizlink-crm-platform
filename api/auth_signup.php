@@ -2,6 +2,8 @@
 session_start();
 require 'config.php';
 require_once 'api_helpers.php';
+require 'auth_token_utils.php';
+require 'mail_service.php';
 require 'csrf_protection.php';
 require 'rate_limiting.php';
 require 'secure_logging.php';
@@ -142,6 +144,25 @@ function createStoreSlug(mysqli $conn, string $businessName): string {
     }
 }
 
+function generateVerificationCode(): string {
+    return str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
+function ensureEmailVerificationTokensTable(mysqli $conn): void {
+    $sql = 'CREATE TABLE IF NOT EXISTS email_verification_tokens (
+        token_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        token_hash VARCHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used_at DATETIME NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_token_hash (token_hash),
+        INDEX idx_expires_at (expires_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+    $conn->query($sql);
+}
+
 function createAdminApprovalNotifications(
     mysqli $conn,
     string $signupRole,
@@ -233,9 +254,16 @@ try {
         $city = trim((string)($profile['city'] ?? ''));
     }
 
-    // Vendor/customer signups require admin approval before login.
-    $status = in_array($role, ['vendor', 'customer'], true) ? 'inactive' : 'active';
-    $isVerified = in_array($role, ['vendor', 'customer'], true) ? 0 : 1;
+    if ($role === 'admin') {
+        $status = 'pending_verification';
+        $isVerified = 0;
+    } elseif (in_array($role, ['vendor', 'customer'], true)) {
+        $status = 'inactive';
+        $isVerified = 0;
+    } else {
+        $status = 'active';
+        $isVerified = 1;
+    }
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     $insertUser = $conn->prepare(
@@ -245,6 +273,10 @@ try {
     $insertUser->execute();
     $userId = (int)$insertUser->insert_id;
     $insertUser->close();
+
+    $verificationEnabled = false;
+    $verificationMethod = null;
+    $verifyCode = '';
 
     if ($role === 'admin') {
         $department = trim((string)($profile['department'] ?? ''));
@@ -259,6 +291,20 @@ try {
         $insertAdmin->bind_param('isss', $userId, $adminLevel, $permissions, $department);
         $insertAdmin->execute();
         $insertAdmin->close();
+
+        ensureEmailVerificationTokensTable($conn);
+        $verifyCode = generateVerificationCode();
+        $verifyCodeHash = hashAuthToken($verifyCode);
+        $verifyExpiryMinutes = 15;
+
+        $verifyStmt = $conn->prepare(
+            'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())'
+        );
+        $verifyStmt->bind_param('isi', $userId, $verifyCodeHash, $verifyExpiryMinutes);
+        $verifyStmt->execute();
+        $verifyStmt->close();
+        $verificationEnabled = true;
+        $verificationMethod = 'code';
     }
 
     if ($role === 'vendor') {
@@ -317,9 +363,21 @@ try {
 
     $conn->commit();
 
-    $responseMessage = in_array($role, ['vendor', 'customer'], true)
-        ? 'Account created successfully. Your account is pending admin approval.'
-        : 'Account created successfully. You can now login.';
+    $mailResult = ['success' => false];
+    if ($verificationEnabled && $verifyCode !== '') {
+        $emailHtmlBody = getAdminVerificationCodeEmailHtml($verifyCode, $firstName ?: 'Admin');
+        $mailResult = sendMail($email, 'Your BizLink Admin Verification Code', $emailHtmlBody, 'Your verification code is: ' . $verifyCode);
+    }
+
+    if ($role === 'admin') {
+        $responseMessage = !empty($mailResult['success'])
+            ? 'Admin account created. Enter the 6-digit OTP sent to your email before login.'
+            : 'Admin account created, but OTP email could not be sent. Check SMTP and use resend code from login.';
+    } else {
+        $responseMessage = in_array($role, ['vendor', 'customer'], true)
+            ? 'Account created successfully. Your account is pending admin approval.'
+            : 'Account created successfully. You can now login.';
+    }
 
     apiSuccess([
         'user' => [
@@ -329,6 +387,10 @@ try {
             'full_name' => $fullName
         ],
         'approval_required' => in_array($role, ['vendor', 'customer'], true),
+        'verification_required' => $verificationEnabled,
+        'verification_method' => $verificationMethod,
+        'verification_code' => (isLocalHostEnvironment() && $verificationEnabled) ? $verifyCode : null,
+        'email_sent' => $mailResult['success'] ?? false,
         'dashboard' => '../pages/index.html'
     ], $responseMessage, 'ACCOUNT_CREATED', 201);
 } catch (Throwable $e) {
