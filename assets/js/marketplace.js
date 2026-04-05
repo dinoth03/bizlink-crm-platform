@@ -139,6 +139,39 @@ const CATEGORY_ALIASES = {
   logistics: 'logistics'
 };
 
+const CATEGORY_IMAGE_FALLBACKS = {
+  electronics: '../assets/images/galaxybook.webp',
+  fashion: '../assets/images/saree.jpg',
+  home: '../assets/images/TeakWoodCoffeeTable.webp',
+  grocery: '../assets/images/Ceylon Black Tea – 1kg Premium.webp',
+  agriculture: '../assets/images/Organic Vegetable Seeds Pack.webp',
+  construction: '../assets/images/Cement – 50kg Premium Bag.webp',
+  health: '../assets/images/Herbal Ayurvedic Oil – 100ml.webp',
+  office: '../assets/images/Ergonomic Office Chair.webp',
+  industrial: '../assets/images/UPS.webp',
+  packaging: '../assets/images/A4 Printing Paper – 5 Ream Box.webp',
+  it: '../assets/images/POS-System.jpg',
+  marketing: '../assets/images/sony.jpg',
+  accounting: '../assets/images/solarlight.jpg',
+  logistics: '../assets/images/Drip Irrigation Starter Kit.jpg',
+  other: '../assets/images/galaxybook.webp'
+};
+
+function resolveApiProductImage(product, category) {
+  const candidate = String(product.image || product.image_url || product.product_image || product.thumbnail || '').trim();
+  if (candidate) {
+    if (/^https?:\/\//i.test(candidate)) {
+      return candidate;
+    }
+    if (candidate.startsWith('../') || candidate.startsWith('./') || candidate.startsWith('/')) {
+      return candidate;
+    }
+    return `../assets/images/${candidate}`;
+  }
+
+  return CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other;
+}
+
 function toCategorySlug(value) {
   const cleaned = (value || '').toString().trim().toLowerCase();
   if (!cleaned) return 'other';
@@ -186,12 +219,14 @@ function mapApiProduct(product, index) {
   const rating = Math.max(3.8, Math.min(5, 4 + ((index % 10) / 10)));
   const reviews = 12 + (index * 7);
   const isNew = index < 6;
+  const image = resolveApiProductImage(product, category);
 
   return {
     id: Number(product.product_id),
     name: product.product_name,
     cat: category,
     emoji: pickEmoji(category),
+    image,
     company: product.shop_name || 'BizLink Vendor',
     price,
     oldPrice: null,
@@ -234,9 +269,9 @@ function updateMarketplaceCounts(products, categories) {
 async function loadMarketplaceData() {
   try {
     const [apiProducts, apiCategories, apiOrders] = await Promise.all([
-      getProducts(),
-      getCategories(),
-      getOrders()
+      getMarketplacePublicList('get_products.php'),
+      getMarketplacePublicList('get_categories.php'),
+      getMarketplaceOptionalList('get_orders.php')
     ]);
 
     if (apiProducts && apiProducts.length > 0) {
@@ -257,6 +292,35 @@ async function loadMarketplaceData() {
 
   updateMarketplaceCounts(PRODUCTS, []);
   return false;
+}
+
+async function getMarketplacePublicList(endpoint) {
+  try {
+    if (typeof apiRequest === 'function') {
+      const result = await apiRequest(endpoint, {}, false);
+      if (result && result.data && result.data.success) {
+        return Array.isArray(result.data.data) ? result.data.data : [];
+      }
+      return [];
+    }
+
+    if (typeof API_BASE === 'string') {
+      const response = await fetch(API_BASE + endpoint);
+      const payload = await response.json();
+      if (payload && payload.success) {
+        return Array.isArray(payload.data) ? payload.data : [];
+      }
+    }
+  } catch (error) {
+    console.warn(`Marketplace API read failed for ${endpoint}:`, error);
+  }
+
+  return [];
+}
+
+async function getMarketplaceOptionalList(endpoint) {
+  const list = await getMarketplacePublicList(endpoint);
+  return Array.isArray(list) ? list : [];
 }
 
 /*INIT*/
