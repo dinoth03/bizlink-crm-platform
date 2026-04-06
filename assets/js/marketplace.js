@@ -268,13 +268,17 @@ function updateMarketplaceCounts(products, categories) {
 
 async function loadMarketplaceData() {
   try {
+    console.log('[Marketplace] Starting API data load...');
     const [apiProducts, apiCategories, apiOrders] = await Promise.all([
       getMarketplacePublicList('get_products.php'),
       getMarketplacePublicList('get_categories.php'),
       getMarketplaceOptionalList('get_orders.php')
     ]);
 
+    console.log(`[Marketplace] API Results - Products: ${apiProducts?.length || 0}, Categories: ${apiCategories?.length || 0}, Orders: ${apiOrders?.length || 0}`);
+
     if (apiProducts && apiProducts.length > 0) {
+      console.log('[Marketplace] Replacing static products with API data');
       const mapped = apiProducts.map(mapApiProduct);
       PRODUCTS.splice(0, PRODUCTS.length, ...mapped);
 
@@ -284,12 +288,16 @@ async function loadMarketplaceData() {
       );
 
       updateMarketplaceCounts(mapped, apiCategories || []);
+      console.log('[Marketplace] API data loaded successfully!');
       return true;
+    } else {
+      console.warn('[Marketplace] API returned no products, using fallback static data');
     }
   } catch (error) {
-    console.error('Failed to load marketplace data from API:', error);
+    console.error('[Marketplace] Failed to load marketplace data from API:', error);
   }
 
+  console.log('[Marketplace] Using fallback static products (' + PRODUCTS.length + ' items)');
   updateMarketplaceCounts(PRODUCTS, []);
   return false;
 }
@@ -309,16 +317,27 @@ async function fetchJsonWithTimeout(url, timeoutMs = 3500) {
 async function getMarketplacePublicList(endpoint) {
   try {
     if (typeof API_BASE === 'string') {
+      console.log(`[Marketplace] Fetching from API: ${API_BASE}${endpoint}`);
       const payload = await fetchJsonWithTimeout(API_BASE + endpoint);
+      
+      // Log the full response for debugging
+      console.log(`[Marketplace] API Response for ${endpoint}:`, payload);
+      
       if (payload && payload.success) {
+        const dataLength = Array.isArray(payload.data) ? payload.data.length : 0;
+        console.log(`[Marketplace] Successfully loaded ${dataLength} items from ${endpoint}`);
         return Array.isArray(payload.data) ? payload.data : [];
+      } else if (payload) {
+        console.warn(`[Marketplace] API returned success=false for ${endpoint}:`, payload.message);
+      } else {
+        console.warn(`[Marketplace] API returned invalid response for ${endpoint}`);
       }
     }
   } catch (error) {
     if (error && error.name === 'AbortError') {
-      console.debug(`Marketplace API timeout for ${endpoint}`);
+      console.debug(`[Marketplace] API timeout for ${endpoint}`);
     } else {
-      console.debug(`Marketplace API read failed for ${endpoint}:`, error?.message || error);
+      console.warn(`[Marketplace] API read failed for ${endpoint}:`, error?.message || error);
     }
   }
 

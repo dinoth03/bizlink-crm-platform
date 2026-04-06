@@ -1,4 +1,24 @@
 <?php
+// ============================================
+// ERROR REPORTING - Enable all error logging
+// ============================================
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display errors to users
+ini_set('log_errors', 1);
+
+// Create logs directory if it doesn't exist
+$logsDir = dirname(__FILE__) . '/../logs';
+if (!file_exists($logsDir)) {
+    @mkdir($logsDir, 0777, true);
+}
+
+// Set error log file location
+$errorLogFile = $logsDir . '/api_errors.log';
+ini_set('error_log', $errorLogFile);
+
+// Log connection start
+error_log("=== API REQUEST STARTED at " . date('Y-m-d H:i:s') . " from " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " ===");
+
 require_once 'api_helpers.php';
 // ============================================
 // DATABASE CONFIGURATION
@@ -10,6 +30,9 @@ define('DB_PASSWORD', getenv('DB_PASSWORD') ?: ''); // XAMPP default is no passw
 define('DB_NAME', getenv('DB_NAME') ?: 'bizlink_crm');
 define('DB_PORT', (int) (getenv('DB_PORT') ?: 3306));
 define('DB_SOCKET', getenv('DB_SOCKET') ?: '');
+
+// Log connection details
+error_log("DB_CONFIG: Host=" . DB_HOST . ", User=" . DB_USER . ", Database=" . DB_NAME . ", Port=" . DB_PORT);
 
 // ============================================
 // SECURITY CONFIGURATION
@@ -29,17 +52,28 @@ define('SECURITY_HEADERS_ENABLED', (bool)(getenv('SECURITY_HEADERS_ENABLED') ?? 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 // Create Connection
+$conn = null;
 try {
     if (DB_SOCKET !== '') {
         // Cloud SQL via Unix socket (Cloud Run): /cloudsql/PROJECT:REGION:INSTANCE
+        error_log("Attempting connection via Unix socket: " . DB_SOCKET);
         $conn = new mysqli(null, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_SOCKET);
     } else {
+        error_log("Attempting connection to " . DB_HOST . ":" . DB_PORT);
         $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
     }
+    
+    if (!$conn) {
+        throw new Exception("Connection failed: " . mysqli_connect_error());
+    }
+    
     $conn->set_charset("utf8mb4");
+    error_log("Database connection successful!");
 } catch (Throwable $exception) {
-    apiError('DB_CONNECTION_ERROR', 'Database connection failed.', 500, [
-        ['field' => 'database', 'message' => $exception->getMessage()]
+    $errorMsg = $exception->getMessage();
+    error_log("DATABASE CONNECTION FAILED: " . $errorMsg);
+    apiError('DB_CONNECTION_ERROR', 'Database connection failed. Check server logs.', 500, [
+        ['field' => 'database', 'message' => $errorMsg]
     ]);
 }
 

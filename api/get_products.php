@@ -1,7 +1,28 @@
 <?php
+// ============================================
+// ERROR REPORTING & DIAGNOSTICS
+// ============================================
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't show errors inline, log them instead
+ini_set('log_errors', 1);
+
+// Log file for debugging
+$errorLogFile = dirname(__FILE__) . '/../logs/api_errors.log';
+if (!file_exists(dirname($errorLogFile))) {
+    @mkdir(dirname($errorLogFile), 0777, true);
+}
+ini_set('error_log', $errorLogFile);
+
 require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
+
+// Verify connection exists
+if (!isset($conn) || $conn === null) {
+    apiError('DB_CONNECTION_FAILED', 'Database connection is not available. Check server logs.', 500, [
+        ['field' => 'database', 'message' => 'Connection object is missing.']
+    ]);
+}
 
 $isAuthenticated = isLoggedIn();
 $userRole = isLoggedIn() ? getUserRole() : null;
@@ -87,12 +108,26 @@ if ($filters['vendor_id'] > 0) {
 $countSql = 'SELECT COUNT(*) AS total FROM products p LEFT JOIN vendors v ON p.vendor_id = v.vendor_id' . $whereClause;
 $countStmt = $conn->prepare($countSql);
 if (!$countStmt) {
-    apiError('DB_QUERY_ERROR', 'Failed to prepare products count query.', 500);
+    $error = $conn->error ?: 'Unknown prepare error';
+    error_log("COUNT QUERY PREPARE FAILED: " . $error . " | SQL: " . $countSql);
+    apiError('DB_QUERY_ERROR', 'Failed to prepare products count query: ' . $error, 500, [
+        ['field' => 'database', 'message' => $error]
+    ]);
 }
-bindDynamicParams($countStmt, $types, $params);
-$countStmt->execute();
-$total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
-$countStmt->close();
+
+try {
+    bindDynamicParams($countStmt, $types, $params);
+    $countStmt->execute();
+    $total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+} catch (Exception $e) {
+    $error = $e->getMessage() ?: $conn->error ?: 'Unknown execute error';
+    error_log("COUNT QUERY EXECUTE FAILED: " . $error);
+    apiError('DB_QUERY_ERROR', 'Failed to execute products count query: ' . $error, 500, [
+        ['field' => 'database', 'message' => $error]
+    ]);
+} finally {
+    $countStmt->close();
+}
 
 $query = $baseQuery . $whereClause . " 
 ORDER BY p.created_at DESC
@@ -100,17 +135,31 @@ LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($query);
 if (!$stmt) {
-    apiError('DB_QUERY_ERROR', 'Failed to prepare products query.', 500);
+    $error = $conn->error ?: 'Unknown prepare error';
+    error_log("PRODUCTS QUERY PREPARE FAILED: " . $error . " | SQL: " . $query);
+    apiError('DB_QUERY_ERROR', 'Failed to prepare products query: ' . $error, 500, [
+        ['field' => 'database', 'message' => $error]
+    ]);
 }
+
 $finalParams = $params;
 $finalTypes = $types;
 $finalParams[] = $pagination['limit'];
 $finalParams[] = $pagination['offset'];
 $finalTypes[] = 'i';
 $finalTypes[] = 'i';
-bindDynamicParams($stmt, $finalTypes, $finalParams);
-$stmt->execute();
-$result = $stmt->get_result();
+
+try {
+    bindDynamicParams($stmt, $finalTypes, $finalParams);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} catch (Exception $e) {
+    $error = $e->getMessage() ?: $conn->error ?: 'Unknown execute error';
+    error_log("PRODUCTS QUERY EXECUTE FAILED: " . $error);
+    apiError('DB_QUERY_ERROR', 'Failed to execute products query: ' . $error, 500, [
+        ['field' => 'database', 'message' => $error]
+    ]);
+}
 
 $products = [];
 while ($row = $result->fetch_assoc()) {
