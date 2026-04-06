@@ -26,23 +26,22 @@ define('CSRF_ENABLED', (bool)(getenv('CSRF_ENABLED') ?? true));
 // Enable security headers by default
 define('SECURITY_HEADERS_ENABLED', (bool)(getenv('SECURITY_HEADERS_ENABLED') ?? true));
 
-// Create Connection
-if (DB_SOCKET !== '') {
-    // Cloud SQL via Unix socket (Cloud Run): /cloudsql/PROJECT:REGION:INSTANCE
-    $conn = new mysqli(null, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_SOCKET);
-} else {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
-}
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-// Check Connection
-if ($conn->connect_error) {
+// Create Connection
+try {
+    if (DB_SOCKET !== '') {
+        // Cloud SQL via Unix socket (Cloud Run): /cloudsql/PROJECT:REGION:INSTANCE
+        $conn = new mysqli(null, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_SOCKET);
+    } else {
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
+    }
+    $conn->set_charset("utf8mb4");
+} catch (Throwable $exception) {
     apiError('DB_CONNECTION_ERROR', 'Database connection failed.', 500, [
-        ['field' => 'database', 'message' => $conn->connect_error]
+        ['field' => 'database', 'message' => $exception->getMessage()]
     ]);
 }
-
-// Set Character Set (important for Unicode)
-$conn->set_charset("utf8mb4");
 
 // ============================================
 // CORS HEADERS - Restrict to whitelist (no wildcard)

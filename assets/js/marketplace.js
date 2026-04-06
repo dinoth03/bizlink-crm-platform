@@ -294,25 +294,32 @@ async function loadMarketplaceData() {
   return false;
 }
 
+async function fetchJsonWithTimeout(url, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return await response.json();
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 async function getMarketplacePublicList(endpoint) {
   try {
-    if (typeof apiRequest === 'function') {
-      const result = await apiRequest(endpoint, {}, false);
-      if (result && result.data && result.data.success) {
-        return Array.isArray(result.data.data) ? result.data.data : [];
-      }
-      return [];
-    }
-
     if (typeof API_BASE === 'string') {
-      const response = await fetch(API_BASE + endpoint);
-      const payload = await response.json();
+      const payload = await fetchJsonWithTimeout(API_BASE + endpoint);
       if (payload && payload.success) {
         return Array.isArray(payload.data) ? payload.data : [];
       }
     }
   } catch (error) {
-    console.warn(`Marketplace API read failed for ${endpoint}:`, error);
+    if (error && error.name === 'AbortError') {
+      console.debug(`Marketplace API timeout for ${endpoint}`);
+    } else {
+      console.debug(`Marketplace API read failed for ${endpoint}:`, error?.message || error);
+    }
   }
 
   return [];
@@ -324,12 +331,18 @@ async function getMarketplaceOptionalList(endpoint) {
 }
 
 /*INIT*/
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadMarketplaceData();
+document.addEventListener('DOMContentLoaded', () => {
+  // Always render the built-in catalog immediately.
   renderProducts();
   animateCounters();
   initNavScroll();
   initBackToTop();
+
+  // Hydrate from API when available, but never block first paint.
+  loadMarketplaceData().then(() => {
+    renderProducts();
+    animateCounters();
+  });
 });
 
 /*NAVBAR SCROLL*/
@@ -652,8 +665,7 @@ function openModal(id) {
   document.getElementById('modalInner').innerHTML = `
     <div class="modal-img-col">
       <div class="modal-img-badge-wrap">${badgeHtml}${newBadge}${serviceBadge}</div>
-      <span class="modal-img-placeholder-emoji">${p.emoji}</span>
-      <span style="font-size:0.7rem;color:var(--t3);">Product Image Space</span>
+      <img class="modal-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=900&q=80'" />
       <div class="modal-img-actions">
         <button class="modal-act-btn" onclick="toggleWishlistItem(event, ${p.id})" title="Wishlist">
           ${isWished ? '❤️' : '🤍'}
