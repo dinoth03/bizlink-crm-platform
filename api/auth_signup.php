@@ -195,23 +195,34 @@ function createAdminApprovalNotifications(
     $priority = 'high';
     $actionUrl = '/admin/dashboard.html';
 
+    $parts = [];
+    $appendPart = static function (string $label, string $value) use (&$parts): void {
+        $value = trim($value);
+        if ($value !== '') {
+            $parts[] = $label . ': ' . $value;
+        }
+    };
+
+    $appendPart('Name', $fullName);
+    $appendPart('Email', $email);
+    $appendPart('Phone', (string)($details['phone'] ?? ''));
+
     if ($signupRole === 'vendor') {
-        $businessName = trim((string)($details['business_name'] ?? ''));
-        $businessCategory = trim((string)($details['business_category'] ?? ''));
+        $appendPart('Business', (string)($details['business_name'] ?? ''));
+        $appendPart('Registration No', (string)($details['business_registration_number'] ?? ''));
+        $appendPart('Category', (string)($details['business_category'] ?? ''));
+        $appendPart('Business Type', (string)($details['business_type'] ?? ''));
+        $appendPart('Employee Range', (string)($details['employee_range'] ?? ''));
+        $appendPart('Province', (string)($details['province'] ?? ''));
         $title = 'New vendor approval request';
-        $message = 'Vendor: ' . $fullName
-            . ' (' . $email . ')'
-            . ($businessName !== '' ? ' | Business: ' . $businessName : '')
-            . ($businessCategory !== '' ? ' | Category: ' . $businessCategory : '')
-            . ' | Awaiting approval.';
     } else {
-        $city = trim((string)($details['city'] ?? ''));
+        $appendPart('City', (string)($details['city'] ?? ''));
+        $appendPart('Province', (string)($details['province'] ?? ''));
+        $appendPart('Preferred Language', (string)($details['preferred_language'] ?? ''));
         $title = 'New customer approval request';
-        $message = 'Customer: ' . $fullName
-            . ' (' . $email . ')'
-            . ($city !== '' ? ' | City: ' . $city : '')
-            . ' | Awaiting approval.';
     }
+
+    $message = ucfirst($signupRole) . ' signup pending approval. ' . implode(' | ', $parts) . ' | Action required: review and approve this account.';
 
     $notifStmt = $conn->prepare(
         'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
@@ -339,7 +350,12 @@ try {
 
         createAdminApprovalNotifications($conn, 'vendor', $userId, $fullName, $email, [
             'business_name' => $businessName,
-            'business_category' => $industry
+            'business_registration_number' => $businessRegNo,
+            'business_category' => $industry,
+            'business_type' => $employeeRange,
+            'employee_range' => $employeeRange,
+            'phone' => $phone,
+            'province' => $province
         ]);
     }
 
@@ -355,7 +371,10 @@ try {
         $insertCustomer->close();
 
         createAdminApprovalNotifications($conn, 'customer', $userId, $fullName, $email, [
-            'city' => $city
+            'city' => $city,
+            'phone' => $phone,
+            'province' => $province,
+            'preferred_language' => $preferredLanguage
         ]);
     }
 
