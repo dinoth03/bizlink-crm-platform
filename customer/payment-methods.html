@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Customer - Payment Methods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/customer-portal.css"/>
+</head>
+<body data-page="payments">
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="dashboard.html" class="logo"><span class="logo-icon">⬡</span>Biz<strong>Link</strong></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="orders.html">Orders</a></li>
+        <li><a href="addresses.html">Addresses</a></li>
+        <li><a href="payment-methods.html" class="active">Payment Methods</a></li>
+        <li><a href="userprofile.html">Profile</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+      <header class="page-header">
+        <h1>Payment Methods</h1>
+        <p>Manage saved cards and set your default payment option.</p>
+      </header>
+
+      <section class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Card</th>
+              <th>Type</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="card-label">Visa ending 1024 <span class="default-badge card">Default</span></td>
+              <td>Credit</td>
+              <td>11/28</td>
+              <td><span class="badge">Active</span></td>
+              <td class="actions">
+                <button class="small-btn" data-set-default-card="1024">Set Default</button>
+                <button class="small-btn" data-delete-card="1024">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="card-label">Mastercard ending 8801</td>
+              <td>Debit</td>
+              <td>03/27</td>
+              <td><span class="badge">Active</span></td>
+              <td class="actions">
+                <button class="small-btn" data-set-default-card="8801">Set Default</button>
+                <button class="small-btn" data-delete-card="8801">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="card-label">Amex ending 4500</td>
+              <td>Credit</td>
+              <td>09/29</td>
+              <td><span class="badge">Active</span></td>
+              <td class="actions">
+                <button class="small-btn" data-set-default-card="4500">Set Default</button>
+                <button class="small-btn" data-delete-card="4500">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card" style="margin-top: 16px;">
+        <h3 style="margin-bottom: 12px;">Add New Card</h3>
+        <div class="form-grid">
+          <input class="input" type="text" placeholder="Cardholder Name"/>
+          <input class="input" type="text" placeholder="Card Number"/>
+          <input class="input" type="text" placeholder="Expiry (MM/YY)"/>
+          <input class="input" type="text" placeholder="CVV"/>
+        </div>
+        <div class="actions" style="margin-top: 14px;">
+          <button class="action-btn primary">Save Payment Method</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="../assets/js/customer-portal.js"></script>
+</body>
+</html>

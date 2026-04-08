@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Customer - Order History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/customer-portal.css"/>
+</head>
+<body data-page="orders">
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="dashboard.html" class="logo"><span class="logo-icon">⬡</span>Biz<strong>Link</strong></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="orders.html" class="active">Orders</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="followed-vendors.html">Following</a></li>
+        <li><a href="userprofile.html">Profile</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+      <header class="page-header">
+        <h1>Order History</h1>
+        <p>Track orders, cancel pending purchases, request returns, and leave reviews.</p>
+      </header>
+
+      <div class="toolbar">
+        <button class="filter-btn active" data-filter-status="all">All</button>
+        <button class="filter-btn" data-filter-status="processing">Processing</button>
+        <button class="filter-btn" data-filter-status="shipped">Shipped</button>
+        <button class="filter-btn" data-filter-status="delivered">Delivered</button>
+        <button class="filter-btn" data-filter-status="cancelled">Cancelled</button>
+      </div>
+
+      <section class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Vendor</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-order-status="processing">
+              <td>BL-10245</td>
+              <td>TeaLanka</td>
+              <td>LKR 5,200</td>
+              <td><span class="status-pill">Processing</span></td>
+              <td>2026-04-07</td>
+              <td class="actions">
+                <button class="small-btn" data-action-track="BL-10245">Track</button>
+                <button class="small-btn" data-action-cancel="BL-10245">Cancel</button>
+              </td>
+            </tr>
+            <tr data-order-status="shipped">
+              <td>BL-10210</td>
+              <td>Tharu Fashion</td>
+              <td>LKR 9,750</td>
+              <td><span class="status-pill">Shipped</span></td>
+              <td>2026-04-05</td>
+              <td class="actions">
+                <button class="small-btn" data-action-track="BL-10210">Track</button>
+              </td>
+            </tr>
+            <tr data-order-status="delivered">
+              <td>BL-10188</td>
+              <td>Coco Goods</td>
+              <td>LKR 3,640</td>
+              <td><span class="status-pill">Delivered</span></td>
+              <td>2026-03-31</td>
+              <td class="actions">
+                <button class="small-btn" data-action-return="BL-10188">Return</button>
+                <button class="small-btn" data-action-review="BL-10188">Review</button>
+              </td>
+            </tr>
+            <tr data-order-status="cancelled">
+              <td>BL-10150</td>
+              <td>Spice Island</td>
+              <td>LKR 2,180</td>
+              <td><span class="status-pill">Cancelled</span></td>
+              <td>2026-03-25</td>
+              <td class="actions">
+                <button class="small-btn" data-action-track="BL-10150">Details</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="footer-links">
+        <a href="wishlist.html">My Wishlist</a>
+        <a href="reviews.html">My Reviews</a>
+        <a href="addresses.html">Addresses</a>
+      </div>
+    </div>
+  </main>
+  <script src="../assets/js/customer-portal.js"></script>
+</body>
+</html>

@@ -18,9 +18,9 @@
     <ul class="nav-links">
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="userprofile.html" class="active">Profile</a></li>
-      <li><a href="#">Orders</a></li>
-      <li><a href="#">Marketplace</a></li>
-      <li><a href="#">Support</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="../pages/marketplace.html">Marketplace</a></li>
+      <li><a href="../pages/contact.html">Support</a></li>
     </ul>
     <div class="nav-cta">
       <a href="#" class="btn-ghost">🇱🇰</a>
@@ -84,6 +84,16 @@
           <div style="margin-top:16px;"><a href="#" class="btn-outline-customer" style="margin-right:12px;">🔗 Link social</a><a href="#" class="btn-outline-customer">📧 Verify email</a></div>
         </div>
 
+        <div class="settings-panel">
+          <div class="panel-title"><span>🧩</span> Settings Hub</div>
+          <p style="color:var(--text-muted); margin-bottom:18px;">Quick access to all account settings sections.</p>
+          <div class="info-row"><span class="info-label">🔔 Notifications</span><span class="info-value">Email, SMS, chat alerts</span></div>
+          <div class="info-row"><span class="info-label">🔒 Privacy</span><span class="info-value">Profile visibility, data choices</span></div>
+          <div class="info-row"><span class="info-label">🔑 Password</span><span class="info-value">Reset and security check</span></div>
+          <div class="info-row"><span class="info-label">📍 Addresses</span><span class="info-value"><a href="addresses.html" style="color:var(--customer);">Manage delivery addresses</a></span></div>
+          <div class="info-row"><span class="info-label">💳 Payments</span><span class="info-value"><a href="payment-methods.html" style="color:var(--customer);">Manage saved cards</a></span></div>
+        </div>
+
         <!-- NOTIFICATIONS & PREFERENCES panel with toggles -->
         <div class="settings-panel">
           <div class="panel-title"><span>🔔</span> Notifications & preferences</div>
@@ -96,6 +106,23 @@
             <select style="background:transparent; border:1px solid var(--border); color:white; padding:6px 12px; border-radius:30px; margin-left:12px;">
               <option>Sinhala</option><option>English</option><option>Tamil</option>
             </select>
+          </div>
+        </div>
+
+        <div class="settings-panel">
+          <div class="panel-title"><span>🔒</span> Privacy settings</div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">👤</span> Show profile to followed vendors</span> <div class="toggle-switch active"></div></div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">📊</span> Allow personalized recommendations</span> <div class="toggle-switch active"></div></div>
+          <div class="pref-item"><span><span style="font-size:1.2rem;">🧾</span> Export account data on request</span> <div class="toggle-switch"></div></div>
+        </div>
+
+        <div class="settings-panel">
+          <div class="panel-title"><span>🔑</span> Password & security</div>
+          <div class="info-row"><span class="info-label">Current password</span><span class="info-value">••••••••</span></div>
+          <div class="info-row"><span class="info-label">Last changed</span><span class="info-value">22 Mar 2026</span></div>
+          <div class="actions" style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <a href="#" class="btn-outline-customer">Change password</a>
+            <a href="#" class="btn-outline-customer">Enable 2FA</a>
           </div>
         </div>
 
@@ -150,13 +177,13 @@
         <p style="color:var(--text-muted);">Sri Lanka's All-in-One CRM & Business Connection Platform – Customer Hub</p>
         <p class="sinhala-tag" style="margin-top:8px;">ගනුදෙනුකරුවන් සඳහා</p>
       </div>
-      <div><h4 style="margin-bottom:12px;">Customer</h4><a href="#">My orders</a><a href="#">Wishlist</a><a href="#">Chat</a></div>
-      <div><h4 style="margin-bottom:12px;">Vendors</h4><a href="#">Marketplace</a><a href="#">Top rated</a></div>
-      <div><h4 style="margin-bottom:12px;">Support</h4><a href="#">Help center</a><a href="#">Contact</a></div>
+      <div><h4 style="margin-bottom:12px;">Customer</h4><a href="orders.html">My orders</a><a href="wishlist.html">Wishlist</a><a href="reviews.html">My reviews</a></div>
+      <div><h4 style="margin-bottom:12px;">Vendors</h4><a href="../pages/marketplace.html">Marketplace</a><a href="followed-vendors.html">Following</a></div>
+      <div><h4 style="margin-bottom:12px;">Support</h4><a href="../pages/contact.html">Help center</a><a href="../pages/contact.html">Contact</a></div>
     </div>
     <div class="footer-bottom">
       <p>© 2024 BizLink – Customer profile page</p>
-      <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a></div>
+      <div class="footer-links"><a href="../pages/privacy.html">Privacy</a><a href="../pages/terms.html">Terms</a></div>
     </div>
   </div>
 </footer>

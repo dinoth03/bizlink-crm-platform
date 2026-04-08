@@ -111,6 +111,68 @@
     }
     .stat-detail { font-size: 0.75rem; color: var(--text-secondary); }
 
+    .loyalty-widget {
+      margin-bottom: 30px;
+      border-color: rgba(255,140,0,0.25);
+    }
+    .loyalty-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .loyalty-head h3 {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      margin-bottom: 4px;
+    }
+    .loyalty-head p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+    }
+    .tier-badge {
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: rgba(255,140,0,0.14);
+      border: 1px solid rgba(255,140,0,0.42);
+      color: #ffd29e;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .points-progress {
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .points-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #ff8c00, #ffb04d);
+      box-shadow: 0 0 18px rgba(255,140,0,0.35);
+    }
+    .points-caption {
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-size: 0.86rem;
+    }
+    .tier-perks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tier-perks span {
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 6px 12px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.02);
+    }
+
     /* recent orders + marketplace */
     .two-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 28px; margin-bottom: 50px; }
     .card {

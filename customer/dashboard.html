@@ -16,7 +16,8 @@
       <a href="../pages/home.html" class="logo"><span class="logo-icon">⬡</span><span class="logo-text">Biz<strong>Link</strong></span></a>
       <ul class="nav-links">
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
-        <li><a href="#customerOrdersSection">Orders</a></li>
+        <li><a href="orders.html">Orders</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
         <li><a href="../pages/marketplace.html">Marketplace</a></li>
         <li><a href="../pages/chat.html?chatRole=admin" id="supportNavLink">Support</a></li>
       </ul>
@@ -49,6 +50,25 @@
         <div class="stat-card"><div class="stat-title">Vendors Followed</div><div class="stat-number" data-target="8">0</div><div class="stat-detail">4 active now</div></div>
       </div>
 
+      <div class="card loyalty-widget">
+        <div class="loyalty-head">
+          <div>
+            <h3>🏅 Loyalty Tier</h3>
+            <p>Current tier: <strong>Gold</strong> · 1,240 points earned</p>
+          </div>
+          <span class="tier-badge">Gold Member</span>
+        </div>
+        <div class="points-progress">
+          <div class="points-fill" style="width: 62%;"></div>
+        </div>
+        <p class="points-caption">760 more points to reach Platinum rewards.</p>
+        <div class="tier-perks">
+          <span>🚚 Priority delivery</span>
+          <span>💸 Member-only discounts</span>
+          <span>🎁 Monthly reward vouchers</span>
+        </div>
+      </div>
+
       <!-- Recent orders & recommended vendors -->
       <div class="two-col">
         <div class="card">
@@ -59,7 +79,7 @@
             <div class="order-item"><span><strong>#BL3005</strong> – Tea gift pack</span> <span class="order-status">Processing</span></div>
             <div class="order-item"><span><strong>#BL3117</strong> – Handicraft</span> <span class="order-status">Out for delivery</span></div>
           </div>
-          <a href="#customerOrdersSection" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
+          <a href="orders.html" style="display:inline-block; margin-top:16px; color:var(--customer);">View all orders →</a>
         </div>
 
         <div class="card">
@@ -119,6 +139,8 @@
           <a href="../pages/chat.html?chatRole=admin" class="btn-customer" style="padding:10px 28px;background:#000080;">Message Admin</a>
           <a href="../pages/chat.html?chatRole=vendor" class="btn-customer" style="padding:10px 28px;background:#50C878;">Message Vendor</a>
           <a href="../pages/marketplace.html" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Browse marketplace</a>
+          <a href="addresses.html" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Addresses</a>
+          <a href="payment-methods.html" style="border:1px solid var(--border); padding:10px 28px; border-radius:40px;">Payment methods</a>
         </div>
       </div>
     </div>
@@ -178,13 +200,13 @@
     <div class="container">
       <div class="footer-grid" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:50px; margin-bottom:40px;">
         <div><div class="logo" style="margin-bottom:16px;"><span class="logo-icon">⬡</span><span>Biz<strong>Link</strong></span></div><p style="color:var(--text-muted);">Serving Sri Lankan customers since 2024</p></div>
-        <div><h4>Customer</h4><a href="#">My orders</a><a href="#">Wishlist</a><a href="#">Chat</a></div>
+        <div><h4>Customer</h4><a href="orders.html">My orders</a><a href="wishlist.html">Wishlist</a><a href="reviews.html">My reviews</a></div>
         <div><h4>Vendors</h4><a href="../pages/marketplace.html">Marketplace</a><a href="#">Top rated</a></div>
-        <div><h4>Support</h4><a href="#">Help center</a><a href="#">Contact</a></div>
+        <div><h4>Support</h4><a href="../pages/contact.html">Help center</a><a href="../pages/contact.html">Contact</a></div>
       </div>
       <div class="footer-bottom" style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:24px; color:var(--text-muted);">
         <p>© 2024 BizLink – Customer Portal</p>
-        <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a></div>
+        <div class="footer-links"><a href="../pages/privacy.html">Privacy</a><a href="../pages/terms.html">Terms</a></div>
       </div>
     </div>
   </footer>

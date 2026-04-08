@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Customer - Wishlist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../assets/css/customer-portal.css"/>
+</head>
+<body data-page="wishlist">
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="dashboard.html" class="logo"><span class="logo-icon">⬡</span>Biz<strong>Link</strong></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="orders.html">Orders</a></li>
+        <li><a href="wishlist.html" class="active">Wishlist</a></li>
+        <li><a href="followed-vendors.html">Following</a></li>
+        <li><a href="userprofile.html">Profile</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+      <header class="page-header">
+        <h1>My Wishlist</h1>
+        <p>Saved products with quick add-to-cart actions.</p>
+      </header>
+
+      <section class="grid products">
+        <article class="item-card">
+          <div class="thumb">🍵</div>
+          <div class="item-body">
+            <h3>Ceylon Premium Tea Box</h3>
+            <p class="muted">TeaLanka • LKR 3,500</p>
+            <div class="actions">
+              <button class="action-btn primary" data-action-cart="Ceylon Premium Tea Box">Add to Cart</button>
+              <button class="action-btn" data-action-remove="1">Remove</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card">
+          <div class="thumb">👗</div>
+          <div class="item-body">
+            <h3>Handloom Casual Dress</h3>
+            <p class="muted">Tharu Fashion • LKR 6,900</p>
+            <div class="actions">
+              <button class="action-btn primary" data-action-cart="Handloom Casual Dress">Add to Cart</button>
+              <button class="action-btn" data-action-remove="2">Remove</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="item-card">
+          <div class="thumb">🥥</div>
+          <div class="item-body">
+            <h3>Coconut Oil Gift Set</h3>
+            <p class="muted">Coco Goods • LKR 2,800</p>
+            <div class="actions">
+              <button class="action-btn primary" data-action-cart="Coconut Oil Gift Set">Add to Cart</button>
+              <button class="action-btn" data-action-remove="3">Remove</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="footer-links">
+        <a href="orders.html">Order History</a>
+        <a href="followed-vendors.html">Followed Vendors</a>
+        <a href="reviews.html">My Reviews</a>
+      </div>
+    </div>
+  </main>
+  <script src="../assets/js/customer-portal.js"></script>
+</body>
+</html>
