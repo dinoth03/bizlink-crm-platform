@@ -232,6 +232,23 @@
         <button class="btn-outline-vendor">📤 Bulk Upload (CSV)</button>
       </div>
       <div class="products-grid" id="productsGrid"></div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <span class="card-title">🧩 Product Variants</span>
+          <button class="btn-ghost-sm">+ Add Variant</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Product</th><th>Variant</th><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th>Price</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Ceylon Tea</td><td>Classic Pack</td><td>250g</td><td>Green</td><td>TEA-001-A</td><td>58</td><td>Rs. 850</td><td><button class="action-btn">Edit</button></td></tr>
+              <tr><td>Ceylon Tea</td><td>Gift Box</td><td>500g</td><td>Gold</td><td>TEA-001-B</td><td>21</td><td>Rs. 1,450</td><td><button class="action-btn">Edit</button></td></tr>
+              <tr><td>Handloom Dress</td><td>Summer Fit</td><td>M / L</td><td>Maroon</td><td>BAT-003-A</td><td>14</td><td>Rs. 3,500</td><td><button class="action-btn">Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- ===== ORDERS ===== -->
@@ -282,6 +299,20 @@
         <select class="filter-select"><option value="">All Districts</option><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
       </div>
       <div class="customers-grid" id="customersGrid"></div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">Customer Outreach</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Customer</th><th>Email</th><th>Spend</th><th>Last Order</th><th>Segment</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Nimali Perera</td><td>nimali@example.lk</td><td>Rs. 42,500</td><td>2026-04-06</td><td><span class="badge b-delivered">VIP</span></td><td><button class="action-btn">Message</button></td></tr>
+              <tr><td>Kasun Fernando</td><td>kasun@example.lk</td><td>Rs. 18,700</td><td>2026-04-04</td><td><span class="badge b-processing">Frequent</span></td><td><button class="action-btn">Message</button></td></tr>
+              <tr><td>Thilini Dissanayake</td><td>thilini@example.lk</td><td>Rs. 7,200</td><td>2026-03-31</td><td><span class="badge b-pending">New</span></td><td><button class="action-btn">Message</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- ===== PROMOTIONS ===== -->
@@ -319,6 +350,19 @@
           <div class="flash-row"><span class="flash-lbl">Next Sale</span><span>Sinhala New Year Sale — April 13, 2026</span></div>
           <div class="flash-row"><span class="flash-lbl">Countdown</span><span class="countdown-val" id="countdown">Loading…</span></div>
         </div>
+      </div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">Create Promotion</span></div>
+        <div class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+          <div class="form-group"><label>Campaign Title</label><input type="text" class="form-input" placeholder="Avurudu Flash Sale" /></div>
+          <div class="form-group"><label>Discount Type</label><select class="form-input"><option>Percentage</option><option>Flat Amount</option></select></div>
+          <div class="form-group"><label>Discount Value</label><input type="number" class="form-input" placeholder="25" /></div>
+          <div class="form-group"><label>Target Category</label><select class="form-input"><option>All Products</option><option>Tea</option><option>Fashion</option><option>Health</option></select></div>
+          <div class="form-group"><label>Start Date</label><input type="date" class="form-input" /></div>
+          <div class="form-group"><label>End Date</label><input type="date" class="form-input" /></div>
+        </div>
+        <button class="btn-vendor" style="margin-top:10px;">Save Campaign</button>
       </div>
     </section>
 
@@ -371,6 +415,20 @@
           </table>
         </div>
       </div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">Commission & Payout History</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Period</th><th>Gross Sales</th><th>Commission</th><th>Net Earnings</th><th>Payout Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>1-7 Apr 2026</td><td>Rs. 144,500</td><td>Rs. 11,560</td><td>Rs. 132,940</td><td><span class="badge b-delivered">Completed</span></td><td><button class="action-btn">View</button></td></tr>
+              <tr><td>25-31 Mar 2026</td><td>Rs. 96,200</td><td>Rs. 7,696</td><td>Rs. 88,504</td><td><span class="badge b-shipped">Pending</span></td><td><button class="action-btn">View</button></td></tr>
+              <tr><td>18-24 Mar 2026</td><td>Rs. 118,900</td><td>Rs. 9,512</td><td>Rs. 109,388</td><td><span class="badge b-delivered">Completed</span></td><td><button class="action-btn">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div class="payout-section">
         <h3 class="payout-title">Payout Methods</h3>
         <div class="payout-grid">
@@ -403,6 +461,20 @@
         </div>
       </div>
       <div class="reviews-list" id="reviewsList"></div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header"><span class="card-title">Review Management</span></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Customer</th><th>Product/Vendor</th><th>Rating</th><th>Review</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Nimali Perera</td><td>Ceylon Tea</td><td>★★★★★</td><td>Excellent quality and fast delivery.</td><td>2026-04-03</td><td><button class="action-btn">Reply</button></td></tr>
+              <tr><td>Kasun Fernando</td><td>Tharu Fashion</td><td>★★★★☆</td><td>Good communication and packaging.</td><td>2026-03-28</td><td><button class="action-btn">Reply</button></td></tr>
+              <tr><td>Chamari Herath</td><td>Coco Goods</td><td>★★★☆☆</td><td>Product was good but delivery was delayed.</td><td>2026-03-20</td><td><button class="action-btn">Reply</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- ===== SETTINGS ===== -->
@@ -416,11 +488,14 @@
       <div class="settings-grid">
         <div class="glass-card settings-col">
           <h3 class="settings-heading">Business Profile</h3>
+             <div class="form-group"><label>Logo URL</label><input type="url" id="settingsLogoUrl" value="https://example.com/logo.png" class="form-input" /></div>
+             <div class="form-group"><label>Banner URL</label><input type="url" id="settingsBannerUrl" value="https://example.com/banner.jpg" class="form-input" /></div>
              <div class="form-group"><label>Business Name</label><input type="text" id="settingsBusinessName" value="" class="form-input" /></div>
              <div class="form-group"><label>Owner Name</label><input type="text" id="settingsOwnerName" value="" class="form-input" /></div>
              <div class="form-group"><label>Contact Number</label><input type="text" id="settingsContactNumber" value="+94 77 123 4567" class="form-input" /></div>
              <div class="form-group"><label>Email</label><input type="email" id="settingsEmail" value="" class="form-input" /></div>
           <div class="form-group"><label>Store Address</label><input type="text" value="No. 42, Galle Road, Colombo 03" class="form-input" /></div>
+          <div class="form-group"><label>Store URL</label><input type="text" value="https://bizlink.lk/store/vendor-name" class="form-input" /></div>
           <div class="form-group"><label>District</label>
             <select class="form-input"><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
           </div>
@@ -443,6 +518,11 @@
           <div class="toggle-row"><span>Low Stock Alerts</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
           <div class="toggle-row"><span>Payment Received</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
           <div class="toggle-row"><span>Review Posted</span><label class="toggle-sw"><input type="checkbox" /><span class="toggle-track"></span></label></div>
+
+          <h3 class="settings-heading" style="margin-top:1.5rem">Bank Details</h3>
+          <div class="form-group"><label>Bank Name</label><input type="text" value="Sampath Bank" class="form-input" /></div>
+          <div class="form-group"><label>Account Holder</label><input type="text" value="BizLink Traders (Pvt) Ltd" class="form-input" /></div>
+          <div class="form-group"><label>Account Number</label><input type="text" value="**** 4892" class="form-input" /></div>
         </div>
       </div>
     </section>
