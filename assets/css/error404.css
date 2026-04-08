@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #060a1c;
+  --bg-soft: #101b37;
+  --border: rgba(255, 255, 255, 0.15);
+  --text: #edf2ff;
+  --muted: #97a7c7;
+  --vendor: #50c878;
+  --customer: #ff8c00;
+}
+
+body {
+  min-height: 100vh;
+  font-family: "DM Sans", sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 10% 20%, rgba(80, 200, 120, 0.2), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(255, 140, 0, 0.18), transparent 35%),
+    linear-gradient(155deg, #040915 0%, #101b37 70%, #1b223f 100%);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(760px, 100%);
+  background: rgba(10, 17, 35, 0.86);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px;
+  text-align: center;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
+}
+
+.code {
+  font-size: clamp(4rem, 12vw, 7rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: transparent;
+  background: linear-gradient(120deg, var(--vendor), #7ad7ff, var(--customer));
+  -webkit-background-clip: text;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  margin-bottom: 8px;
+}
+
+p {
+  color: var(--muted);
+  max-width: 56ch;
+  margin: 0 auto 18px;
+}
+
+.actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #50c878, #327f4e);
+  border-color: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.quick-links {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  text-align: left;
+}
+
+.quick-links a {
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.quick-links a:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 24px;
+  }
+
+  .quick-links {
+    grid-template-columns: 1fr;
+  }
+}

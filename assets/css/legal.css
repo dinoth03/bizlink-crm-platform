@@ -1,0 +1,259 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-dark: #050a1a;
+  --bg-mid: #0c1428;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.12);
+  --text-primary: #f0f4ff;
+  --text-secondary: #b8c5df;
+  --text-muted: #7c8daa;
+  --vendor-color: #50c878;
+  --customer-color: #ff8c00;
+  --admin-color: #000080;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  font-family: "DM Sans", sans-serif;
+  color: var(--text-primary);
+  background: radial-gradient(circle at 15% 5%, rgba(80, 200, 120, 0.18), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(0, 0, 128, 0.22), transparent 35%),
+    linear-gradient(160deg, #030817 0%, #0b1630 70%, #131425 100%);
+  min-height: 100vh;
+  line-height: 1.65;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5, 10, 26, 0.85);
+  backdrop-filter: blur(10px);
+}
+
+.nav-inner {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  gap: 16px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+}
+
+.logo-icon {
+  color: var(--vendor-color);
+}
+
+.logo strong {
+  color: var(--vendor-color);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.page-wrap {
+  padding: 56px 0 64px;
+}
+
+.page-header {
+  margin-bottom: 26px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+}
+
+.legal-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+}
+
+.toc {
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  background: rgba(7, 13, 31, 0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.toc h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.toc ul {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.toc a {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.toc a:hover {
+  color: var(--text-primary);
+}
+
+.legal-card {
+  background: rgba(7, 13, 31, 0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h3 {
+  margin-bottom: 10px;
+  font-size: 1.25rem;
+}
+
+.section p,
+.section li {
+  color: var(--text-secondary);
+}
+
+.section ul {
+  margin-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.highlight {
+  border-left: 4px solid var(--customer-color);
+  background: rgba(255, 140, 0, 0.08);
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  margin-top: 14px;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.meta-pill {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.footer-links {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-links a {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+
+.footer-links a:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+@media (max-width: 900px) {
+  .legal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .toc {
+    position: static;
+  }
+
+  .nav-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+  }
+}
