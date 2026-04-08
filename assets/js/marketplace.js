@@ -377,6 +377,18 @@ async function checkCustomerLogin() {
   marketplaceState.currentCustomer = null;
 }
 
+async function requireCustomerForPurchase() {
+  await checkCustomerLogin();
+
+  if (marketplaceState.isLoggedIn) {
+    return true;
+  }
+
+  window.alert('Please sign up or sign in as a customer to buy products.');
+  window.location.href = '../pages/index.html?reason=unauthorized';
+  return false;
+}
+
 /*UPDATE NAVBAR WITH CUSTOMER INFO*/
 function updateNavbarForLoggedInCustomer(user) {
   const navSignIn = document.querySelector('.nav-signin');
@@ -396,6 +408,21 @@ function updateNavbarForLoggedInCustomer(user) {
   navSignIn.style.cursor = 'pointer';
 }
 
+function initCheckoutGuard() {
+  const checkoutBtn = document.querySelector('.checkout-btn');
+  if (!checkoutBtn) return;
+
+  checkoutBtn.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const allowed = await requireCustomerForPurchase();
+    if (!allowed) {
+      return;
+    }
+
+    window.alert('Checkout will be available after cart API integration.');
+  });
+}
+
 /*INIT*/
 document.addEventListener('DOMContentLoaded', async () => {
   // Load products first so users only see DB-backed marketplace items.
@@ -409,6 +436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Check if customer is logged in
   await checkCustomerLogin();
+  initCheckoutGuard();
 
   loadMarketplaceData().then(() => {
     renderProducts();
@@ -833,10 +861,12 @@ function changeQty(delta) {
   input.value = val;
 }
 
-function modalAddToCart(id) {
+async function modalAddToCart(id) {
   const qty = parseInt(document.getElementById('modalQty')?.value || 1);
-  addToCartById(id, qty);
-  closeModalDirect();
+  const added = await addToCartById(id, qty);
+  if (added) {
+    closeModalDirect();
+  }
 }
 
 async function modalBuyNow(id) {
@@ -845,9 +875,9 @@ async function modalBuyNow(id) {
 }
 
 /* CART*/
-function handleAddToCart(e, id) {
+async function handleAddToCart(e, id) {
   e.stopPropagation();
-  addToCartById(id, 1);
+  await addToCartById(id, 1);
 }
 
 async function handleBuyNow(e, id) {
@@ -867,10 +897,8 @@ async function startBuyNowCheckout(id, qty = 1) {
     return;
   }
 
-  // Check if customer is logged in
-  if (!marketplaceState.isLoggedIn) {
-    window.alert('Please sign in to your customer account to purchase with Stripe.');
-    window.location.href = '../pages/index.html?reason=unauthorized';
+  const allowed = await requireCustomerForPurchase();
+  if (!allowed) {
     return;
   }
 
@@ -889,9 +917,16 @@ async function startBuyNowCheckout(id, qty = 1) {
   window.location.href = result.data.checkout_url;
 }
 
-function addToCartById(id, qty = 1) {
+async function addToCartById(id, qty = 1) {
   const p = PRODUCTS.find(x => x.id === id);
-  if (!p) return;
+  if (!p) return false;
+
+  if (!p.isService) {
+    const allowed = await requireCustomerForPurchase();
+    if (!allowed) {
+      return false;
+    }
+  }
 
   const existing = state.cart.find(c => c.id === id);
   if (existing) {
@@ -905,6 +940,7 @@ function addToCartById(id, qty = 1) {
   showToast(`🛒 "${p.name}" added to cart!`, 'cart');
   // Re-render to update button state
   renderProducts();
+  return true;
 }
 
 function toggleCart() {
