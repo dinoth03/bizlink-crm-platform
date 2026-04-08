@@ -94,6 +94,48 @@ function normalizeStatus(status) {
   return map[(status || '').toLowerCase()] || 'Pending';
 }
 
+function normalizePaymentStatus(status) {
+  const map = {
+    unpaid: 'Unpaid',
+    paid: 'Paid',
+    partially_paid: 'Partially paid',
+    failed: 'Payment failed',
+    refunded: 'Refunded'
+  };
+  return map[(status || '').toLowerCase()] || 'Unpaid';
+}
+
+function canPayOrder(order) {
+  const paymentStatus = String(order?.payment_status || '').toLowerCase();
+  return ['unpaid', 'failed', 'partially_paid'].includes(paymentStatus);
+}
+
+function getOrderPaymentAction(order) {
+  if (!canPayOrder(order)) {
+    return '';
+  }
+
+  return `<button type="button" class="btn-customer" style="padding:8px 18px;font-size:0.82rem;" onclick="payOrderWithStripe(${Number(order.order_id || 0)}, this)">Pay with Stripe</button>`;
+}
+
+function showStripePaymentNoticeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const paymentStatus = (params.get('payment_status') || '').toLowerCase();
+  if (paymentStatus === '') return;
+
+  if (paymentStatus === 'success') {
+    window.alert('Payment successful. Order status will update shortly.');
+  } else if (paymentStatus === 'cancelled') {
+    window.alert('Payment was cancelled. You can try again any time.');
+  }
+
+  params.delete('payment_status');
+  params.delete('session_id');
+  const query = params.toString();
+  const cleanUrl = window.location.pathname + (query ? `?${query}` : '') + window.location.hash;
+  window.history.replaceState({}, '', cleanUrl);
+}
+
 const customerDashboardState = {
   customerId: null,
   userId: null,
@@ -337,18 +379,57 @@ function renderAllOrders(orders) {
       const amountText = amount > 0 ? `Rs. ${Math.round(amount).toLocaleString()}` : 'Amount pending';
       const vendor = order.vendor_name || order.vendor || 'Unknown Vendor';
       const product = order.product_name || 'Order Item';
+      const paymentStatus = normalizePaymentStatus(order.payment_status);
+      const paymentAction = getOrderPaymentAction(order);
       return `
         <div class="all-order-row">
           <div>
             <strong>#${order.order_number}</strong>
-            <span>${product} • ${vendor} • ${amountText}</span>
+            <span>${product} • ${vendor} • ${amountText} • ${paymentStatus}</span>
           </div>
-          <span class="order-status">${normalizeStatus(order.order_status)}</span>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;">
+            <span class="order-status">${normalizeStatus(order.order_status)}</span>
+            ${paymentAction}
+          </div>
         </div>
       `;
     })
     .join('');
 }
+
+window.payOrderWithStripe = async function (orderId, buttonEl) {
+  const safeOrderId = Number(orderId || 0);
+  if (!safeOrderId || typeof createStripeCheckoutSession !== 'function') {
+    window.alert('Unable to start payment right now.');
+    return;
+  }
+
+  const btn = buttonEl && buttonEl.tagName ? buttonEl : null;
+  const originalText = btn ? btn.textContent : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Starting...';
+  }
+
+  try {
+    const result = await createStripeCheckoutSession(safeOrderId);
+    if (!result || !result.success || !result.data || !result.data.checkout_url) {
+      const msg = (result && result.message) ? result.message : 'Unable to create Stripe checkout session.';
+      window.alert(msg);
+      return;
+    }
+
+    window.location.href = result.data.checkout_url;
+  } catch (error) {
+    console.error('Stripe payment start failed:', error);
+    window.alert('Unable to start payment at this moment.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText || 'Pay with Stripe';
+    }
+  }
+};
 
 function renderRecommendedVendors(vendors) {
   const container = document.getElementById('recommendedVendorsList');
@@ -523,6 +604,7 @@ async function customerLogout() {
 }
 
 window.addEventListener('load', async () => {
+  showStripePaymentNoticeFromUrl();
   await loadCustomerDashboardData();
   startCounterAnimation();
   console.log('BizLink Customer Portal - Live data mode');

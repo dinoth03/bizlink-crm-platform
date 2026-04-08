@@ -20,7 +20,7 @@ $filters = [
 ];
 
 $validOrderStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
-$validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
+$validPaymentStatuses = ['unpaid', 'paid', 'partially_paid', 'failed', 'refunded'];
 $validationErrors = [];
 
 if ($filters['status'] !== '' && !in_array($filters['status'], $validOrderStatuses, true)) {

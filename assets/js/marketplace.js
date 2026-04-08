@@ -1,7 +1,7 @@
 /*PRODUCT DATA*/
 const PRODUCTS = [
   // ── Electronics ──
-  { id:1, name:"Galaxy Pro Laptop 15\"", cat:"electronics", emoji:"💻", image:"../assets/images/galaxybook.webp", company:"TechZone Lanka", price:189000, oldPrice:210000, rating:4.7, reviews:142, badge:"hot", isNew:false, tags:["Laptop","Core i7","16GB RAM"], desc:"High-performance laptop ideal for business and design work. Imported and verified by TechZone Lanka, Colombo's leading electronics distributor.", delivery:"Colombo: 1–2 days · Island: 3–5 days" },
+  { id:1, name:"Galaxy Pro Laptop 15\"", cat:"electronics", emoji:"💻", image:"../assets/images/galaxybook.webp", company:"TechZone Lanka", price:189000, oldPrice:210000, rating:4.7, reviews:142, badge:"hot", isNew:false, tags:["Laptop","Core i7","16GB RAM"], desc:"High-performance laptop ideal for business and design work. Imported and verified by TechZone Lanka, Colombo's leading electronics distributor.", delivery:"Colombo: 1–2 days · Island: 3–5 days", isApiBacked:false },
   { id:2, name:"Wireless Noise-Cancel Headphones", cat:"electronics", emoji:"🎧", image:"../assets/images/sony.jpg", company:"SoundCraft PVT", price:14500, oldPrice:18000, rating:4.5, reviews:87, badge:"sale", isNew:false, tags:["Audio","Wireless","Bluetooth"], desc:"Premium noise-cancelling headphones with 30-hour battery life. Perfect for professionals working from home or in offices.", delivery:"Island-wide: 2–4 days" },
   { id:3, name:"Smart CCTV 4-Camera Kit", cat:"electronics", emoji:"📹", image:"../assets/images/cctv.jpg", company:"SecureVision SL", price:32000, oldPrice:null, rating:4.6, reviews:54, badge:"", isNew:true, tags:["Security","HD","WiFi"], desc:"Full HD smart CCTV system with remote mobile monitoring. Ideal for small businesses and shops across Sri Lanka.", delivery:"Colombo: 2 days · Other: 4–6 days" },
   { id:4, name:"Power Backup UPS 2000VA", cat:"electronics", emoji:"🔌", image:"../assets/images/UPS.webp", company:"PowerGuard Lanka", price:21500, oldPrice:null, rating:4.4, reviews:33, badge:"", isNew:false, tags:["UPS","Power","Office"], desc:"Reliable UPS for Sri Lanka's power fluctuation challenges. Protects computers and equipment during outages.", delivery:"Island-wide: 3–5 days" },
@@ -76,7 +76,7 @@ const PRODUCTS = [
   { id:45, name:"Floor Tiles – Marble Finish 60x60cm", cat:"construction", emoji:"🏗️", image:"https://images.unsplash.com/photo-1578926314433-c6f7f1af2650?auto=format&fit=crop&w=600&q=80", company:"Ceramic Lanka", price:480, oldPrice:null, rating:4.4, reviews:61, badge:"", isNew:false, tags:["Tiles","Floor","Marble"], desc:"Premium marble-finish porcelain tiles. Price per tile. Minimum order 50 tiles. Ideal for residential and commercial projects.", delivery:"Colombo: 3–5 days · Island: 7–10 days" },
   { id:46, name:"Casio Scientific Calculator", cat:"office", emoji:"🔢", image:"https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80", company:"EduSupplies SL", price:2200, oldPrice:2800, rating:4.7, reviews:132, badge:"", isNew:false, tags:["Calculator","Casio","Education"], desc:"Casio FX-991ES Plus scientific calculator. Required for A/L exams and professional accounting work. Authentic with warranty.", delivery:"Island-wide: 2–3 days" },
   { id:47, name:"Stainless Steel Water Bottle 1L", cat:"health", emoji:"💧", image:"https://images.unsplash.com/photo-1602143407151-7e536f085b97?auto=format&fit=crop&w=600&q=80", company:"PureLife Lanka", price:1450, oldPrice:null, rating:4.5, reviews:95, badge:"new", isNew:true, tags:["Water Bottle","Steel","Eco"], desc:"BPA-free double-walled stainless steel water bottle. Keeps beverages cold for 24h, hot for 12h. Eco-friendly alternative to plastic.", delivery:"Island-wide: 2–3 days" },
-  { id:48, name:"Jumbo Cardboard Box (10 pcs)", cat:"packaging", emoji:"📦", image:"https://images.unsplash.com/photo-1515811340770-24477517c5f2?auto=format&fit=crop&w=600&q=80", company:"BoxCraft Lanka", price:1900, oldPrice:null, rating:4.2, reviews:29, badge:"", isNew:false, tags:["Cardboard","Box","Shipping"], desc:"Heavy-duty jumbo corrugated cardboard boxes. Ideal for e-commerce shipping and warehouse storage. Custom sizes available.", delivery:"Island-wide: 2–3 days" },
+  { id:48, name:"Jumbo Cardboard Box (10 pcs)", cat:"packaging", emoji:"📦", image:"https://images.unsplash.com/photo-1515811340770-24477517c5f2?auto=format&fit=crop&w=600&q=80", company:"BoxCraft Lanka", price:1900, oldPrice:null, rating:4.2, reviews:29, badge:"", isNew:false, tags:["Cardboard","Box","Shipping"], desc:"Heavy-duty jumbo corrugated cardboard boxes. Ideal for e-commerce shipping and warehouse storage. Custom sizes available.", delivery:"Island-wide: 2–3 days", isApiBacked:false },
 ];
 
 /*STATE*/
@@ -235,9 +235,10 @@ function mapApiProduct(product, index) {
     badge: isNew ? 'new' : '',
     isNew,
     tags: [category, stock > 0 ? 'In Stock' : 'Pre-order'],
-    desc: `${product.product_name} by ${product.shop_name || 'a verified vendor'} on BizLink Marketplace.`,
+    desc: String(product.product_description || '').trim() || `${product.product_name} by ${product.shop_name || 'a verified vendor'} on BizLink Marketplace.`,
     delivery: 'Island-wide: 2–5 days',
-    isService: false
+    isService: false,
+    isApiBacked: true
   };
 }
 
@@ -290,15 +291,14 @@ async function loadMarketplaceData() {
       updateMarketplaceCounts(mapped, apiCategories || []);
       console.log('[Marketplace] API data loaded successfully!');
       return true;
-    } else {
-      console.warn('[Marketplace] API returned no products, using fallback static data');
     }
   } catch (error) {
     console.error('[Marketplace] Failed to load marketplace data from API:', error);
   }
 
-  console.log('[Marketplace] Using fallback static products (' + PRODUCTS.length + ' items)');
-  updateMarketplaceCounts(PRODUCTS, []);
+  // If API is not available, hide static demo catalog to avoid non-purchasable items.
+  PRODUCTS.splice(0, PRODUCTS.length);
+  updateMarketplaceCounts([], []);
   return false;
 }
 
@@ -349,15 +349,67 @@ async function getMarketplaceOptionalList(endpoint) {
   return Array.isArray(list) ? list : [];
 }
 
+/*MARKETPLACE STATE*/
+let marketplaceState = {
+  currentCustomer: null,
+  isLoggedIn: false
+};
+
+/*CHECK CUSTOMER LOGIN STATUS*/
+async function checkCustomerLogin() {
+  try {
+    if (typeof authMe !== 'function') {
+      return;
+    }
+
+    const identity = await authMe();
+    if (identity && identity.user && String(identity.user.role || '').toLowerCase() === 'customer') {
+      marketplaceState.currentCustomer = identity.user;
+      marketplaceState.isLoggedIn = true;
+      updateNavbarForLoggedInCustomer(identity.user);
+      return;
+    }
+  } catch (error) {
+    console.debug('[Marketplace] Customer login check failed:', error);
+  }
+
+  marketplaceState.isLoggedIn = false;
+  marketplaceState.currentCustomer = null;
+}
+
+/*UPDATE NAVBAR WITH CUSTOMER INFO*/
+function updateNavbarForLoggedInCustomer(user) {
+  const navSignIn = document.querySelector('.nav-signin');
+  if (!navSignIn) return;
+
+  const firstName = String(user.full_name || user.name || 'Customer').split(' ')[0];
+  const initials = firstName.slice(0, 1).toUpperCase();
+
+  navSignIn.innerHTML = `
+    <span style="display:inline-flex;align-items:center;gap:8px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, #50C878, #137a45);color:white;font-size:0.9rem;font-weight:700;">${initials}</span>
+      <span style="font-size:0.9rem;">${firstName}</span>
+    </span>
+  `;
+  navSignIn.href = '../customer/dashboard.html';
+  navSignIn.title = 'Go to dashboard';
+  navSignIn.style.cursor = 'pointer';
+}
+
 /*INIT*/
-document.addEventListener('DOMContentLoaded', () => {
-  // Always render the built-in catalog immediately.
-  renderProducts();
-  animateCounters();
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load products first so users only see DB-backed marketplace items.
+  const grid = document.getElementById('productGrid');
+  if (grid) {
+    grid.innerHTML = '<div style="padding:20px;color:#6b7280;grid-column:1 / -1;text-align:center;">Loading marketplace products...</div>';
+  }
+
   initNavScroll();
   initBackToTop();
 
-  // Hydrate from API when available, but never block first paint.
+  // Check if customer is logged in
+  await checkCustomerLogin();
+
   loadMarketplaceData().then(() => {
     renderProducts();
     animateCounters();
@@ -586,8 +638,14 @@ function renderCard(p, i) {
 
   const addBtnClass = p.isService ? 'service-btn' : (inCart ? 'added' : '');
   const addBtnText = p.isService ? '📞 Enquire' : (inCart ? '✓ Added' : '+ Cart');
+  const buyNowButtonHtml = (!p.isService)
+    ? `<button class="card-add-btn" onclick="handleBuyNow(event, ${p.id})">Buy Now</button>`
+    : '';
 
   const oldPriceHtml = p.oldPrice ? `<div class="card-price-old">Rs. ${p.oldPrice.toLocaleString()}</div>` : '';
+  const stripeReadinessBadge = p.isService
+    ? ''
+    : '<span style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#e9fbf2;border:1px solid #9ee1be;color:#137a45;font-size:0.74rem;font-weight:700;">Stripe checkout</span>';
 
   return `
     <div class="prod-card" style="animation-delay:${delay}s" onclick="openModal(${p.id})">
@@ -609,6 +667,7 @@ function renderCard(p, i) {
         <div class="card-category">${p.cat.toUpperCase()}</div>
         <div class="card-title">${p.name}</div>
         <div class="card-company">by <span>${p.company}</span></div>
+        ${stripeReadinessBadge}
         <div class="card-rating">
           <span class="stars">${stars}</span>
           <span class="rating-num">${p.rating}</span>
@@ -619,10 +678,13 @@ function renderCard(p, i) {
             <div class="card-price">Rs. ${p.price.toLocaleString()}</div>
             ${oldPriceHtml}
           </div>
-          <button class="card-add-btn ${addBtnClass}"
-            onclick="handleAddToCart(event, ${p.id})">
-            ${addBtnText}
-          </button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            ${buyNowButtonHtml}
+            <button class="card-add-btn ${addBtnClass}"
+              onclick="handleAddToCart(event, ${p.id})">
+              ${addBtnText}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -680,6 +742,9 @@ function openModal(id) {
   const oldPriceHtml = p.oldPrice ? `<span class="modal-price-old">Rs. ${p.oldPrice.toLocaleString()}</span>` : '';
   const tagsHtml = p.tags.map(t => `<span class="modal-tag">${t}</span>`).join('');
   const addBtnLabel = p.isService ? '📞 Contact Vendor' : '🛒 Add to Cart';
+  const stripeReadinessModal = p.isService
+    ? ''
+    : '<span style="display:inline-block;margin-top:10px;padding:4px 12px;border-radius:999px;background:#e9fbf2;border:1px solid #9ee1be;color:#137a45;font-size:0.76rem;font-weight:700;">Payable with Stripe (customer login required)</span>';
 
   document.getElementById('modalInner').innerHTML = `
     <div class="modal-img-col">
@@ -703,6 +768,8 @@ function openModal(id) {
         <span class="modal-review-cnt">(${p.reviews} reviews)</span>
       </div>
 
+      ${stripeReadinessModal}
+
       <div class="modal-price-row">
         <span class="modal-price">Rs. ${p.price.toLocaleString()}</span>
         ${oldPriceHtml}
@@ -725,9 +792,8 @@ function openModal(id) {
       ` : ''}
 
       <div class="modal-actions">
-        <button class="modal-add-btn" onclick="modalAddToCart(${p.id})">
-          ${addBtnLabel}
-        </button>
+        ${(!p.isService) ? `<button class="modal-add-btn" onclick="modalBuyNow(${p.id})">Pay with Stripe</button>` : ''}
+        <button class="modal-add-btn" onclick="modalAddToCart(${p.id})">${addBtnLabel}</button>
         <button class="modal-wish-btn" onclick="toggleWishlistItem(event, ${p.id})" title="Wishlist">
           ${isWished ? '❤️' : '🤍'}
         </button>
@@ -773,10 +839,54 @@ function modalAddToCart(id) {
   closeModalDirect();
 }
 
+async function modalBuyNow(id) {
+  const qty = parseInt(document.getElementById('modalQty')?.value || 1);
+  await startBuyNowCheckout(id, qty);
+}
+
 /* CART*/
 function handleAddToCart(e, id) {
   e.stopPropagation();
   addToCartById(id, 1);
+}
+
+async function handleBuyNow(e, id) {
+  e.stopPropagation();
+  await startBuyNowCheckout(id, 1);
+}
+
+async function startBuyNowCheckout(id, qty = 1) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) {
+    window.alert('Product not found. Please refresh the page and try again.');
+    return;
+  }
+
+  if (p.isService) {
+    window.alert('This is a service listing. Please contact the vendor directly.');
+    return;
+  }
+
+  // Check if customer is logged in
+  if (!marketplaceState.isLoggedIn) {
+    window.alert('Please sign in to your customer account to purchase with Stripe.');
+    window.location.href = '../pages/index.html?reason=unauthorized';
+    return;
+  }
+
+  if (typeof createMarketplaceStripeCheckout !== 'function') {
+    window.alert('Payment service is currently unavailable.');
+    return;
+  }
+
+  const result = await createMarketplaceStripeCheckout(id, qty);
+  if (!result || !result.success || !result.data || !result.data.checkout_url) {
+    const msg = result && result.message ? result.message : 'Unable to start Stripe checkout.';
+    window.alert(msg);
+    return;
+  }
+
+  window.location.href = result.data.checkout_url;
 }
 
 function addToCartById(id, qty = 1) {

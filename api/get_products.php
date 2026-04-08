@@ -59,12 +59,14 @@ if (!empty($validationErrors)) {
 $baseQuery = "SELECT 
     p.product_id,
     p.product_name,
+    p.product_description,
     p.category,
     p.vendor_id,
     v.business_name as shop_name,
     p.price as base_price,
     p.quantity_in_stock as stock_quantity,
     p.is_active as product_status,
+    p.primary_image_url as image_url,
     p.created_at
 FROM products p
 LEFT JOIN vendors v ON p.vendor_id = v.vendor_id";

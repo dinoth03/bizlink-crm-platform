@@ -492,7 +492,9 @@ function mapApiOrder(row) {
 
 function mapApiProduct(row, index) {
   const stock = Number(row.stock_quantity || 0);
+  const imageUrl = String(row.image_url || '').trim();
   return {
+    id: Number(row.product_id || 0),
     name: row.product_name,
     emoji: ['📦', '🛍️', '🌿', '🧴', '💻', '🛒'][index % 6],
     price: Number(row.base_price || 0),
@@ -500,7 +502,7 @@ function mapApiProduct(row, index) {
     sku: `PRD-${String(row.product_id).padStart(3, '0')}`,
     discount: 0,
     status: Number(row.product_status) === 1 ? (stock > 0 ? 'active' : 'out') : 'draft',
-    img: ''
+    img: imageUrl || ''
   };
 }
 
@@ -1075,24 +1077,35 @@ const MODALS = {
   addProduct: {
     title: '📦 Add New Product',
     html: `
-      <div class="form-group"><label>Product Name</label><input type="text" placeholder="e.g. Ceylon Green Tea 250g" class="form-input" /></div>
+      <div class="form-group"><label>Product Name</label><input id="vendorProductName" type="text" placeholder="e.g. Ceylon Green Tea 250g" class="form-input" /></div>
       <div class="form-group"><label>Category</label>
-        <select class="form-input"><option>Food & Beverages</option><option>Clothing</option><option>Crafts</option><option>Cosmetics</option><option>Spices</option></select>
+        <select id="vendorProductCategory" class="form-input">
+          <option value="grocery">Grocery</option>
+          <option value="fashion">Fashion</option>
+          <option value="home">Home</option>
+          <option value="electronics">Electronics</option>
+          <option value="health">Health</option>
+          <option value="agriculture">Agriculture</option>
+          <option value="construction">Construction</option>
+          <option value="office">Office</option>
+          <option value="packaging">Packaging</option>
+          <option value="industrial">Industrial</option>
+        </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Price (Rs.)</label><input type="number" placeholder="0.00" class="form-input" /></div>
-        <div class="form-group"><label>Discount (%)</label><input type="number" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>Price (Rs.)</label><input id="vendorProductPrice" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" /></div>
+        <div class="form-group"><label>Discount (%)</label><input id="vendorProductDiscount" type="number" min="0" max="100" placeholder="0" class="form-input" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Stock Quantity</label><input type="number" placeholder="0" class="form-input" /></div>
-        <div class="form-group"><label>SKU Code</label><input type="text" placeholder="e.g. TEA-009" class="form-input" /></div>
+        <div class="form-group"><label>Stock Quantity</label><input id="vendorProductStock" type="number" min="0" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>SKU Code</label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009" class="form-input" /></div>
       </div>
-      <div class="form-group"><label>Product Description</label><textarea class="form-input" rows="3" placeholder="Product description…"></textarea></div>
-      <div class="form-group"><label>Product Image URL</label><input type="url" placeholder="https://…" class="form-input" /></div>
-      <div class="form-group"><label>Status</label><select class="form-input"><option>Active</option><option>Draft</option></select></div>
+      <div class="form-group"><label>Product Description</label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description…"></textarea></div>
+      <div class="form-group"><label>Product Image URL</label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
+      <div class="form-group"><label>Status</label><select id="vendorProductStatus" class="form-input"><option value="active">Active</option><option value="draft">Draft</option></select></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
         <button class="btn-outline-vendor" onclick="closeModal()">Cancel</button>
-        <button class="btn-vendor" onclick="closeModal()">Save Product</button>
+        <button class="btn-vendor" id="vendorSaveProductBtn" onclick="submitVendorProduct(event)">Save Product</button>
       </div>
     `
   },
@@ -1127,6 +1140,57 @@ function showModal(type) {
 }
 function closeModal() {
   document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+async function submitVendorProduct(event) {
+  if (event && event.preventDefault) event.preventDefault();
+
+  const saveBtn = document.getElementById('vendorSaveProductBtn');
+  const payload = {
+    product_name: String(document.getElementById('vendorProductName')?.value || '').trim(),
+    category: String(document.getElementById('vendorProductCategory')?.value || '').trim(),
+    price: Number(document.getElementById('vendorProductPrice')?.value || 0),
+    discount_percentage: Number(document.getElementById('vendorProductDiscount')?.value || 0),
+    quantity_in_stock: Number(document.getElementById('vendorProductStock')?.value || 0),
+    sku: String(document.getElementById('vendorProductSku')?.value || '').trim(),
+    product_description: String(document.getElementById('vendorProductDescription')?.value || '').trim(),
+    primary_image_url: String(document.getElementById('vendorProductImage')?.value || '').trim(),
+    status: String(document.getElementById('vendorProductStatus')?.value || 'active').trim().toLowerCase()
+  };
+
+  if (!payload.product_name || !payload.category || payload.price <= 0) {
+    window.alert('Please enter product name, category, and a valid price.');
+    return;
+  }
+
+  if (typeof addVendorProduct !== 'function') {
+    window.alert('Product service is not available right now.');
+    return;
+  }
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+  }
+
+  try {
+    const result = await addVendorProduct(payload);
+    if (!result || !result.success) {
+      window.alert(result && result.message ? result.message : 'Failed to save product.');
+      return;
+    }
+
+    await loadVendorDashboardData();
+    allProducts = [...dashboardData.products];
+    renderProducts();
+    closeModal();
+    window.alert('Product added successfully. It is now available in marketplace.');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Product';
+    }
+  }
 }
 
 

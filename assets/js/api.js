@@ -343,6 +343,53 @@ async function getOrders() {
     }
 }
 
+async function createStripeCheckoutSession(orderId) {
+    try {
+        const result = await apiRequest('create_stripe_checkout_session.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_id: Number(orderId || 0)
+            })
+        });
+
+        if (!result) return null;
+        return flattenEnvelope(result.data || {});
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to create Stripe checkout session.'
+        };
+    }
+}
+
+async function createMarketplaceStripeCheckout(productId, quantity = 1) {
+    try {
+        const result = await apiRequest('create_marketplace_order_checkout.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: Number(productId || 0),
+                quantity: Number(quantity || 1)
+            })
+        });
+
+        if (!result) return null;
+        return flattenEnvelope(result.data || {});
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to start marketplace Stripe checkout.'
+        };
+    }
+}
+
 // Get All Products
 async function getProducts() {
     try {
@@ -358,6 +405,27 @@ async function getProducts() {
     } catch (error) {
         console.error('API Error:', error);
         return null;
+    }
+}
+
+async function addVendorProduct(payload) {
+    try {
+        const result = await apiRequest('add_vendor_product.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        });
+
+        if (!result) return null;
+        return flattenEnvelope(result.data || {});
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to add product right now.'
+        };
     }
 }
 
