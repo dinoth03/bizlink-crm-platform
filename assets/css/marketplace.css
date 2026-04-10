@@ -586,6 +586,7 @@ ul { list-style: none; }
 .card-add-btn:hover { transform: scale(1.06); box-shadow: 0 8px 24px var(--vendor-glow); }
 .card-add-btn.added { background: var(--customer-g); box-shadow: 0 4px 16px var(--customer-glow); }
 .card-add-btn.service-btn { background: var(--admin-g); box-shadow: 0 4px 16px var(--admin-glow); }
+.card-add-btn.guest-btn { background: #6b7280; box-shadow: 0 4px 16px rgba(107, 114, 128, 0.22); }
 
 /* LIST VIEW overrides */
 .product-grid.list-view .prod-card {

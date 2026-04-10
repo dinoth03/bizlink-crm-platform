@@ -362,7 +362,7 @@ async function checkCustomerLogin() {
       return;
     }
 
-    const identity = await authMe();
+    const identity = await authMe(false);
     if (identity && identity.user && String(identity.user.role || '').toLowerCase() === 'customer') {
       marketplaceState.currentCustomer = identity.user;
       marketplaceState.isLoggedIn = true;
@@ -664,9 +664,9 @@ function renderCard(p, i) {
   const newBadge = p.isNew && !p.badge ? `<div class="card-badge badge-new">NEW</div>` : '';
   const serviceBadge = p.isService ? `<div class="card-badge badge-service">SERVICE</div>` : '';
 
-  const addBtnClass = p.isService ? 'service-btn' : (inCart ? 'added' : '');
-  const addBtnText = p.isService ? '📞 Enquire' : (inCart ? '✓ Added' : '+ Cart');
-  const buyNowButtonHtml = (!p.isService)
+  const addBtnClass = p.isService ? 'service-btn' : (!marketplaceState.isLoggedIn ? 'guest-btn' : (inCart ? 'added' : ''));
+  const addBtnText = p.isService ? '📞 Enquire' : (!marketplaceState.isLoggedIn ? 'Login to Buy' : (inCart ? '✓ Added' : '+ Cart'));
+  const buyNowButtonHtml = (!p.isService && marketplaceState.isLoggedIn)
     ? `<button class="card-add-btn" onclick="handleBuyNow(event, ${p.id})">Buy Now</button>`
     : '';
 
@@ -820,8 +820,10 @@ function openModal(id) {
       ` : ''}
 
       <div class="modal-actions">
-        ${(!p.isService) ? `<button class="modal-add-btn" onclick="modalBuyNow(${p.id})">Pay with Stripe</button>` : ''}
-        <button class="modal-add-btn" onclick="modalAddToCart(${p.id})">${addBtnLabel}</button>
+        ${(!p.isService && marketplaceState.isLoggedIn) ? `<button class="modal-add-btn" onclick="modalBuyNow(${p.id})">Pay with Stripe</button>` : ''}
+        <button class="modal-add-btn" onclick="modalAddToCart(${p.id})">
+          ${!marketplaceState.isLoggedIn && !p.isService ? 'Login to Buy' : addBtnLabel}
+        </button>
         <button class="modal-wish-btn" onclick="toggleWishlistItem(event, ${p.id})" title="Wishlist">
           ${isWished ? '❤️' : '🤍'}
         </button>

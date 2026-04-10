@@ -211,9 +211,9 @@ async function authLogout() {
     }
 }
 
-async function authMe() {
+async function authMe(shouldRedirect = true) {
     try {
-        const result = await apiRequest('auth_me.php');
+        const result = await apiRequest('auth_me.php', {}, shouldRedirect);
         if (!result) return null;
         const data = result.data || {};
         if (data.success && data.data) {
