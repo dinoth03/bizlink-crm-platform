@@ -285,6 +285,7 @@ try {
     $sessionId = (string)($session['id'] ?? '');
     $checkoutUrl = (string)($session['url'] ?? '');
     $paymentIntentId = (string)($session['payment_intent'] ?? '');
+    $paymentIntentValue = $paymentIntentId !== '' ? $paymentIntentId : null;
 
     if ($sessionId === '' || $checkoutUrl === '') {
         throw new Exception('Stripe session response is missing required fields.');
@@ -326,7 +327,7 @@ try {
         $paymentMethod,
         $orderTotal,
         $pendingStatus,
-        $paymentIntentId,
+        $paymentIntentValue,
         $sessionId,
         $gatewayName,
         $gatewayResponse

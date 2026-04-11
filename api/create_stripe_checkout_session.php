@@ -129,6 +129,7 @@ $session = (array)$stripeResult['data'];
 $sessionId = (string)($session['id'] ?? '');
 $checkoutUrl = (string)($session['url'] ?? '');
 $paymentIntentId = (string)($session['payment_intent'] ?? '');
+$paymentIntentValue = $paymentIntentId !== '' ? $paymentIntentId : null;
 
 if ($sessionId === '' || $checkoutUrl === '') {
     apiError('STRIPE_INVALID_SESSION', 'Stripe session response is missing required fields.', 502);
@@ -153,7 +154,7 @@ if ($existingPayment) {
     if ($updatePaymentStmt) {
         $pendingStatus = 'pending';
         $gatewayName = 'stripe';
-        $updatePaymentStmt->bind_param('dsssi', $totalAmount, $pendingStatus, $paymentIntentId, $gatewayName, $paymentId);
+        $updatePaymentStmt->bind_param('dsssi', $totalAmount, $pendingStatus, $paymentIntentValue, $gatewayName, $paymentId);
         $updatePaymentStmt->execute();
         $updatePaymentStmt->close();
     }
@@ -188,7 +189,7 @@ if ($existingPayment) {
             $paymentMethod,
             $totalAmount,
             $pendingStatus,
-            $paymentIntentId,
+            $paymentIntentValue,
             $sessionId,
             $gatewayName,
             $gatewayResponse

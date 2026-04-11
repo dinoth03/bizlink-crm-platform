@@ -92,7 +92,9 @@ function upsertStripePaymentRecord(mysqli $conn, array $data): void {
     $amount = (float)($data['amount'] ?? 0);
     $paymentStatus = (string)($data['payment_status'] ?? 'pending');
     $paymentIntentId = (string)($data['payment_intent_id'] ?? '');
+    $paymentIntentValue = $paymentIntentId !== '' ? $paymentIntentId : null;
     $checkoutSessionId = (string)($data['checkout_session_id'] ?? '');
+    $checkoutSessionValue = $checkoutSessionId !== '' ? $checkoutSessionId : null;
     $refundAmount = (float)($data['refund_amount'] ?? 0);
     $gatewayResponse = (string)($data['gateway_response'] ?? '{}');
 
@@ -108,7 +110,7 @@ function upsertStripePaymentRecord(mysqli $conn, array $data): void {
         return;
     }
 
-    $existingStmt->bind_param('ssi', $checkoutSessionId, $paymentIntentId, $orderId);
+    $existingStmt->bind_param('ssi', $checkoutSessionValue, $paymentIntentValue, $orderId);
     $existingStmt->execute();
     $existing = $existingStmt->get_result()->fetch_assoc();
     $existingStmt->close();
@@ -135,8 +137,8 @@ function upsertStripePaymentRecord(mysqli $conn, array $data): void {
                 'dsssssddi',
                 $amount,
                 $paymentStatus,
-                $paymentIntentId,
-                $checkoutSessionId,
+                $paymentIntentValue,
+                $checkoutSessionValue,
                 $gatewayName,
                 $gatewayResponse,
                 $refundAmount,
@@ -180,8 +182,8 @@ function upsertStripePaymentRecord(mysqli $conn, array $data): void {
         $paymentMethod,
         $amount,
         $paymentStatus,
-        $paymentIntentId,
-        $checkoutSessionId,
+        $paymentIntentValue,
+        $checkoutSessionValue,
         $gatewayName,
         $gatewayResponse,
         $refundAmount,
