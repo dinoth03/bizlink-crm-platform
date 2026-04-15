@@ -387,13 +387,15 @@ function renderMessages(conv) {
     const isMe    = msg.from === 'me';
     const contact = conv ? getContact(conv.contactId) : null;
     const showAvi = !isMe && (i === 0 || conv.messages[i-1].from !== msg.from);
+    const showSenderName = isMe ? (i === 0 || conv.messages[i-1].from !== msg.from) : showAvi;
     const delay   = Math.min(i * 0.03, 0.4);
 
     const aviHtml = !isMe
       ? `<div class="msg-avatar${showAvi ? '' : ' hidden-avi'}" style="background:${contact?.color || '#50C878'}">${contact?.initials || '?'}</div>`
       : '';
 
-    const senderHtml = (!isMe && showAvi) ? `<div class="msg-sender-name">${contact?.name || ''}</div>` : '';
+    const senderName = isMe ? ME.name : contact?.name || '';
+    const senderHtml = showSenderName ? `<div class="msg-sender-name">${senderName}</div>` : '';
 
     let bubbleContent = '';
     if (msg.type === 'file') {
