@@ -51,11 +51,11 @@ jobs:
         id: deploy_check
         shell: bash
         env:
-          DEPLOY_HOST: ${{ secrets['DEPLOY_HOST'] }}
-          DEPLOY_USER: ${{ secrets['DEPLOY_USER'] }}
-          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
-          DEPLOY_PORT: ${{ secrets['DEPLOY_PORT'] }}
-          DEPLOY_PATH: ${{ secrets['DEPLOY_PATH'] }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -e
           missing=0
@@ -78,11 +78,11 @@ jobs:
         with:
           switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='.vscode'
           path: ./
-          remote_path: ${{ secrets['DEPLOY_PATH'] }}
-          remote_host: ${{ secrets['DEPLOY_HOST'] }}
-          remote_user: ${{ secrets['DEPLOY_USER'] }}
-          remote_key: ${{ secrets['DEPLOY_SSH_PRIVATE_KEY'] }}
-          remote_port: ${{ secrets['DEPLOY_PORT'] }}
+          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.DEPLOY_PORT }}
 
       - name: Skip deploy when secrets are missing
         if: steps.deploy_check.outputs.ready != 'true'

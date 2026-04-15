@@ -1,7 +1,7 @@
 /*BIZLINK CRM CHAT — chat.js*/
 
 /*DATA*/
-const ME = { id:'me', name:'Kasun Perera', initials:'KP', role:'admin', color:'#000080' };
+const ME = { id:'me', name:'Your Name', initials:'YN', role:'user', color:'#000080' };
 
 const CONTACTS = [
   { id:'c1',  name:'Amara Perera',       initials:'AP', role:'customer', color:'#FF8C00', status:'online',  company:'—',                    phone:'+94 77 234 5678', email:'amara@gmail.com',       province:'Western',  joined:'Jan 2024' },
@@ -126,6 +126,29 @@ let pendingChatRole = null;
 let ME_USER_ID = null;
 let isGuestMode = false;
 
+function renderCurrentUserBadge() {
+  const ruName = document.querySelector('.ru-name');
+  const ruRole = document.querySelector('.ru-role');
+  const ruAvatar = document.querySelector('.ru-avatar');
+
+  if (ruName) ruName.textContent = ME.name;
+  if (ruRole) ruRole.textContent = capitalize(ME.role || 'user');
+  if (ruAvatar) {
+    ruAvatar.textContent = ME.initials || 'YN';
+    ruAvatar.style.background = ME.color || '#000080';
+  }
+}
+
+function applyChatIdentity(user = {}) {
+  const fullName = String(user.full_name || user.name || ME.name || 'Your Name').trim() || 'Your Name';
+  const role = String(user.role || ME.role || 'user').trim().toLowerCase() || 'user';
+
+  ME.name = fullName;
+  ME.initials = getInitials(fullName);
+  ME.role = role;
+  renderCurrentUserBadge();
+}
+
 function enableGuestMode(reason = '') {
   if (!isGuestMode) {
     showToast('Guest chat mode enabled. Sign in to sync messages.', 'info');
@@ -136,16 +159,8 @@ function enableGuestMode(reason = '') {
   ME.name = 'Guest User';
   ME.initials = 'GU';
   ME.role = 'guest';
-
-  const ruName = document.querySelector('.ru-name');
-  const ruRole = document.querySelector('.ru-role');
-  const ruAvatar = document.querySelector('.ru-avatar');
-  if (ruName) ruName.textContent = ME.name;
-  if (ruRole) ruRole.textContent = 'Guest';
-  if (ruAvatar) {
-    ruAvatar.textContent = ME.initials;
-    ruAvatar.style.background = '#6b7280';
-  }
+  ME.color = '#6b7280';
+  renderCurrentUserBadge();
 
   if (reason) {
     console.info('Guest mode reason:', reason);
@@ -177,9 +192,7 @@ async function loadChatDataFromApi() {
 
     isGuestMode = false;
     ME_USER_ID = Number(payload.current_user.id);
-    ME.name = payload.current_user.name;
-    ME.initials = getInitials(payload.current_user.name);
-    ME.role = payload.current_user.role;
+    applyChatIdentity(payload.current_user);
 
     CONTACTS.splice(0, CONTACTS.length, ...(payload.contacts || []));
     CONVERSATIONS.splice(0, CONVERSATIONS.length, ...(payload.conversations || []));
@@ -187,21 +200,32 @@ async function loadChatDataFromApi() {
     state.pinned = new Set();
     state.muted = new Set();
 
-    const ruName = document.querySelector('.ru-name');
-    const ruRole = document.querySelector('.ru-role');
-    const ruAvatar = document.querySelector('.ru-avatar');
-    if (ruName) ruName.textContent = ME.name;
-    if (ruRole) ruRole.textContent = capitalize(ME.role);
-    if (ruAvatar) {
-      ruAvatar.textContent = ME.initials;
-      ruAvatar.style.background = ME.color;
-    }
-
     return true;
   } catch (error) {
     console.error('Chat API load failed:', error);
     return false;
   }
+}
+
+async function bootstrapChatIdentity() {
+  if (typeof authMe !== 'function') {
+    renderCurrentUserBadge();
+    return false;
+  }
+
+  try {
+    const identity = await authMe(false);
+    if (identity && identity.user) {
+      ME_USER_ID = Number(identity.user.user_id || 0) || ME_USER_ID;
+      applyChatIdentity(identity.user);
+      return true;
+    }
+  } catch (error) {
+    console.error('Failed to load authenticated chat identity:', error);
+  }
+
+  renderCurrentUserBadge();
+  return false;
 }
 
 function conversationDbId(convId) {
@@ -222,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  await bootstrapChatIdentity();
   await loadChatDataFromApi();
 
   renderConvoList();
