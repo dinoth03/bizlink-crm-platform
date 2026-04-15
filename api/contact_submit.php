@@ -1,6 +1,8 @@
 <?php
 require 'config.php';
 require_once 'api_helpers.php';
+require_once 'csrf_protection.php';
+require_once 'rate_limiting.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -9,6 +11,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $payload = readJsonPayload();
 if (!is_array($payload)) {
     apiError('INVALID_JSON', 'Invalid JSON payload.', 400);
+}
+
+// CSRF protection for public endpoint (no session required)
+$csrfToken = $payload['csrf_token'] ?? '';
+if (!validateCsrfToken($conn, $csrfToken, null, session_id())) {
+    apiError('CSRF_VALIDATION_FAILED', 'Security validation failed. Please refresh and try again.', 403);
+}
+
+// Rate limit: max 5 submissions per IP per hour
+$clientIp = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+$rateLimitResult = checkRateLimit($conn, $clientIp, 'contact_submit_by_ip', 5, 3600);
+if (!$rateLimitResult->allowed) {
+    apiError('RATE_LIMIT_EXCEEDED', 'Too many submissions. Please try again later.', 429, [
+        ['field' => 'rate_limit', 'message' => 'Maximum 5 submissions per hour per IP.']
+    ]);
 }
 
 $role = strtolower(trim((string)($payload['role'] ?? 'customer')));
@@ -38,30 +55,6 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 if ($message === '' || strlen($message) < 10) {
     apiError('VALIDATION_ERROR', 'Please enter a message with at least 10 characters.', 422, [
         ['field' => 'message', 'message' => 'message must be at least 10 characters.']
-    ]);
-}
-
-$createTableSql = "
-CREATE TABLE IF NOT EXISTS contact_inquiries (
-    inquiry_id INT PRIMARY KEY AUTO_INCREMENT,
-    full_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    target_role ENUM('admin', 'vendor', 'customer') NOT NULL,
-    message TEXT NOT NULL,
-    inquiry_status ENUM('new', 'in_progress', 'resolved', 'closed') DEFAULT 'new',
-    source_page VARCHAR(255),
-    ip_address VARCHAR(45),
-    user_agent VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_target_role (target_role),
-    INDEX idx_status (inquiry_status),
-    INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-";
-
-if (!$conn->query($createTableSql)) {
-    apiError('DB_QUERY_ERROR', 'Failed to prepare contact storage.', 500, [
-        ['field' => 'database', 'message' => $conn->error]
     ]);
 }
 

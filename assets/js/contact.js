@@ -64,6 +64,12 @@
       setStatus('Sending your message...', 'info');
 
       try {
+        // Fetch CSRF token before submitting form
+        const csrfToken = await ensureCsrfToken();
+        if (!csrfToken) {
+          throw new Error('Security token unavailable. Please refresh and try again.');
+        }
+
         const response = await fetch('../api/contact_submit.php', {
           method: 'POST',
           headers: {
@@ -74,6 +80,7 @@
             name: fullName,
             email,
             message,
+            csrf_token: csrfToken,
             source_page: '/pages/contact.html'
           })
         });
@@ -83,7 +90,7 @@
           throw new Error((result && result.message) || 'Unable to submit your message.');
         }
 
-        setStatus(`Message sent successfully. Ticket #${result.inquiry_id}`, 'success');
+        setStatus(`Message sent successfully. Ticket #${result.data.inquiry_id}`, 'success');
         if (messageInput) messageInput.value = '';
       } catch (error) {
         console.error('Contact form submit failed:', error);
