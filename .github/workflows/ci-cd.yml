@@ -19,6 +19,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          tools: composer
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -36,6 +37,15 @@ jobs:
           find . -type f -name "*.js" -not -path "./.git/*" -print0 | while IFS= read -r -d '' file; do
             node --check "$file"
           done
+
+      - name: Install PHP test dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run PHPUnit unit tests
+        run: composer run test:unit
+
+      - name: Run PHPUnit integration tests
+        run: composer run test:integration
 
   deploy:
     name: Deploy to Server
