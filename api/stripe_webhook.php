@@ -208,12 +208,76 @@ function updateOrderPaymentStatus(mysqli $conn, int $orderId, string $paymentSta
     $stmt->close();
 }
 
+function createVendorPaymentNotification(mysqli $conn, int $orderId, float $amount, string $currency): void {
+    if ($orderId <= 0) {
+        return;
+    }
+
+    $orderStmt = $conn->prepare(
+        'SELECT o.order_number, o.vendor_id, v.user_id AS vendor_user_id
+         FROM orders o
+         INNER JOIN vendors v ON v.vendor_id = o.vendor_id
+         WHERE o.order_id = ?
+         LIMIT 1'
+    );
+    if (!$orderStmt) {
+        return;
+    }
+
+    $orderStmt->bind_param('i', $orderId);
+    $orderStmt->execute();
+    $orderData = $orderStmt->get_result()->fetch_assoc();
+    $orderStmt->close();
+
+    $vendorUserId = (int)($orderData['vendor_user_id'] ?? 0);
+    if ($vendorUserId <= 0) {
+        return;
+    }
+
+    $orderNumber = (string)($orderData['order_number'] ?? ('#' . $orderId));
+    $title = 'Payment received';
+    $message = sprintf(
+        'Order %s has been paid. Amount: %s %s.',
+        $orderNumber,
+        strtoupper($currency),
+        number_format($amount, 2)
+    );
+    $notificationType = 'payment';
+    $relatedEntityType = 'order';
+    $priority = 'high';
+    $actionUrl = '/vendor/vendorpanel.html?page=payments';
+
+    $notifStmt = $conn->prepare(
+        'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    if (!$notifStmt) {
+        return;
+    }
+
+    $notifStmt->bind_param(
+        'issssiss',
+        $vendorUserId,
+        $notificationType,
+        $title,
+        $message,
+        $relatedEntityType,
+        $orderId,
+        $priority,
+        $actionUrl
+    );
+    $notifStmt->execute();
+    $notifStmt->close();
+}
+
 $orderId = extractOrderIdFromStripeEvent($eventObject);
 $checkoutSessionId = (string)($eventObject['id'] ?? '');
 $paymentIntentId = (string)($eventObject['payment_intent'] ?? '');
 
 if ($eventType === 'checkout.session.completed' || $eventType === 'checkout.session.async_payment_succeeded') {
     $amountTotal = ((int)($eventObject['amount_total'] ?? 0)) / 100;
+    $eventCurrency = (string)($eventObject['currency'] ?? 'lkr');
     $gatewayResponse = json_encode([
         'event_id' => $eventId,
         'event_type' => $eventType,
@@ -231,6 +295,7 @@ if ($eventType === 'checkout.session.completed' || $eventType === 'checkout.sess
     ]);
 
     updateOrderPaymentStatus($conn, $orderId, 'paid');
+    createVendorPaymentNotification($conn, $orderId, $amountTotal, $eventCurrency);
 }
 
 if ($eventType === 'payment_intent.payment_failed') {

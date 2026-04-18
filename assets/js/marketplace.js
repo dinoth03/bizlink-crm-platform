@@ -235,7 +235,7 @@ function mapApiProduct(product, index) {
     badge: isNew ? 'new' : '',
     isNew,
     tags: [category, stock > 0 ? 'In Stock' : 'Pre-order'],
-    desc: `${product.product_name} by ${product.shop_name || 'a verified vendor'} on BizLink Marketplace.`,
+    desc: String(product.product_description || '').trim() || `${product.product_name} by ${product.shop_name || 'a verified vendor'} on BizLink Marketplace.`,
     delivery: 'Island-wide: 2–5 days',
     isService: false
   };

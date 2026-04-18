@@ -143,6 +143,197 @@ function generateUniqueOrderNumber(mysqli $conn, int $maxAttempts = 5): string {
     return '';
 }
 
+function createVendorOrderNotification(
+    mysqli $conn,
+    int $vendorId,
+    int $orderId,
+    string $orderNumber,
+    string $productName,
+    int $quantity,
+    float $orderTotal,
+    string $customerName
+): void {
+    if ($vendorId <= 0 || $orderId <= 0) {
+        return;
+    }
+
+    $vendorUserStmt = $conn->prepare('SELECT user_id FROM vendors WHERE vendor_id = ? LIMIT 1');
+    if (!$vendorUserStmt) {
+        return;
+    }
+
+    $vendorUserStmt->bind_param('i', $vendorId);
+    $vendorUserStmt->execute();
+    $vendorUser = $vendorUserStmt->get_result()->fetch_assoc();
+    $vendorUserStmt->close();
+
+    $vendorUserId = (int)($vendorUser['user_id'] ?? 0);
+    if ($vendorUserId <= 0) {
+        return;
+    }
+
+    $safeCustomerName = trim($customerName) !== '' ? trim($customerName) : 'A customer';
+    $title = 'New marketplace order';
+    $message = sprintf(
+        '%s placed order %s for %dx %s (Rs. %s).',
+        $safeCustomerName,
+        $orderNumber,
+        $quantity,
+        $productName,
+        number_format($orderTotal, 2)
+    );
+    $notificationType = 'order_status';
+    $relatedEntityType = 'order';
+    $priority = 'high';
+    $actionUrl = '/vendor/vendorpanel.html?page=orders';
+
+    $notifStmt = $conn->prepare(
+        'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    if (!$notifStmt) {
+        return;
+    }
+
+    $notifStmt->bind_param(
+        'issssiss',
+        $vendorUserId,
+        $notificationType,
+        $title,
+        $message,
+        $relatedEntityType,
+        $orderId,
+        $priority,
+        $actionUrl
+    );
+    $notifStmt->execute();
+    $notifStmt->close();
+}
+
+function ensureVendorCustomerConversation(
+    mysqli $conn,
+    int $customerUserId,
+    int $vendorUserId,
+    string $customerName,
+    string $vendorName
+): int {
+    if ($customerUserId <= 0 || $vendorUserId <= 0 || $customerUserId === $vendorUserId) {
+        return 0;
+    }
+
+    $existingSql = '
+        SELECT c.conversation_id
+        FROM conversations c
+        JOIN conversation_participants cp1 ON cp1.conversation_id = c.conversation_id AND cp1.user_id = ? AND cp1.is_active = 1
+        JOIN conversation_participants cp2 ON cp2.conversation_id = c.conversation_id AND cp2.user_id = ? AND cp2.is_active = 1
+        WHERE c.is_active = 1
+        LIMIT 1
+    ';
+    $existingStmt = $conn->prepare($existingSql);
+    if ($existingStmt) {
+        $existingStmt->bind_param('ii', $customerUserId, $vendorUserId);
+        $existingStmt->execute();
+        $existing = $existingStmt->get_result()->fetch_assoc();
+        $existingStmt->close();
+
+        if ($existing) {
+            return (int)$existing['conversation_id'];
+        }
+    }
+
+    $conversationType = 'vendor_customer';
+    $subject = trim(($customerName !== '' ? $customerName : ('Customer #' . $customerUserId)) . ' and ' . ($vendorName !== '' ? $vendorName : ('Vendor #' . $vendorUserId)) . ' chat');
+
+    $convStmt = $conn->prepare(
+        'INSERT INTO conversations (sender_id, receiver_id, conversation_type, subject, last_message_date, is_active)
+         VALUES (?, ?, ?, ?, NOW(), 1)'
+    );
+    if (!$convStmt) {
+        return 0;
+    }
+
+    $convStmt->bind_param('iiss', $customerUserId, $vendorUserId, $conversationType, $subject);
+    $created = $convStmt->execute();
+    $conversationId = $created ? (int)$convStmt->insert_id : 0;
+    $convStmt->close();
+
+    if ($conversationId <= 0) {
+        return 0;
+    }
+
+    $participantStmt = $conn->prepare(
+        'INSERT IGNORE INTO conversation_participants (conversation_id, user_id, participant_role)
+         VALUES (?, ?, ?), (?, ?, ?)'
+    );
+
+    if ($participantStmt) {
+        $customerRole = 'customer';
+        $vendorRole = 'vendor';
+        $participantStmt->bind_param('iisiss', $conversationId, $customerUserId, $customerRole, $conversationId, $vendorUserId, $vendorRole);
+        $participantStmt->execute();
+        $participantStmt->close();
+    }
+
+    return $conversationId;
+}
+
+function createOrderChatMessage(
+    mysqli $conn,
+    int $conversationId,
+    int $customerUserId,
+    int $vendorUserId,
+    int $orderId,
+    string $orderNumber,
+    string $productName,
+    int $quantity,
+    float $totalAmount
+): void {
+    if ($conversationId <= 0 || $customerUserId <= 0 || $vendorUserId <= 0) {
+        return;
+    }
+
+    $message = sprintf(
+        'New order placed: %s | Product: %s | Qty: %d | Total: Rs. %s | Order ID: %d',
+        $orderNumber,
+        $productName,
+        $quantity,
+        number_format($totalAmount, 2),
+        $orderId
+    );
+
+    $messageType = 'text';
+    $insertMessageStmt = $conn->prepare(
+        'INSERT INTO messages (conversation_id, sender_id, receiver_id, message_content, message_type, is_read, created_at)
+         VALUES (?, ?, ?, ?, ?, 0, NOW())'
+    );
+
+    if (!$insertMessageStmt) {
+        return;
+    }
+
+    $insertMessageStmt->bind_param('iiiss', $conversationId, $customerUserId, $vendorUserId, $message, $messageType);
+    $insertMessageStmt->execute();
+    $messageId = (int)$insertMessageStmt->insert_id;
+    $insertMessageStmt->close();
+
+    if ($messageId > 0) {
+        $readSelfStmt = $conn->prepare('INSERT IGNORE INTO message_reads (message_id, user_id, read_at) VALUES (?, ?, NOW())');
+        if ($readSelfStmt) {
+            $readSelfStmt->bind_param('ii', $messageId, $customerUserId);
+            $readSelfStmt->execute();
+            $readSelfStmt->close();
+        }
+    }
+
+    $touchStmt = $conn->prepare('UPDATE conversations SET last_message_date = NOW() WHERE conversation_id = ? LIMIT 1');
+    if ($touchStmt) {
+        $touchStmt->bind_param('i', $conversationId);
+        $touchStmt->execute();
+        $touchStmt->close();
+    }
+}
+
 $orderNumber = generateUniqueOrderNumber($conn, 5);
 
 if ($orderNumber === '') {
@@ -339,6 +530,53 @@ try {
         throw new Exception('Failed to create payment record: ' . $err);
     }
     $insertPaymentStmt->close();
+
+    $vendorUserId = 0;
+    $vendorUserStmt = $conn->prepare('SELECT v.user_id, v.business_name FROM vendors v WHERE v.vendor_id = ? LIMIT 1');
+    $vendorBusinessName = (string)($product['business_name'] ?? '');
+    if ($vendorUserStmt) {
+        $vendorUserStmt->bind_param('i', $vendorId);
+        $vendorUserStmt->execute();
+        $vendorRow = $vendorUserStmt->get_result()->fetch_assoc();
+        $vendorUserStmt->close();
+        $vendorUserId = (int)($vendorRow['user_id'] ?? 0);
+        if ($vendorBusinessName === '') {
+            $vendorBusinessName = (string)($vendorRow['business_name'] ?? '');
+        }
+    }
+
+    if ($vendorUserId > 0) {
+        $conversationId = ensureVendorCustomerConversation(
+            $conn,
+            $userId,
+            $vendorUserId,
+            (string)($currentUser['full_name'] ?? ''),
+            $vendorBusinessName
+        );
+
+        createOrderChatMessage(
+            $conn,
+            $conversationId,
+            $userId,
+            $vendorUserId,
+            $orderId,
+            $orderNumber,
+            (string)$product['product_name'],
+            $quantity,
+            $orderTotal
+        );
+    }
+
+    createVendorOrderNotification(
+        $conn,
+        $vendorId,
+        $orderId,
+        $orderNumber,
+        (string)$product['product_name'],
+        $quantity,
+        $orderTotal,
+        (string)($currentUser['full_name'] ?? '')
+    );
 
     $conn->commit();
 
