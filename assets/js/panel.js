@@ -720,8 +720,173 @@ function filterVendorTable(query) {
 }
 
 function filterVendorStatus(status) {
-  showToast(`Filtering by: ${status}`, 'info');
+  const tbody = document.getElementById('vendorsBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    if (status === 'all') {
+      row.style.display = '';
+    } else {
+      const statusText = row.querySelector('.status-badge')?.textContent?.toLowerCase() || '';
+      row.style.display = statusText.includes(status.toLowerCase()) ? '' : 'none';
+    }
+  });
 }
+
+/* CUSTOMERS TABLE FILTERING */
+function filterCustomersTable() {
+  const tbody = document.getElementById('customersBody');
+  if (!tbody) return;
+  
+  const searchValue = document.getElementById('customerSearch')?.value?.toLowerCase() || '';
+  const statusValue = document.getElementById('customerStatus')?.value?.toLowerCase() || '';
+  const provinceValue = document.getElementById('customerProvince')?.value?.toLowerCase() || '';
+  const dateFromValue = document.getElementById('customerDateFrom')?.value || '';
+  const dateToValue = document.getElementById('customerDateTo')?.value || '';
+  
+  const dateFrom = dateFromValue ? new Date(dateFromValue) : null;
+  const dateTo = dateToValue ? new Date(dateToValue) : null;
+  
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 9) return;
+    
+    // Extract data from cells
+    const name = cells[1]?.textContent?.toLowerCase() || '';
+    const email = cells[2]?.textContent?.toLowerCase() || '';
+    const province = cells[3]?.textContent?.toLowerCase() || '';
+    const joined = cells[6]?.textContent?.trim() || '';
+    const statusBadge = cells[7]?.querySelector('.status-badge')?.textContent?.toLowerCase() || '';
+    
+    // Search filter (name or email)
+    const matchesSearch = !searchValue || name.includes(searchValue) || email.includes(searchValue);
+    
+    // Status filter
+    const matchesStatus = !statusValue || statusBadge.includes(statusValue);
+    
+    // Province filter
+    const matchesProvince = !provinceValue || province.includes(provinceValue) || (provinceValue === 'western' && (province.includes('colombo') || province.includes('gampaha')));
+    
+    // Date range filter
+    let matchesDateRange = true;
+    if (dateFrom || dateTo) {
+      try {
+        const monthYear = joined.match(/(\\w+)\\s+(\\d+)/);
+        if (monthYear) {
+          const monthStr = monthYear[1];
+          const yearStr = monthYear[2];
+          const date = new Date(`${monthStr} 1, ${yearStr}`);
+          if (dateFrom && date < dateFrom) matchesDateRange = false;
+          if (dateTo && date > dateTo) matchesDateRange = false;
+        }
+      } catch (e) {
+        matchesDateRange = true;
+      }
+    }
+    
+    row.style.display = (matchesSearch && matchesStatus && matchesProvince && matchesDateRange) ? '' : 'none';
+  });
+}
+
+/* ORDERS TABLE FILTERING */
+function filterOrdersTable() {
+  const tbody = document.getElementById('ordersFullBody');
+  if (!tbody) return;
+  
+  const searchValue = document.getElementById('orderSearch')?.value?.toLowerCase() || '';
+  const statusValue = document.getElementById('orderStatus')?.value?.toLowerCase() || '';
+  const provinceValue = document.getElementById('orderProvince')?.value?.toLowerCase() || '';
+  const dateFromValue = document.getElementById('orderDateFrom')?.value || '';
+  const dateToValue = document.getElementById('orderDateTo')?.value || '';
+  
+  const dateFrom = dateFromValue ? new Date(dateFromValue) : null;
+  const dateTo = dateToValue ? new Date(dateToValue) : null;
+  
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 9) return;
+    
+    // Extract data from cells
+    const orderId = cells[1]?.textContent?.toLowerCase() || '';
+    const customer = cells[2]?.textContent?.toLowerCase() || '';
+    const vendor = cells[4]?.textContent?.toLowerCase() || '';
+    const statusBadge = cells[7]?.querySelector('.status-badge')?.textContent?.toLowerCase() || '';
+    const dateStr = cells[8]?.textContent?.trim() || '';
+    
+    // Search filter
+    const matchesSearch = !searchValue || orderId.includes(searchValue) || customer.includes(searchValue) || vendor.includes(searchValue);
+    
+    // Status filter
+    const matchesStatus = !statusValue || statusBadge.includes(statusValue);
+    
+    // Province filter (placeholder - would need province data)
+    const matchesProvince = true;
+    
+    // Date range filter
+    let matchesDateRange = true;
+    if (dateFrom || dateTo) {
+      try {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          if (dateFrom && date < dateFrom) matchesDateRange = false;
+          if (dateTo && date > dateTo) matchesDateRange = false;
+        }
+      } catch (e) {
+        matchesDateRange = true;
+      }
+    }
+    
+    row.style.display = (matchesSearch && matchesStatus && matchesProvince && matchesDateRange) ? '' : 'none';
+  });
+}
+
+/* INQUIRIES TABLE FILTERING */
+function filterInquiriesTable() {
+  const tbody = document.getElementById('inquiriesBody');
+  if (!tbody) return;
+  
+  const searchValue = document.getElementById('inquirySearch')?.value?.toLowerCase() || '';
+  const statusValue = document.getElementById('statusFilter')?.value?.toLowerCase() || '';
+  const roleValue = document.getElementById('roleFilter')?.value?.toLowerCase() || '';
+  const dateFromValue = document.getElementById('inquiryDateFrom')?.value || '';
+  const dateToValue = document.getElementById('inquiryDateTo')?.value || '';
+  
+  const dateFrom = dateFromValue ? new Date(dateFromValue) : null;
+  const dateTo = dateToValue ? new Date(dateToValue) : null;
+  
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 5) return;
+    
+    // Extract data from cells
+    const name = cells[1]?.textContent?.toLowerCase() || '';
+    const email = cells[2]?.textContent?.toLowerCase() || '';
+    const role = cells[3]?.textContent?.toLowerCase() || '';
+    const statusBadge = cells[4]?.querySelector('.status-badge')?.textContent?.toLowerCase() || '';
+    
+    // Search filter
+    const matchesSearch = !searchValue || name.includes(searchValue) || email.includes(searchValue);
+    
+    // Status filter
+    const matchesStatus = !statusValue || statusBadge.includes(statusValue);
+    
+    // Role filter
+    const matchesRole = !roleValue || role.includes(roleValue);
+    
+    // Date range filter (placeholder - would need date data in cells)
+    let matchesDateRange = true;
+    
+    row.style.display = (matchesSearch && matchesStatus && matchesRole && matchesDateRange) ? '' : 'none';
+  });
+}
+
+// Legacy functions for backward compatibility
+function searchInquiries() { filterInquiriesTable(); }
+function filterInquiries() { filterInquiriesTable(); }
 
 /* CUSTOMERS TABLE */
 async function renderCustomersTable() {
@@ -729,12 +894,34 @@ async function renderCustomersTable() {
   if (!tbody) return;
   
   try {
-    const res = await fetch('http://localhost/bizlink-crm-platform/api/get_customers.php');
-    const json = await res.json();
-    if (json.success && json.data.length > 0) {
-      tbody.innerHTML = json.data.map(c => {
-        const status = c.customer_status === 'active' ? 'Active' : (c.customer_status || 'N/A');
+    const [customersRes, pendingRes] = await Promise.all([
+      fetch('http://localhost/bizlink-crm-platform/api/get_customers.php'),
+      fetch('http://localhost/bizlink-crm-platform/api/admin_get_pending_customers.php')
+    ]);
+
+    const [customersJson, pendingJson] = await Promise.all([customersRes.json(), pendingRes.json()]);
+    if (customersJson.success && customersJson.data.length > 0) {
+      const pendingByUserId = new Map();
+      if (pendingJson && pendingJson.success && Array.isArray(pendingJson.data)) {
+        pendingJson.data.forEach((item) => {
+          pendingByUserId.set(Number(item.user_id || 0), item);
+        });
+      }
+
+      tbody.innerHTML = customersJson.data.map(c => {
+        const statusRaw = String(c.customer_status || '').toLowerCase();
+        const isPending = statusRaw === 'inactive' || statusRaw === 'pending_verification';
+        const pendingRecord = pendingByUserId.get(Number(c.user_id || 0));
+        const customerId = Number(c.customer_id || pendingRecord?.customer_id || 0);
+        const status = statusRaw === 'active' ? 'Active' : (statusRaw || 'N/A');
         const joined = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—';
+        const actionButtons = isPending && customerId > 0 ? `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-vendor" type="button" style="padding:6px 10px;font-size:12px;" onclick="approveEntry('customer', ${customerId})">Approve</button>
+            <button class="btn-danger-outline" type="button" style="padding:6px 10px;font-size:12px;" onclick="rejectEntry('customer', ${customerId})">Reject</button>
+          </div>
+        ` : '<span style="color:#64748b;font-size:12px;">No action needed</span>';
+
         return `
           <tr>
             <td><input type="checkbox"/></td>
@@ -745,6 +932,7 @@ async function renderCustomersTable() {
             <td>Rs. ${Number(c.total_spent || 0).toLocaleString()}</td>
             <td>${joined}</td>
             <td><span class="status-badge badge-active">${status}</span></td>
+            <td>${actionButtons}</td>
           </tr>
         `;
       }).join('');
@@ -754,7 +942,7 @@ async function renderCustomersTable() {
     console.warn('Could not fetch customers from API:', e);
   }
   
-  renderTableState(tbody, 8, 'No customers found in database');
+  renderTableState(tbody, 9, 'No customers found in database');
 }
 
 /* ORDERS TABLE */

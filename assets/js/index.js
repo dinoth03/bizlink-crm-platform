@@ -10,6 +10,11 @@ const state = {
   formData:   {}
 };
 
+const pendingApprovalContext = {
+  email: '',
+  role: ''
+};
+
 /*TAB SWITCHER*/
 function switchTab(tab) {
   state.tab = tab;
@@ -257,6 +262,9 @@ async function handleSignup() {
   const password = state.formData.password || '';
   const phone = state.formData.phone || '';
 
+  pendingApprovalContext.email = '';
+  pendingApprovalContext.role = '';
+
   if (!role) {
     showToast('Please select account role.', 'warn');
     return;
@@ -308,6 +316,8 @@ async function handleSignup() {
     successMsg = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Please check your email and enter the 6-digit admin verification code before login.`;
   } else if (signupResult.approval_required) {
     successMsg = `Welcome to BizLink, <strong>${firstName}</strong>!<br/>Your account is pending admin approval. You can login after approval.`;
+    pendingApprovalContext.email = email;
+    pendingApprovalContext.role = role;
   }
   document.getElementById('successMsg').innerHTML = successMsg;
 
@@ -341,6 +351,20 @@ async function handleSignup() {
     successBtn.href = redirectLink;
   }
 
+  const checker = document.getElementById('approvalChecker');
+  const checkerEmail = document.getElementById('approvalCheckerEmail');
+  const checkerResult = document.getElementById('approvalCheckerResult');
+  if (checker) {
+    const showChecker = !!signupResult.approval_required;
+    checker.classList.toggle('hidden', !showChecker);
+    if (showChecker && checkerEmail) {
+      checkerEmail.textContent = email;
+    }
+    if (checkerResult) {
+      checkerResult.textContent = '';
+    }
+  }
+
   if (role === 'admin' && signupResult.verification_method === 'code' && signupResult.verification_code) {
     window.prompt('Local development admin verification code:', signupResult.verification_code);
   }
@@ -348,6 +372,51 @@ async function handleSignup() {
   setTimeout(() => {
     window.location.href = redirectLink;
   }, 2500);
+}
+
+async function checkSignupApprovalStatus() {
+  const email = String(pendingApprovalContext.email || '').trim().toLowerCase();
+  const role = String(pendingApprovalContext.role || '').trim().toLowerCase();
+  const resultEl = document.getElementById('approvalCheckerResult');
+  const checkBtn = document.getElementById('checkApprovalBtn');
+
+  if (!email || !role) {
+    if (resultEl) resultEl.textContent = 'Sign up first to use approval status checking.';
+    return;
+  }
+
+  if (typeof authCheckApprovalStatus !== 'function') {
+    if (resultEl) resultEl.textContent = 'Approval status service is unavailable right now.';
+    return;
+  }
+
+  if (checkBtn) {
+    checkBtn.disabled = true;
+    checkBtn.textContent = 'Checking...';
+  }
+
+  const statusResult = await authCheckApprovalStatus({ email, role });
+
+  if (checkBtn) {
+    checkBtn.disabled = false;
+    checkBtn.textContent = 'Check Approval Status';
+  }
+
+  if (!resultEl) return;
+
+  if (!statusResult || !statusResult.success) {
+    resultEl.textContent = (statusResult && statusResult.message) || 'Could not fetch approval status. Please try again.';
+    return;
+  }
+
+  const status = String(statusResult.approval_status || '').toLowerCase();
+  if (status === 'approved') {
+    resultEl.textContent = 'Approved: You can now sign in from the login tab.';
+  } else if (status === 'rejected') {
+    resultEl.textContent = statusResult.status_message || 'Rejected: Please contact support for assistance.';
+  } else {
+    resultEl.textContent = statusResult.status_message || 'Pending: Your account is still under admin review.';
+  }
 }
 
 /*HANDLE LOGIN SUBMIT*/
@@ -405,7 +474,16 @@ async function handleLogin(e) {
     }
 
     if (errorCode === 'ACCOUNT_PENDING_APPROVAL') {
-      showToast('Your account is waiting for admin approval.', 'info');
+      if (typeof authCheckApprovalStatus === 'function') {
+        const statusResult = await authCheckApprovalStatus({ email: loginEmail, role: state.loginRole });
+        if (statusResult && statusResult.success) {
+          showToast(statusResult.status_message || 'Your account is waiting for admin approval.', 'info');
+        } else {
+          showToast((statusResult && statusResult.message) || 'Your account is waiting for admin approval.', 'info');
+        }
+      } else {
+        showToast('Your account is waiting for admin approval.', 'info');
+      }
       return;
     }
 

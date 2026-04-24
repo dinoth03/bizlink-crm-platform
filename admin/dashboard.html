@@ -77,6 +77,7 @@
         Contact Inquiries
         <span class="nav-badge" id="contactBadge" style="display:none;"></span>
       </a>
+    </div>
 
     <div class="sb-nav-group">
       <span class="sb-nav-label">Finance</span>
@@ -273,6 +274,32 @@
           <div class="kpi-label">Active Vendors</div>
           <div class="kpi-sublabel">14 pending approval</div>
           <div class="kpi-sparkline" id="spark4"></div>
+        </div>
+      </div>
+
+      <!-- Approval Shortcuts -->
+      <div class="data-card" style="margin-top:24px;">
+        <div class="dc-header">
+          <div>
+            <h3 class="dc-title">Approval Queue</h3>
+            <p class="dc-sub">Approve vendors and customers from one place</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+          <div style="border:1px solid #e5e7eb;border-radius:14px;padding:18px;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">
+            <div style="font-size:13px;color:#64748b;margin-bottom:6px;">Pending Customers</div>
+            <div style="font-size:28px;font-weight:800;color:#ff2d55;line-height:1;" id="pendingCustomerCountCard">0</div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn-primary" type="button" onclick="showApprovalModal('customer')">Review Customers</button>
+            </div>
+          </div>
+          <div style="border:1px solid #e5e7eb;border-radius:14px;padding:18px;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,0.04);">
+            <div style="font-size:13px;color:#64748b;margin-bottom:6px;">Pending Vendors</div>
+            <div style="font-size:28px;font-weight:800;color:#ff2d55;line-height:1;" id="pendingVendorCountCard">0</div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn-outline" type="button" onclick="showApprovalModal('vendor')">Review Vendors</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -578,20 +605,22 @@
       <div class="filter-bar">
         <div class="fb-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" placeholder="Search orders..." class="fb-input"/>
+          <input type="text" placeholder="Search orders..." class="fb-input" id="orderSearch" oninput="filterOrdersTable()"/>
         </div>
-        <select class="fb-select">
-          <option>All Status</option>
-          <option>Completed</option>
-          <option>Processing</option>
-          <option>Cancelled</option>
+        <select class="fb-select" id="orderStatus" onchange="filterOrdersTable()">
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="processing">Processing</option>
+          <option value="cancelled">Cancelled</option>
         </select>
-        <select class="fb-select">
-          <option>All Categories</option>
-          <option>Electronics</option>
-          <option>Fashion</option>
-          <option>Grocery</option>
+        <select class="fb-select" id="orderProvince" onchange="filterOrdersTable()">
+          <option value="">All Provinces</option>
+          <option value="western">Western</option>
+          <option value="central">Central</option>
+          <option value="southern">Southern</option>
         </select>
+        <input type="date" class="fb-select" id="orderDateFrom" onchange="filterOrdersTable()" title="From Date"/>
+        <input type="date" class="fb-select" id="orderDateTo" onchange="filterOrdersTable()" title="To Date"/>
       </div>
       <div class="data-card no-pad">
         <table class="data-table full-table" id="ordersFullTable">
@@ -711,9 +740,39 @@
       <div class="reports-grid" id="reportsGrid"></div>
     </div>
     <div class="page hidden" id="page-customers">
-      <div class="page-header"><div><h1 class="page-title">Customer Management</h1><p class="page-subtitle">View and manage all registered customers.</p></div></div>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Customer Management</h1>
+          <p class="page-subtitle">View, approve, and suspend registered customers.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn-outline" type="button" onclick="showApprovalModal('customer')">Review Pending Customers</button>
+        </div>
+      </div>
       <div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">12,480</span><span class="ms-lbl">Total</span></div><div class="ms-card"><span class="ms-num green-text">9,840</span><span class="ms-lbl">Active</span></div><div class="ms-card"><span class="ms-num amber-text">342</span><span class="ms-lbl">New This Week</span></div><div class="ms-card"><span class="ms-num red-text">124</span><span class="ms-lbl">Flagged</span></div></div>
-      <div class="data-card no-pad" style="margin-top:20px"><table class="data-table full-table"><thead><tr><th><input type="checkbox"/></th><th>Customer</th><th>Email</th><th>Province</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Status</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+      <div class="filter-bar">
+        <div class="fb-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search customers..." class="fb-input" id="customerSearch" oninput="filterCustomersTable()"/>
+        </div>
+        <select class="fb-select" id="customerStatus" onchange="filterCustomersTable()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="suspended">Suspended</option>
+        </select>
+        <select class="fb-select" id="customerProvince" onchange="filterCustomersTable()">
+          <option value="">All Provinces</option>
+          <option value="western">Western</option>
+          <option value="central">Central</option>
+          <option value="southern">Southern</option>
+          <option value="northern">Northern</option>
+          <option value="eastern">Eastern</option>
+        </select>
+        <input type="date" class="fb-select" id="customerDateFrom" onchange="filterCustomersTable()" title="From Date"/>
+        <input type="date" class="fb-select" id="customerDateTo" onchange="filterCustomersTable()" title="To Date"/>
+      </div>
+      <div class="data-card no-pad" style="margin-top:20px"><table class="data-table full-table"><thead><tr><th><input type="checkbox"/></th><th>Customer</th><th>Email</th><th>Province</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead><tbody id="customersBody"></tbody></table></div>
     </div>
     <div class="page hidden" id="page-marketplace"><div class="page-header"><div><h1 class="page-title">Marketplace Overview</h1><p class="page-subtitle">Monitor product listings and category performance.</p></div></div><div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">1,284</span><span class="ms-lbl">Listings</span></div><div class="ms-card"><span class="ms-num green-text">48</span><span class="ms-lbl">Categories</span></div><div class="ms-card"><span class="ms-num amber-text">76</span><span class="ms-lbl">Pending Review</span></div><div class="ms-card"><span class="ms-num red-text">12</span><span class="ms-lbl">Flagged</span></div></div></div>
     <div class="page hidden" id="page-revenue"><div class="page-header"><div><h1 class="page-title">Revenue & Finance</h1><p class="page-subtitle">Financial overview and commission tracking.</p></div></div><div class="mini-stats"><div class="ms-card"><span class="ms-num navy-text">Rs. 4.82M</span><span class="ms-lbl">Gross Revenue</span></div><div class="ms-card"><span class="ms-num green-text">Rs. 241K</span><span class="ms-lbl">Platform Commission</span></div><div class="ms-card"><span class="ms-num amber-text">Rs. 48K</span><span class="ms-lbl">Pending Payouts</span></div><div class="ms-card"><span class="ms-num navy-text">5%</span><span class="ms-lbl">Commission Rate</span></div></div></div>
@@ -737,21 +796,23 @@
       <div class="filter-bar">
         <div class="fb-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" placeholder="Search inquiries..." class="fb-input" id="inquirySearch" oninput="searchInquiries()"/>
+          <input type="text" placeholder="Search inquiries..." class="fb-input" id="inquirySearch" oninput="filterInquiriesTable()"/>
         </div>
-        <select class="fb-select" id="statusFilter" onchange="filterInquiries()">
+        <select class="fb-select" id="statusFilter" onchange="filterInquiriesTable()">
           <option value="">All Status</option>
           <option value="new">New</option>
           <option value="in_progress">In Progress</option>
           <option value="resolved">Resolved</option>
           <option value="closed">Closed</option>
         </select>
-        <select class="fb-select" id="roleFilter" onchange="filterInquiries()">
+        <select class="fb-select" id="roleFilter" onchange="filterInquiriesTable()">
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
           <option value="vendor">Vendor</option>
           <option value="customer">Customer</option>
         </select>
+        <input type="date" class="fb-select" id="inquiryDateFrom" onchange="filterInquiriesTable()" title="From Date"/>
+        <input type="date" class="fb-select" id="inquiryDateTo" onchange="filterInquiriesTable()" title="To Date"/>
       </div>
 
       <!-- Inquiries Table -->
@@ -853,11 +914,12 @@ async function loadPendingCounts() {
       pendingVendors = vendorsData.data || [];
       const badge = document.getElementById('vendorBadge');
       const navBadge = document.getElementById('pendingVendorsBadge');
-      if (pendingVendors.length > 0) {
-        badge.textContent = pendingVendors.length;
-        badge.style.display = 'flex';
-        navBadge.textContent = pendingVendors.length;
-        navBadge.style.display = 'inline-block';
+      const vendorCountCard = document.getElementById('pendingVendorCountCard');
+      if (badge) badge.style.display = pendingVendors.length > 0 ? 'flex' : 'none';
+      if (navBadge) navBadge.style.display = pendingVendors.length > 0 ? 'inline-block' : 'none';
+      if (badge) badge.textContent = String(pendingVendors.length);
+      if (navBadge) {
+        navBadge.textContent = String(pendingVendors.length);
         navBadge.style.background = '#ff2d55';
         navBadge.style.color = 'white';
         navBadge.style.borderRadius = '10px';
@@ -866,6 +928,7 @@ async function loadPendingCounts() {
         navBadge.style.fontWeight = 'bold';
         navBadge.style.marginLeft = '8px';
       }
+      if (vendorCountCard) vendorCountCard.textContent = String(pendingVendors.length);
     }
 
     // Get pending customers
@@ -875,11 +938,12 @@ async function loadPendingCounts() {
       pendingCustomers = customersData.data || [];
       const badge = document.getElementById('customerBadge');
       const navBadge = document.getElementById('pendingCustomersBadge');
-      if (pendingCustomers.length > 0) {
-        badge.textContent = pendingCustomers.length;
-        badge.style.display = 'flex';
-        navBadge.textContent = pendingCustomers.length;
-        navBadge.style.display = 'inline-block';
+      const customerCountCard = document.getElementById('pendingCustomerCountCard');
+      if (badge) badge.style.display = pendingCustomers.length > 0 ? 'flex' : 'none';
+      if (navBadge) navBadge.style.display = pendingCustomers.length > 0 ? 'inline-block' : 'none';
+      if (badge) badge.textContent = String(pendingCustomers.length);
+      if (navBadge) {
+        navBadge.textContent = String(pendingCustomers.length);
         navBadge.style.background = '#ff2d55';
         navBadge.style.color = 'white';
         navBadge.style.borderRadius = '10px';
@@ -888,6 +952,7 @@ async function loadPendingCounts() {
         navBadge.style.fontWeight = 'bold';
         navBadge.style.marginLeft = '8px';
       }
+      if (customerCountCard) customerCountCard.textContent = String(pendingCustomers.length);
     }
   } catch (error) {
     console.error('Error loading pending counts:', error);
@@ -982,7 +1047,7 @@ async function rejectEntry(type, id) {
   
   try {
     const payload = {[paramName]: id};
-    if (type === 'vendor' && reason) {
+    if (reason) {
       payload.reason = reason;
     }
     
@@ -1081,7 +1146,7 @@ function renderInquiriesTable(inquiries) {
       <td><a href="mailto:${escapeHtml(inq.email)}">${escapeHtml(inq.email)}</a></td>
       <td><span style="text-transform:capitalize">${inq.target_role}</span></td>
       <td><div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(inq.message)}</div></td>
-      <td><span style="display:inline-block;padding:4px 8px;background:${statusColor};color:white;border-radius:4px;font-size:12px;text-transform:uppercase;">${inq.status.replace('_', ' ')}</span></td>
+      <td><span class="status-badge" style="display:inline-block;padding:4px 8px;background:${statusColor};color:white;border-radius:4px;font-size:12px;text-transform:uppercase;">${inq.status.replace('_', ' ')}</span></td>
       <td>${new Date(inq.created_at).toLocaleDateString()}</td>
       <td>
         <button class="btn-small" onclick="openInquiryDetails(${inq.inquiry_id})" style="padding:4px 8px;font-size:12px;">View</button>

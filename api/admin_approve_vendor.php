@@ -2,6 +2,7 @@
 session_start();
 require 'config.php';
 require_once 'api_helpers.php';
+require 'mail_service.php';
 
 // Only admins can access
 if (($_SESSION['role'] ?? '') !== 'admin') {
@@ -28,7 +29,13 @@ $conn->begin_transaction();
 
 try {
     // Get vendor and user info
-    $stmt = $conn->prepare('SELECT user_id FROM vendors WHERE vendor_id = ? LIMIT 1');
+    $stmt = $conn->prepare(
+        'SELECT v.user_id, v.business_name, u.email, u.full_name
+         FROM vendors v
+         INNER JOIN users u ON u.user_id = v.user_id
+         WHERE v.vendor_id = ?
+         LIMIT 1'
+    );
     $stmt->bind_param('i', $vendorId);
     $stmt->execute();
     $vendor = $stmt->get_result()->fetch_assoc();
@@ -39,6 +46,9 @@ try {
     }
 
     $userId = (int)$vendor['user_id'];
+    $vendorEmail = trim((string)($vendor['email'] ?? ''));
+    $vendorName = trim((string)($vendor['full_name'] ?? $vendor['business_name'] ?? 'Vendor'));
+    $businessName = trim((string)($vendor['business_name'] ?? 'your business'));
     $adminId = (int)($_SESSION['user_id'] ?? 0);
 
     // Update vendor verification status to 'verified'
@@ -73,10 +83,24 @@ try {
 
     $conn->commit();
 
+    $mailResult = ['success' => false];
+    if ($vendorEmail !== '' && filter_var($vendorEmail, FILTER_VALIDATE_EMAIL)) {
+        $emailBody = '<p>Hi ' . htmlspecialchars($vendorName, ENT_QUOTES) . ',</p>';
+        $emailBody .= '<p>Great news! Your vendor account for <strong>' . htmlspecialchars($businessName, ENT_QUOTES) . '</strong> has been approved.</p>';
+        $emailBody .= '<p>You can now log in and access your vendor dashboard.</p>';
+        $mailResult = sendMail(
+            $vendorEmail,
+            'Your BizLink vendor account is approved',
+            $emailBody,
+            'Your BizLink vendor account has been approved. You can now log in.'
+        );
+    }
+
     apiSuccess([
         'vendor_id' => $vendorId,
         'status' => 'verified',
-        'account_status' => 'active'
+        'account_status' => 'active',
+        'email_sent' => !empty($mailResult['success'])
     ], 'Vendor approved successfully.', 'VENDOR_APPROVED', 200);
 
 } catch (Throwable $e) {

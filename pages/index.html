@@ -554,6 +554,13 @@
           <p class="success-sub" id="successMsg">Welcome to BizLink, !<br/>Your account is ready.</p>
           <p class="success-sinhala">BizLink වෙත සාදරයෙන් පිළිගනිමු!</p>
           <div class="success-role-tag" id="successRoleTag"></div>
+          <div class="approval-checker hidden" id="approvalChecker">
+            <p class="approval-checker-text">Need an update? Check your approval status for <strong id="approvalCheckerEmail">your account</strong>.</p>
+            <div class="approval-checker-actions">
+              <button type="button" class="btn-outline" id="checkApprovalBtn" onclick="checkSignupApprovalStatus()">Check Approval Status</button>
+            </div>
+            <p class="approval-checker-result" id="approvalCheckerResult"></p>
+          </div>
           <a href="index.html" class="submit-btn success-btn">
             <span class="btn-text">Go to Sign In</span>
             <span class="btn-icon">→</span>

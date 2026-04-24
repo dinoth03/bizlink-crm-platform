@@ -306,6 +306,26 @@ async function authResendVerification(payload) {
     }
 }
 
+async function authCheckApprovalStatus(payload) {
+    try {
+        const result = await apiRequest('check_approval_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload || {})
+        }, false);
+
+        return result ? flattenEnvelope(result.data || { success: false, message: 'Status check failed.' }) : { success: false, message: 'Status check failed.' };
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to connect to status service.'
+        };
+    }
+}
+
 
 // Get Dashboard Stats
 async function getDashboardStats() {
