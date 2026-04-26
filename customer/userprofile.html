@@ -51,16 +51,16 @@
 
       <!-- LEFT CARD (user info + avatar + quick stats) -->
       <div class="profile-card">
-        <div class="avatar-large">👩🏾‍💼</div>
-        <h2 class="profile-name">Dilani Perera</h2>
-        <div style="text-align: center; margin-bottom: 10px;"><span class="profile-badge">VERIFIED CUSTOMER</span></div>
-        <p style="text-align:center; color:var(--customer);">dilani.perera@bizlink.lk</p>
+        <div class="avatar-large" id="profileAvatar">👤</div>
+        <h2 class="profile-name" id="profileName">Customer Name</h2>
+        <div style="text-align: center; margin-bottom: 10px;"><span class="profile-badge" id="profileBadge">CUSTOMER</span></div>
+        <p style="text-align:center; color:var(--customer);" id="profileEmail">customer@example.com</p>
         <div style="margin: 24px 0;">
-          <div class="info-row"><span class="info-label">📍 Location</span><span class="info-value">Colombo 05</span></div>
-          <div class="info-row"><span class="info-label">📱 Mobile</span><span class="info-value">+94 77 234 5678</span></div>
-          <div class="info-row"><span class="info-label">🎂 Birth date</span><span class="info-value">15 May 1992</span></div>
-          <div class="info-row"><span class="info-label">📝 Language</span><span class="info-value">Sinhala, English</span></div>
-          <div class="info-row"><span class="info-label">🤝 Member since</span><span class="info-value">Jan 2024</span></div>
+          <div class="info-row"><span class="info-label">📍 Location</span><span class="info-value" id="profileLocation">—</span></div>
+          <div class="info-row"><span class="info-label">📱 Mobile</span><span class="info-value" id="profileMobile">—</span></div>
+          <div class="info-row"><span class="info-label">🎂 Birth date</span><span class="info-value" id="profileBirthDate">Not set</span></div>
+          <div class="info-row"><span class="info-label">📝 Language</span><span class="info-value" id="profileLanguage">—</span></div>
+          <div class="info-row"><span class="info-label">🤝 Member since</span><span class="info-value" id="profileMemberSince">—</span></div>
         </div>
         <button class="edit-profile-btn" id="editProfileBtn">✎ Edit profile</button>
         <!-- quick stats mini -->
@@ -77,9 +77,9 @@
         <!-- ACCOUNT SETTINGS panel -->
         <div class="settings-panel">
           <div class="panel-title"><span>⚙️</span> Account settings</div>
-          <div class="info-row"><span class="info-label">Full name</span><span class="info-value">Dilani Perera <span style="color:var(--customer); font-size:0.7rem; border:1px solid var(--customer); padding:2px 6px; border-radius:12px;">edit</span></span></div>
-          <div class="info-row"><span class="info-label">Email address</span><span class="info-value">dilani.p@bizlink.lk</span></div>
-          <div class="info-row"><span class="info-label">Phone number</span><span class="info-value">+94 77 234 5678</span></div>
+          <div class="info-row"><span class="info-label">Full name</span><span class="info-value"><span id="settingsFullName">Customer Name</span> <span style="color:var(--customer); font-size:0.7rem; border:1px solid var(--customer); padding:2px 6px; border-radius:12px;">edit</span></span></div>
+          <div class="info-row"><span class="info-label">Email address</span><span class="info-value" id="settingsEmail">customer@example.com</span></div>
+          <div class="info-row"><span class="info-label">Phone number</span><span class="info-value" id="settingsPhone">—</span></div>
           <div class="info-row"><span class="info-label">Password</span><span class="info-value">•••••••• <span style="color:var(--customer);">change</span></span></div>
           <div style="margin-top:16px;"><a href="#" class="btn-outline-customer" style="margin-right:12px;">🔗 Link social</a><a href="#" class="btn-outline-customer">📧 Verify email</a></div>
         </div>

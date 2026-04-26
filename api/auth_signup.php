@@ -163,6 +163,30 @@ function ensureEmailVerificationTokensTable(mysqli $conn): void {
     $conn->query($sql);
 }
 
+function ensureCustomerNameColumn(mysqli $conn): void {
+    $checkStmt = $conn->prepare(
+        'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1'
+    );
+    $tableName = 'customers';
+    $columnName = 'customer_name';
+    $checkStmt->bind_param('ss', $tableName, $columnName);
+    $checkStmt->execute();
+    $exists = $checkStmt->get_result()->fetch_assoc();
+    $checkStmt->close();
+
+    if (!$exists) {
+        $conn->query('ALTER TABLE customers ADD COLUMN customer_name VARCHAR(255) NULL AFTER user_id');
+    }
+
+    // Keep customer_name populated for older rows created before this change.
+    $conn->query(
+        'UPDATE customers c
+         JOIN users u ON c.user_id = u.user_id
+         SET c.customer_name = u.full_name
+         WHERE c.customer_name IS NULL OR TRIM(c.customer_name) = ""'
+    );
+}
+
 function createAdminApprovalNotifications(
     mysqli $conn,
     string $signupRole,
@@ -254,6 +278,7 @@ function createAdminApprovalNotifications(
 
 
 try {
+    ensureCustomerNameColumn($conn);
     $conn->begin_transaction();
 
     $province = '';
@@ -365,8 +390,9 @@ try {
             $preferredLanguage = 'en';
         }
 
-        $insertCustomer = $conn->prepare('INSERT INTO customers (user_id, preferred_language) VALUES (?, ?)');
-        $insertCustomer->bind_param('is', $userId, $preferredLanguage);
+        $customerName = $fullName;
+        $insertCustomer = $conn->prepare('INSERT INTO customers (user_id, customer_name, preferred_language) VALUES (?, ?, ?)');
+        $insertCustomer->bind_param('iss', $userId, $customerName, $preferredLanguage);
         $insertCustomer->execute();
         $insertCustomer->close();
 
