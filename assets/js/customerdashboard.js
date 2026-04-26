@@ -498,14 +498,16 @@ async function loadCustomerDashboardData() {
       return;
     }
 
-    if (String(identity.user.role || '').toLowerCase() !== 'customer') {
-      const role = String(identity.user.role || '').toLowerCase();
+    const role = String(identity.user.role || '').toLowerCase().trim();
+
+    if (role !== 'customer') {
       const redirectMap = {
         admin: '../admin/dashboard.html',
-        vendor: '../vendor/vendorpanel.html',
-        customer: '../customer/dashboard.html'
+        vendor: '../vendor/vendorpanel.html'
       };
-      window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+      
+      const target = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+      window.location.href = target;
       return;
     }
 

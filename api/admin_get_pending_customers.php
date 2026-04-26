@@ -18,7 +18,7 @@ $stmt = $conn->prepare(
             c.preferred_language, c.preferred_currency, u.city, u.province, u.account_status
      FROM customers c
      JOIN users u ON c.user_id = u.user_id
-     WHERE u.account_status = "inactive" AND u.role = "customer"
+     WHERE u.account_status IN ("inactive", "pending_verification") AND u.role = "customer"
      ORDER BY c.created_at DESC
      LIMIT 100'
 );

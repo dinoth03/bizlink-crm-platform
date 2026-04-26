@@ -1,4 +1,21 @@
-(function () {
+(async function () {
+  // --- AUTH GATE ---
+  if (typeof authMe === 'function') {
+    const identity = await authMe(true); // Redirect to login if not authenticated
+    if (!identity || !identity.user) return;
+
+    const role = String(identity.user.role || '').toLowerCase().trim();
+    if (role !== 'customer') {
+      const redirects = {
+        admin: '../admin/dashboard.html',
+        vendor: '../vendor/vendorpanel.html'
+      };
+      window.location.href = redirects[role] || '../pages/index.html?reason=unauthorized';
+      return;
+    }
+  }
+  // -----------------
+
   function showDemo(message) {
     window.alert(message);
   }

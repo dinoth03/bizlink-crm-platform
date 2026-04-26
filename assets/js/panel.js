@@ -571,44 +571,45 @@ async function renderApprovalList() {
   const list = document.getElementById('approvalList');
   if (!list) return;
 
-  let vendors = adminDashboardCache.vendors;
-  if (!vendors || vendors.length === 0) {
-    try {
-      vendors = await getVendors();
-      adminDashboardCache.vendors = vendors || [];
-    } catch (error) {
-      console.warn('Could not load approval list vendors:', error);
-      vendors = [];
+  try {
+    // Fetch pending vendors and customers
+    const [vendorsRes, customersRes] = await Promise.all([
+      fetch('http://localhost/bizlink-crm-platform/api/admin_get_pending_vendors.php'),
+      fetch('http://localhost/bizlink-crm-platform/api/admin_get_pending_customers.php')
+    ]);
+
+    const vendorsData = await vendorsRes.json();
+    const customersData = await customersRes.json();
+
+    const pendingVendors = (vendorsData.success ? vendorsData.data : []) || [];
+    const pendingCustomers = (customersData.success ? customersData.data : []) || [];
+
+    const allPending = [
+      ...pendingVendors.map(v => ({ ...v, type: 'vendor', icon: '🏪' })),
+      ...pendingCustomers.map(c => ({ ...c, type: 'customer', icon: '👤' }))
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+
+    if (allPending.length === 0) {
+      list.innerHTML = '<div class="approval-item"><div class="ai-info"><span class="ai-name">No pending approvals</span><span class="ai-cat">All applications are up to date</span></div></div>';
+      return;
     }
-  }
 
-  const pendingVendors = (vendors || [])
-    .filter((vendor) => String(vendor.vendor_status || '').toLowerCase() === 'pending')
-    .slice(0, 4)
-    .map((vendor, index) => ({
-      emoji: ['🏪', '👗', '🍜', '🛠️'][index % 4],
-      name: vendor.shop_name || 'Vendor',
-      cat: vendor.business_category || 'General'
-    }));
-
-  if (pendingVendors.length === 0) {
-    list.innerHTML = '<div class="approval-item"><div class="ai-info"><span class="ai-name">No pending approvals</span><span class="ai-cat">All vendor applications are up to date</span></div></div>';
-    return;
-  }
-
-  list.innerHTML = pendingVendors.map(v => `
-    <div class="approval-item">
-      <div class="ai-avatar">${v.emoji}</div>
-      <div class="ai-info">
-        <span class="ai-name">${v.name}</span>
-        <span class="ai-cat">${v.cat}</span>
+    list.innerHTML = allPending.map(item => `
+      <div class="approval-item">
+        <div class="ai-avatar">${item.icon}</div>
+        <div class="ai-info">
+          <span class="ai-name">${escapeHtml(item.type === 'vendor' ? item.business_name : item.full_name)}</span>
+          <span class="ai-cat">${item.type.charAt(0).toUpperCase() + item.type.slice(1)} · ${escapeHtml(item.type === 'vendor' ? (item.business_category || 'General') : (item.city || 'N/A'))}</span>
+        </div>
+        <div class="ai-actions">
+          <button class="ai-btn ok" onclick="approveEntry('${item.type}', ${item[item.type === 'vendor' ? 'vendor_id' : 'customer_id']})" title="Approve">✓</button>
+        </div>
       </div>
-      <div class="ai-actions">
-        <button class="ai-btn ok" onclick="approveVendor('${v.name}')">✓</button>
-        <button class="ai-btn no" onclick="rejectVendor('${v.name}')">✕</button>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  } catch (error) {
+    console.warn('Could not load approval list:', error);
+    list.innerHTML = '<div class="approval-item"><div class="ai-info"><span class="ai-name">Error loading approvals</span></div></div>';
+  }
 }
 
 async function renderTopVendors() {

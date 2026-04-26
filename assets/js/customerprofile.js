@@ -77,14 +77,17 @@
         return;
       }
 
-      const role = String(identity.user.role || '').toLowerCase();
+      const role = String(identity.user.role || '').toLowerCase().trim();
+      
+      // If NOT a customer, redirect to their proper dashboard or login
       if (role !== 'customer') {
         const redirects = {
           admin: '../admin/dashboard.html',
-          vendor: '../vendor/vendorpanel.html',
-          customer: 'dashboard.html'
+          vendor: '../vendor/vendorpanel.html'
         };
-        window.location.href = redirects[role] || '../pages/index.html?reason=unauthorized';
+        
+        const target = redirects[role] || '../pages/index.html?reason=unauthorized';
+        window.location.href = target;
         return;
       }
 
