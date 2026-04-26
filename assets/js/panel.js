@@ -682,6 +682,8 @@ async function renderVendorsTable() {
       tbody.innerHTML = json.data.map(v => {
         const status = v.vendor_status === 'verified' ? 'Active' : v.vendor_status.charAt(0).toUpperCase() + v.vendor_status.slice(1);
         const statusClass = v.vendor_status === 'verified' ? 'active' : v.vendor_status;
+        const vendorId = Number(v.vendor_id || 0);
+        const vendorName = String(v.shop_name || v.vendor_name || 'Vendor').replace(/'/g, "\\'");
         return `
           <tr>
             <td><input type="checkbox"/></td>
@@ -693,8 +695,8 @@ async function renderVendorsTable() {
             <td>—</td>
             <td><span class="status-badge badge-${statusClass}">${status}</span></td>
             <td>
-              <button class="tbl-action view" onclick="viewVendor('${v.shop_name}')">View</button>
-              ${v.vendor_status === 'pending' ? '<button class="tbl-action approve" onclick="approveVendor(\'' + v.shop_name + '\')">Approve</button>' : ''}
+              <button class="tbl-action view" onclick="viewVendor('${vendorName}')">View</button>
+              ${v.vendor_status === 'pending' && vendorId > 0 ? '<button class="tbl-action approve" onclick="approveVendor(' + vendorId + ', \'' + vendorName + '\')">Approve</button>' : ''}
             </td>
           </tr>
         `;
@@ -1273,10 +1275,38 @@ function submitVendorForm() {
 }
 
 /* ACTION FUNCTIONS */
-function approveVendor(vendorName) {
-  showToast(`✅ ${vendorName} approved!`, 'success');
-  renderApprovalList();
-  renderVendorsTable();
+async function approveVendor(vendorId, vendorName = 'Vendor') {
+  const id = Number(vendorId || 0);
+  if (id <= 0) {
+    showToast('Invalid vendor selected for approval.', 'error');
+    return;
+  }
+
+  try {
+    const result = typeof apiRequest === 'function'
+      ? await apiRequest('admin_approve_vendor.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vendor_id: id })
+        })
+      : null;
+
+    const payload = result ? (result.data || {}) : null;
+    if (result && result.ok && payload.success) {
+      showToast(`✅ ${vendorName} approved!`, 'success');
+      await renderApprovalList();
+      await renderVendorsTable();
+      if (typeof loadPendingCounts === 'function') {
+        loadPendingCounts();
+      }
+      return;
+    }
+
+    const msg = payload?.message || 'Failed to approve vendor.';
+    showToast(msg, 'error');
+  } catch (error) {
+    showToast(`Approval failed: ${error.message}`, 'error');
+  }
 }
 
 function rejectVendor(vendorName) {

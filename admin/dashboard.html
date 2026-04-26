@@ -1022,22 +1022,32 @@ async function approveEntry(type, id) {
   const paramName = type === 'vendor' ? 'vendor_id' : 'customer_id';
   
   try {
-    const res = await fetch(`../api/${endpoint}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({[paramName]: id})
-    });
-    const data = await res.json();
-    if (data.success) {
+    const result = typeof apiRequest === 'function'
+      ? await apiRequest(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({[paramName]: id})
+        })
+      : await fetch(`../api/${endpoint}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({[paramName]: id})
+        }).then(async (res) => ({ ok: res.ok, status: res.status, data: await res.json() }));
+
+    const data = result ? (result.data || {}) : {};
+    if (result && result.ok && data.success) {
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} approved successfully!`);
       loadPendingCounts();
+      const backdrop = document.getElementById('approvalBackdrop');
+      if (backdrop) backdrop.style.display = 'none';
       if (type === 'customer' && typeof renderCustomersTable === 'function') {
         renderCustomersTable();
       } else {
         showApprovalModal(type);
       }
     } else {
-      alert((data && data.message) || ('Error approving ' + type));
+      const errorMessage = data?.message || (result ? `Error approving ${type} (HTTP ${result.status})` : ('Error approving ' + type));
+      alert(errorMessage);
     }
   } catch (error) {
     alert('Error: ' + error.message);
@@ -1055,22 +1065,32 @@ async function rejectEntry(type, id) {
       payload.reason = reason;
     }
     
-    const res = await fetch(`../api/${endpoint}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.success) {
+    const result = typeof apiRequest === 'function'
+      ? await apiRequest(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        })
+      : await fetch(`../api/${endpoint}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        }).then(async (res) => ({ ok: res.ok, status: res.status, data: await res.json() }));
+
+    const data = result ? (result.data || {}) : {};
+    if (result && result.ok && data.success) {
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} rejected successfully!`);
       loadPendingCounts();
+      const backdrop = document.getElementById('approvalBackdrop');
+      if (backdrop) backdrop.style.display = 'none';
       if (type === 'customer' && typeof renderCustomersTable === 'function') {
         renderCustomersTable();
       } else {
         showApprovalModal(type);
       }
     } else {
-      alert((data && data.message) || ('Error rejecting ' + type));
+      const errorMessage = data?.message || (result ? `Error rejecting ${type} (HTTP ${result.status})` : ('Error rejecting ' + type));
+      alert(errorMessage);
     }
   } catch (error) {
     alert('Error: ' + error.message);

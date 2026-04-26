@@ -30,7 +30,7 @@ $conn->begin_transaction();
 try {
     // Get vendor and user info
     $stmt = $conn->prepare(
-        'SELECT v.user_id, v.business_name, u.email, u.full_name
+        'SELECT v.user_id, v.business_name, v.business_email, u.email AS user_email, u.full_name
          FROM vendors v
          INNER JOIN users u ON u.user_id = v.user_id
          WHERE v.vendor_id = ?
@@ -46,7 +46,8 @@ try {
     }
 
     $userId = (int)$vendor['user_id'];
-    $vendorEmail = trim((string)($vendor['email'] ?? ''));
+    $vendorEmail = trim((string)($vendor['user_email'] ?? ''));
+    $businessEmail = trim((string)($vendor['business_email'] ?? ''));
     $vendorName = trim((string)($vendor['full_name'] ?? $vendor['business_name'] ?? 'Vendor'));
     $businessName = trim((string)($vendor['business_name'] ?? 'your business'));
     $adminId = (int)($_SESSION['user_id'] ?? 0);
@@ -83,24 +84,42 @@ try {
 
     $conn->commit();
 
-    $mailResult = ['success' => false];
-    if ($vendorEmail !== '' && filter_var($vendorEmail, FILTER_VALIDATE_EMAIL)) {
-        $emailBody = '<p>Hi ' . htmlspecialchars($vendorName, ENT_QUOTES) . ',</p>';
-        $emailBody .= '<p>Great news! Your vendor account for <strong>' . htmlspecialchars($businessName, ENT_QUOTES) . '</strong> has been approved.</p>';
-        $emailBody .= '<p>You can now log in and access your vendor dashboard.</p>';
-        $mailResult = sendMail(
-            $vendorEmail,
+    $recipientEmails = [];
+    foreach ([$vendorEmail, $businessEmail] as $candidateEmail) {
+        $normalizedEmail = strtolower(trim((string)$candidateEmail));
+        if ($normalizedEmail !== '' && filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            $recipientEmails[$normalizedEmail] = true;
+        }
+    }
+
+    $mailResults = [];
+    $mailBody = '<p>Hi ' . htmlspecialchars($vendorName, ENT_QUOTES) . ',</p>';
+    $mailBody .= '<p>Great news! Your vendor account for <strong>' . htmlspecialchars($businessName, ENT_QUOTES) . '</strong> has been approved.</p>';
+    $mailBody .= '<p>You can now log in and access your vendor dashboard.</p>';
+
+    foreach (array_keys($recipientEmails) as $recipientEmail) {
+        $mailResults[$recipientEmail] = sendMail(
+            $recipientEmail,
             'Your BizLink vendor account is approved',
-            $emailBody,
+            $mailBody,
             'Your BizLink vendor account has been approved. You can now log in.'
         );
+    }
+
+    $emailSent = false;
+    foreach ($mailResults as $result) {
+        if (!empty($result['success'])) {
+          $emailSent = true;
+          break;
+        }
     }
 
     apiSuccess([
         'vendor_id' => $vendorId,
         'status' => 'verified',
         'account_status' => 'active',
-        'email_sent' => !empty($mailResult['success'])
+        'email_sent' => $emailSent,
+        'recipient_emails' => array_keys($recipientEmails)
     ], 'Vendor approved successfully.', 'VENDOR_APPROVED', 200);
 
 } catch (Throwable $e) {
