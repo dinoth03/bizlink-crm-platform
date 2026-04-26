@@ -430,13 +430,21 @@ async function getProducts() {
 
 async function addVendorProduct(payload) {
     try {
-        const result = await apiRequest('add_vendor_product.php', {
-            method: 'POST',
-            headers: {
+        const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+        const requestOptions = {
+            method: 'POST'
+        };
+
+        if (isFormData) {
+            requestOptions.body = payload;
+        } else {
+            requestOptions.headers = {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload || {})
-        });
+            };
+            requestOptions.body = JSON.stringify(payload || {});
+        }
+
+        const result = await apiRequest('add_vendor_product.php', requestOptions);
 
         if (!result) return null;
         return flattenEnvelope(result.data || {});

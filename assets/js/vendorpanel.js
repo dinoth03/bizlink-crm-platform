@@ -1135,6 +1135,11 @@ const MODALS = {
         <div class="form-group"><label>SKU Code</label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009" class="form-input" /></div>
       </div>
       <div class="form-group"><label>Product Description</label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description…"></textarea></div>
+      <div class="form-group">
+        <label>Product Image from Computer</label>
+        <input id="vendorProductImageFile" type="file" accept="image/*" class="form-input" />
+        <small style="display:block;color:var(--text-muted);margin-top:6px;">Choose an image from your computer. You can also paste an image URL below as a fallback.</small>
+      </div>
       <div class="form-group"><label>Product Image URL</label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
       <div class="form-group"><label>Status</label><select id="vendorProductStatus" class="form-input"><option value="active">Active</option><option value="draft">Draft</option></select></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
@@ -1191,10 +1196,19 @@ async function submitVendorProduct(event) {
     primary_image_url: String(document.getElementById('vendorProductImage')?.value || '').trim(),
     status: String(document.getElementById('vendorProductStatus')?.value || 'active').trim().toLowerCase()
   };
+  const imageFile = document.getElementById('vendorProductImageFile')?.files?.[0] || null;
 
   if (!payload.product_name || !payload.category || payload.price <= 0) {
     window.alert('Please enter product name, category, and a valid price.');
     return;
+  }
+
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, String(value));
+  });
+  if (imageFile) {
+    formData.append('product_image', imageFile);
   }
 
   if (typeof addVendorProduct !== 'function') {
@@ -1218,7 +1232,7 @@ async function submitVendorProduct(event) {
   }
 
   try {
-    const result = await addVendorProduct(payload);
+    const result = await addVendorProduct(formData);
     if (!result || !result.success) {
       window.alert(result && result.message ? result.message : 'Failed to save product.');
       return;

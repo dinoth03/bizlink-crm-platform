@@ -27,6 +27,15 @@ requireRateLimit($conn, $clientIp, 'vendor_add_product_by_ip', 40, 900);
 requireRateLimit($conn, 'vendor:' . $userId, 'vendor_add_product_by_user', 30, 900);
 
 $payload = readJsonPayload();
+if (empty($payload) && !empty($_POST)) {
+    $payload = $_POST;
+}
+
+$uploadRelativeDir = '../uploads/vendor-products';
+$uploadAbsoluteDir = __DIR__ . '/../uploads/vendor-products';
+if (!is_dir($uploadAbsoluteDir)) {
+    @mkdir($uploadAbsoluteDir, 0777, true);
+}
 
 $productName = sanitizeString((string)($payload['product_name'] ?? ''), 255);
 $category = sanitizeString((string)($payload['category'] ?? ''), 100);
@@ -37,6 +46,68 @@ $status = strtolower(trim((string)($payload['status'] ?? 'active')));
 $skuInput = sanitizeString((string)($payload['sku'] ?? ''), 100);
 $imageUrl = sanitizeString((string)($payload['primary_image_url'] ?? ''), 500);
 $discountPercentage = isset($payload['discount_percentage']) ? (float)$payload['discount_percentage'] : 0;
+
+if (!empty($_FILES['product_image']) && is_array($_FILES['product_image'])) {
+    $uploadedFile = $_FILES['product_image'];
+    $uploadError = (int)($uploadedFile['error'] ?? UPLOAD_ERR_NO_FILE);
+
+    if ($uploadError === UPLOAD_ERR_OK) {
+        $tmpPath = (string)($uploadedFile['tmp_name'] ?? '');
+        $originalName = (string)($uploadedFile['name'] ?? 'product-image');
+        $fileSize = (int)($uploadedFile['size'] ?? 0);
+        $fileType = (string)($uploadedFile['type'] ?? '');
+
+        if ($fileSize > 5 * 1024 * 1024) {
+            apiError('VALIDATION_ERROR', 'Product image must be 5MB or smaller.', 422, [
+                ['field' => 'product_image', 'message' => 'Image file is too large.']
+            ]);
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $detectedMime = null;
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo) {
+                $detectedMime = finfo_file($finfo, $tmpPath) ?: null;
+                finfo_close($finfo);
+            }
+        }
+        $mimeType = $detectedMime ?: $fileType;
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+            apiError('VALIDATION_ERROR', 'Please upload a JPG, PNG, GIF, or WEBP image.', 422, [
+                ['field' => 'product_image', 'message' => 'Unsupported image type.']
+            ]);
+        }
+
+        $extensionMap = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp'
+        ];
+        $extension = $extensionMap[$mimeType] ?? pathinfo($originalName, PATHINFO_EXTENSION);
+        $safeBase = preg_replace('/[^a-zA-Z0-9_-]+/', '-', strtolower(pathinfo($originalName, PATHINFO_FILENAME)));
+        $safeBase = trim((string)$safeBase, '-');
+        if ($safeBase === '') {
+            $safeBase = 'product-image';
+        }
+
+        $savedFileName = $safeBase . '-' . time() . '.' . $extension;
+        $targetPath = $uploadAbsoluteDir . '/' . $savedFileName;
+
+        if (!move_uploaded_file($tmpPath, $targetPath)) {
+            apiError('UPLOAD_FAILED', 'Unable to save the uploaded product image.', 500, [
+                ['field' => 'product_image', 'message' => 'Upload failed.']
+            ]);
+        }
+
+        $imageUrl = $uploadRelativeDir . '/' . $savedFileName;
+    }
+}
+
+if ($imageUrl !== '' && !preg_match('#^(https?://|\.\./|/|\./)#i', $imageUrl)) {
+    $imageUrl = '../' . ltrim($imageUrl, '/');
+}
 
 $errors = [];
 if ($productName === '') {

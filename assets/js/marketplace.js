@@ -236,6 +236,7 @@ function mapApiProduct(product, index) {
   return {
     id: uiProductId,
     api_product_id: apiProductId,
+    vendor_user_id: Number(product.vendor_user_id || 0),
     source: 'api',
     name: product.product_name,
     cat: category,
@@ -789,7 +790,7 @@ function openModal(id) {
           <strong>${p.company}</strong>
           <span>Verified BizLink Vendor · 🇱🇰</span>
         </div>
-        <button class="mvc-chat">💬 Chat</button>
+        <button class="mvc-chat" onclick="startVendorChatFromProduct(${p.id})">💬 Chat</button>
       </div>
 
       <div class="modal-delivery">
@@ -852,6 +853,28 @@ async function modalBuyNow(id) {
     console.error('Marketplace Stripe checkout failed:', error);
     window.alert('Unable to start Stripe checkout at this moment.');
   }
+}
+
+async function startVendorChatFromProduct(productId) {
+  const product = findCatalogProductById(productId);
+  if (!product) {
+    return;
+  }
+
+  const allowed = await requireCustomerForPurchase();
+  if (!allowed) {
+    return;
+  }
+
+  const params = new URLSearchParams();
+  params.set('chatRole', 'vendor');
+
+  const targetUserId = Number(product.vendor_user_id || 0);
+  if (targetUserId > 0) {
+    params.set('targetUserId', String(targetUserId));
+  }
+
+  window.location.href = `chat.html?${params.toString()}`;
 }
 
 /* CART*/

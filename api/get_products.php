@@ -62,6 +62,7 @@ $baseQuery = "SELECT
     p.product_description,
     p.category,
     p.vendor_id,
+    v.user_id as vendor_user_id,
     v.business_name as shop_name,
     p.price as base_price,
     p.quantity_in_stock as stock_quantity,
