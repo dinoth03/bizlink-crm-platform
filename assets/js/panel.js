@@ -900,22 +900,82 @@ async function renderCustomersTable() {
     ]);
 
     const [customersJson, pendingJson] = await Promise.all([customersRes.json(), pendingRes.json()]);
-    if (customersJson.success && customersJson.data.length > 0) {
-      const pendingByUserId = new Map();
-      if (pendingJson && pendingJson.success && Array.isArray(pendingJson.data)) {
-        pendingJson.data.forEach((item) => {
-          pendingByUserId.set(Number(item.user_id || 0), item);
-        });
+    if (customersJson.success) {
+      const activeCustomers = Array.isArray(customersJson.data) ? customersJson.data : [];
+      const pendingCustomers = pendingJson && pendingJson.success && Array.isArray(pendingJson.data)
+        ? pendingJson.data
+        : [];
+
+      const mergedByUserId = new Map();
+
+      // First, add all active customers
+      activeCustomers.forEach((item) => {
+        const key = Number(item.user_id || 0);
+        if (key > 0) {
+          mergedByUserId.set(key, item);
+        }
+      });
+
+      // Then, for pending customers:
+      // - If not in map, add the complete pending record
+      // - If in map, update ONLY the status and customer_id to ensure they're correct
+      pendingCustomers.forEach((item) => {
+        const key = Number(item.user_id || 0);
+        if (key <= 0) return;
+        
+        if (!mergedByUserId.has(key)) {
+          // New pending customer not in active list
+          mergedByUserId.set(key, {
+            customer_id: item.customer_id,
+            user_id: item.user_id,
+            full_name: item.full_name,
+            email: item.email,
+            city: item.city,
+            total_orders: 0,
+            total_spent: 0,
+            created_at: item.created_at,
+            customer_status: item.account_status || 'inactive'
+          });
+        } else {
+          // Customer exists in active list, but update their status from pending list to ensure it's correct
+          const existing = mergedByUserId.get(key);
+          existing.customer_status = item.account_status || 'inactive';
+          existing.customer_id = item.customer_id; // Ensure customer_id is set from pending if available
+        }
+      });
+
+      const mergedCustomers = Array.from(mergedByUserId.values());
+      if (mergedCustomers.length === 0) {
+        renderTableState(tbody, 9, 'No customers found in database');
+        return;
       }
 
-      tbody.innerHTML = customersJson.data.map(c => {
+      console.log('[DEBUG] All merged customers:', mergedCustomers);
+
+      tbody.innerHTML = mergedCustomers.map(c => {
         const statusRaw = String(c.customer_status || '').toLowerCase();
-        const isPending = statusRaw === 'inactive' || statusRaw === 'pending_verification';
-        const pendingRecord = pendingByUserId.get(Number(c.user_id || 0));
-        const customerId = Number(c.customer_id || pendingRecord?.customer_id || 0);
+        const needsApproval = statusRaw !== 'active';
+        const customerId = Number(c.customer_id || 0);
         const status = statusRaw === 'active' ? 'Active' : (statusRaw || 'N/A');
+        const statusClass = statusRaw === 'active'
+          ? 'active'
+          : (statusRaw === 'inactive' || statusRaw === 'pending_verification' ? 'pending' : statusRaw);
         const joined = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—';
-        const actionButtons = isPending && customerId > 0 ? `
+        
+        // Debug log for Rivindu Perera
+        if (c.full_name && c.full_name.toLowerCase().includes('rivindu')) {
+          console.log('[DEBUG] Rivindu Perera customer data:', {
+            customer_id: c.customer_id,
+            customerId_parsed: customerId,
+            customer_status: c.customer_status,
+            statusRaw,
+            needsApproval,
+            full_name: c.full_name,
+            email: c.email
+          });
+        }
+        
+        const actionButtons = needsApproval && customerId > 0 ? `
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn-vendor" type="button" style="padding:6px 10px;font-size:12px;" onclick="approveEntry('customer', ${customerId})">Approve</button>
             <button class="btn-danger-outline" type="button" style="padding:6px 10px;font-size:12px;" onclick="rejectEntry('customer', ${customerId})">Reject</button>
@@ -931,7 +991,7 @@ async function renderCustomersTable() {
             <td>${c.total_orders || 0}</td>
             <td>Rs. ${Number(c.total_spent || 0).toLocaleString()}</td>
             <td>${joined}</td>
-            <td><span class="status-badge badge-active">${status}</span></td>
+            <td><span class="status-badge badge-${statusClass}">${status}</span></td>
             <td>${actionButtons}</td>
           </tr>
         `;

@@ -99,6 +99,7 @@ CREATE TABLE vendors (
 CREATE TABLE customers (
     customer_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT UNIQUE NOT NULL,
+    customer_name VARCHAR(255),
     preferred_language VARCHAR(50) DEFAULT 'en',
     preferred_currency VARCHAR(10) DEFAULT 'LKR',
     total_orders INT DEFAULT 0,

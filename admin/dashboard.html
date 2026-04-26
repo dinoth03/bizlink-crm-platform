@@ -1031,9 +1031,13 @@ async function approveEntry(type, id) {
     if (data.success) {
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} approved successfully!`);
       loadPendingCounts();
-      showApprovalModal(type);
+      if (type === 'customer' && typeof renderCustomersTable === 'function') {
+        renderCustomersTable();
+      } else {
+        showApprovalModal(type);
+      }
     } else {
-      alert('Error approving ' + type);
+      alert((data && data.message) || ('Error approving ' + type));
     }
   } catch (error) {
     alert('Error: ' + error.message);
@@ -1060,9 +1064,13 @@ async function rejectEntry(type, id) {
     if (data.success) {
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} rejected successfully!`);
       loadPendingCounts();
-      showApprovalModal(type);
+      if (type === 'customer' && typeof renderCustomersTable === 'function') {
+        renderCustomersTable();
+      } else {
+        showApprovalModal(type);
+      }
     } else {
-      alert('Error rejecting ' + type);
+      alert((data && data.message) || ('Error rejecting ' + type));
     }
   } catch (error) {
     alert('Error: ' + error.message);
