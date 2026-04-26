@@ -93,7 +93,17 @@ let state = {
   page: 1,
   itemsPerPage: 12,
   preferenceCounts: {},
+  catalog: [...PRODUCTS],
 };
+
+function getCatalog() {
+  return Array.isArray(state.catalog) && state.catalog.length > 0 ? state.catalog : PRODUCTS;
+}
+
+function findCatalogProductById(id) {
+  const numericId = Number(id);
+  return getCatalog().find((product) => Number(product.id) === numericId);
+}
 
 function computeCategoryPreferences(orders, products) {
   if (!Array.isArray(orders) || orders.length === 0) {
@@ -213,6 +223,8 @@ function pickEmoji(categorySlug) {
 }
 
 function mapApiProduct(product, index) {
+  const apiProductId = Number(product.product_id || 0);
+  const uiProductId = 900000 + apiProductId;
   const category = toCategorySlug(product.category);
   const price = Number(product.base_price || 0);
   const stock = Number(product.stock_quantity || 0);
@@ -222,7 +234,9 @@ function mapApiProduct(product, index) {
   const image = resolveApiProductImage(product, category);
 
   return {
-    id: Number(product.product_id),
+    id: uiProductId,
+    api_product_id: apiProductId,
+    source: 'api',
     name: product.product_name,
     cat: category,
     emoji: pickEmoji(category),
@@ -239,6 +253,23 @@ function mapApiProduct(product, index) {
     delivery: 'Island-wide: 2–5 days',
     isService: false
   };
+}
+
+function mergeCatalogProducts(staticProducts, apiProducts) {
+  const merged = [...(Array.isArray(staticProducts) ? staticProducts : [])];
+  const existingKeys = new Set(
+    merged.map((product) => `${String(product.name || '').trim().toLowerCase()}|${String(product.company || '').trim().toLowerCase()}`)
+  );
+
+  (Array.isArray(apiProducts) ? apiProducts : []).forEach((product) => {
+    const key = `${String(product.name || '').trim().toLowerCase()}|${String(product.company || '').trim().toLowerCase()}`;
+    if (!existingKeys.has(key)) {
+      merged.push(product);
+      existingKeys.add(key);
+    }
+  });
+
+  return merged;
 }
 
 function updateMarketplaceCounts(products, categories) {
@@ -275,21 +306,25 @@ async function loadMarketplaceData() {
     ]);
 
     if (apiProducts && apiProducts.length > 0) {
-      // Keep the full built-in 48-product catalog visible, and only use the API
-      // for personalization/counts if it is available.
+      const mappedProducts = apiProducts.map(mapApiProduct).filter((product) => Number(product.api_product_id || 0) > 0);
+      if (mappedProducts.length > 0) {
+        state.catalog = mergeCatalogProducts(PRODUCTS, mappedProducts);
+      }
+
       state.preferenceCounts = computeCategoryPreferences(
         apiOrders || [],
-        PRODUCTS
+        getCatalog()
       );
 
-      updateMarketplaceCounts(PRODUCTS, apiCategories || []);
+      updateMarketplaceCounts(getCatalog(), apiCategories || []);
       return true;
     }
   } catch (error) {
     console.error('Failed to load marketplace data from API:', error);
   }
 
-  updateMarketplaceCounts(PRODUCTS, []);
+  state.catalog = [...PRODUCTS];
+  updateMarketplaceCounts(getCatalog(), []);
   return false;
 }
 
@@ -526,7 +561,7 @@ function addFilterTag(container, label, removeFn) {
 
 /*FILTER & SORT PRODUCTS*/
 function getFilteredProducts() {
-  let list = [...PRODUCTS];
+  let list = [...getCatalog()];
 
   if (state.cat !== 'all') list = list.filter(p => p.cat === state.cat);
   if (state.search) list = list.filter(p =>
@@ -683,7 +718,7 @@ function goPage(p) {
 
 /* MODAL*/
 function openModal(id) {
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = findCatalogProductById(id);
   if (!p) return;
 
   const isWished = state.wishlist.includes(p.id);
@@ -792,6 +827,10 @@ async function modalAddToCart(id) {
 
 async function modalBuyNow(id) {
   const qty = parseInt(document.getElementById('modalQty')?.value || 1);
+  const product = findCatalogProductById(id);
+  const checkoutProductId = product && Number(product.api_product_id || 0) > 0
+    ? Number(product.api_product_id)
+    : Number(id);
   const allowed = await requireCustomerForPurchase();
   if (!allowed) return;
 
@@ -801,7 +840,7 @@ async function modalBuyNow(id) {
   }
 
   try {
-    const result = await createMarketplaceStripeCheckout(id, qty);
+    const result = await createMarketplaceStripeCheckout(checkoutProductId, qty);
     if (!result || !result.success || !result.data || !result.data.checkout_url) {
       const message = (result && result.message) ? result.message : 'Unable to start Stripe checkout.';
       window.alert(message);
@@ -822,7 +861,7 @@ async function handleAddToCart(e, id) {
 }
 
 async function addToCartById(id, qty = 1) {
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = findCatalogProductById(id);
   if (!p) return false;
 
   if (!p.isService) {
@@ -913,7 +952,6 @@ function changeCartQty(id, delta) {
 }
 
 function removeFromCart(id) {
-  const p = PRODUCTS.find(x => x.id === id);
   state.cart = state.cart.filter(c => c.id !== id);
   updateCartBadge();
   renderCartItems();
@@ -926,7 +964,7 @@ function toggleWishlist() {}
 
 function toggleWishlistItem(e, id) {
   e.stopPropagation();
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = findCatalogProductById(id);
   if (state.wishlist.includes(id)) {
     state.wishlist = state.wishlist.filter(w => w !== id);
     showToast(`💔 Removed from wishlist`, 'wish');

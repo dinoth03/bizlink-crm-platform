@@ -670,10 +670,6 @@ async function loadVendorDashboardData() {
       dashboardData.activeVendor = activeVendor;
       dashboardData.loadedFromApi = true;
 
-      if (dashboardData.products.length === 0) {
-        dashboardData.products = products.map(mapApiProduct);
-      }
-
       updateVendorIdentity(activeVendor);
       setCounterTargets(computeStats(dashboardData.orders));
 

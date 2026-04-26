@@ -76,7 +76,8 @@ $params = [];
 $types = [];
 
 if ($isAuthenticated && $userRole === 'vendor') {
-    $whereClause .= ' AND (v.user_id = ? OR p.is_active = 1)';
+    // Vendors should only see their own catalog in vendor dashboard contexts.
+    $whereClause .= ' AND v.user_id = ?';
     $params[] = $userId;
     $types[] = 'i';
 } else {
