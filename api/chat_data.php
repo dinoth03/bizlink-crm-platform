@@ -111,7 +111,6 @@ $convStmt->bind_param('i', $userId);
 $convStmt->execute();
 $convRes = $convStmt->get_result();
 
-$contacts = [];
 $conversations = [];
 
 while ($conv = $convRes->fetch_assoc()) {

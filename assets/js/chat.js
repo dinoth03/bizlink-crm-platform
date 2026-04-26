@@ -295,9 +295,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 /*CONVERSATION LIST*/
 function renderConvoList(filter = state.filter, search = state.search) {
   const list = document.getElementById('convoList');
+  const query = String(search || '').toLowerCase().trim();
+
+  // 1. Filter existing conversations
   let convos = CONVERSATIONS.filter(c => {
     const contact = getContact(c.contactId);
-    const query = String(search || '').toLowerCase().trim();
     if (query) {
       const searchText = [
         contact.name,
@@ -314,19 +316,69 @@ function renderConvoList(filter = state.filter, search = state.search) {
     return true;
   });
 
-  // Sort: pinned first, then by recency (preserve array order)
+  // Sort: pinned first
   convos = [...convos].sort((a,b) => {
     const ap = state.pinned.has(a.id) ? 1 : 0;
     const bp = state.pinned.has(b.id) ? 1 : 0;
     return bp - ap;
   });
 
-  if (convos.length === 0) {
+  let html = convos.map((c, i) => renderConvoItem(c, i)).join('');
+
+  // 2. If searching, also find matching contacts who don't have a conversation yet
+  if (query) {
+    const matchingContacts = CONTACTS.filter(contact => {
+      // Exclude if already in a conversation
+      if (CONVERSATIONS.some(c => c.contactId === contact.id)) return false;
+
+      // Filter by role if a filter is active
+      if (filter === 'vendors' && contact.role !== 'vendor') return false;
+      if (filter === 'customers' && contact.role !== 'customer') return false;
+      if (filter === 'admin' && contact.role !== 'admin') return false;
+      if (filter === 'unread') return false;
+
+      const searchText = [
+        contact.name,
+        contact.company,
+        contact.owner_name,
+        contact.email
+      ].join(' ').toLowerCase();
+      return searchText.includes(query);
+    });
+
+    if (matchingContacts.length > 0) {
+      html += `<div style="padding:12px 20px; font-size:0.75rem; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; border-top:1px solid rgba(255,255,255,0.05); margin-top:8px;">New Contacts</div>`;
+      html += matchingContacts.map((c, i) => renderNewContactItem(c, i + convos.length)).join('');
+    }
+  }
+
+  if (convos.length === 0 && (!query || (query && html === ''))) {
     list.innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--t3);font-size:.82rem;">No conversations found</div>`;
     return;
   }
 
-  list.innerHTML = convos.map((c, i) => renderConvoItem(c, i)).join('');
+  list.innerHTML = html;
+}
+
+function renderNewContactItem(contact, i) {
+  const delay = i * 0.04;
+  return `
+    <div class="convo-item potential"
+      onclick="startNewChat('${contact.id}')"
+      style="animation-delay:${delay}s">
+      <div class="ci-avatar">
+        <div class="ci-avi" style="background:${contact.color}">${contact.initials}</div>
+        <div class="ci-badge badge-${contact.status}"></div>
+      </div>
+      <div class="ci-content">
+        <div class="ci-row1">
+          <span class="ci-name">${contact.name}</span>
+        </div>
+        <div class="ci-row2">
+          <span class="ci-preview">Start a new conversation</span>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderConvoItem(conv, i) {
