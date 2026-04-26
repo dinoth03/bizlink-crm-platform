@@ -786,10 +786,48 @@ function renderProducts(list = allProducts) {
             <span class="stock-txt ${outStock ? 'out-stock' : lowStock ? 'low-stock' : ''}">${outStock ? 'Out of stock' : 'Stock: ' + p.stock}</span>
             <span style="font-size:0.68rem;color:${statusColor}">${statusLabel}</span>
           </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button class="action-btn delete-product-btn" onclick="handleDeleteProduct(event, ${Number(p.id || 0)})">🗑 Delete</button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
+}
+
+async function handleDeleteProduct(event, productId) {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+
+  const id = Number(productId || 0);
+  if (id <= 0) {
+    window.alert('Invalid product selected.');
+    return;
+  }
+
+  const targetProduct = allProducts.find((product) => Number(product.id) === id);
+  const productName = targetProduct ? targetProduct.name : 'this product';
+  const confirmed = window.confirm(`Delete ${productName}? This action cannot be undone.`);
+  if (!confirmed) {
+    return;
+  }
+
+  if (typeof deleteVendorProduct !== 'function') {
+    window.alert('Delete service is not available right now.');
+    return;
+  }
+
+  const result = await deleteVendorProduct(id);
+  if (!result || !result.success) {
+    window.alert(result && result.message ? result.message : 'Failed to delete product.');
+    return;
+  }
+
+  await loadVendorDashboardData();
+  allProducts = [...dashboardData.products];
+  renderProducts();
+  showToast(`🗑 ${productName} deleted`, 'remove');
 }
 
 function filterProducts(q) {
@@ -1162,6 +1200,16 @@ async function submitVendorProduct(event) {
   if (typeof addVendorProduct !== 'function') {
     window.alert('Product service is not available right now.');
     return;
+  }
+
+  if (typeof authMe === 'function') {
+    const identity = await authMe(false);
+    const role = String(identity?.user?.role || '').toLowerCase();
+    if (!identity || !identity.user || role !== 'vendor') {
+      window.alert('Your vendor session is not active. Please sign in again as a vendor.');
+      window.location.href = '../pages/index.html?reason=unauthorized';
+      return;
+    }
   }
 
   if (saveBtn) {

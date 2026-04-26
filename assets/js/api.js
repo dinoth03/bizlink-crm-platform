@@ -449,6 +449,29 @@ async function addVendorProduct(payload) {
     }
 }
 
+async function deleteVendorProduct(productId) {
+    try {
+        const result = await apiRequest('delete_vendor_product.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: Number(productId || 0)
+            })
+        });
+
+        if (!result) return null;
+        return flattenEnvelope(result.data || {});
+    } catch (error) {
+        console.error('API Error:', error);
+        return {
+            success: false,
+            message: 'Unable to delete product right now.'
+        };
+    }
+}
+
 // Get All Vendors
 async function getVendors() {
     try {

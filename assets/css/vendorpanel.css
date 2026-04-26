@@ -759,6 +759,17 @@ ul { list-style: none; }
 }
 .action-btn:hover { background: rgba(80,200,120,0.15); }
 
+.delete-product-btn {
+  border-color: rgba(255, 107, 107, 0.35);
+  color: #ff8a8a;
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.delete-product-btn:hover {
+  background: rgba(255, 107, 107, 0.18);
+  color: #ffd1d1;
+}
+
 /*PRODUCTS GRID*/
 .filter-row {
   display: flex;
