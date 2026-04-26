@@ -122,6 +122,7 @@ let state = {
 };
 
 let pendingChatRole = null;
+let pendingTargetUserId = null;
 
 let ME_USER_ID = null;
 let isGuestMode = false;
@@ -238,12 +239,18 @@ function conversationDbId(convId) {
 
 /*INIT*/
 document.addEventListener('DOMContentLoaded', async () => {
-  const chatRoleParam = new URLSearchParams(window.location.search).get('chatRole');
+  const urlParams = new URLSearchParams(window.location.search);
+  const chatRoleParam = urlParams.get('chatRole');
   if (chatRoleParam) {
     const normalizedRole = chatRoleParam.toLowerCase();
     if (['admin', 'vendor'].includes(normalizedRole)) {
       pendingChatRole = normalizedRole;
     }
+  }
+
+  const targetUserIdParam = Number(urlParams.get('targetUserId') || 0);
+  if (targetUserIdParam > 0) {
+    pendingTargetUserId = targetUserIdParam;
   }
 
   await bootstrapChatIdentity();
@@ -257,12 +264,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   applyRoleFilterFromUrl();
 
-  if (pendingChatRole) {
+  let handledInitialChatAction = false;
+
+  if (pendingTargetUserId) {
+    const targetContact = CONTACTS.find((contact) => Number(contact.userId || 0) === Number(pendingTargetUserId));
+    if (targetContact) {
+      startNewChat(targetContact.id);
+      pendingTargetUserId = null;
+      handledInitialChatAction = true;
+    } else {
+      openNewChat('vendor');
+      showToast('Select a vendor to start chatting.', 'info');
+      pendingTargetUserId = null;
+      handledInitialChatAction = true;
+    }
+  } else if (pendingChatRole) {
     openNewChat(pendingChatRole);
+    handledInitialChatAction = true;
   }
 
   // Auto-open first conversation
-  if (!pendingChatRole && CONVERSATIONS.length > 0) {
+  if (!handledInitialChatAction && CONVERSATIONS.length > 0) {
     setTimeout(() => openConversation(CONVERSATIONS[0].id), 200);
   }
 
@@ -275,7 +297,16 @@ function renderConvoList(filter = state.filter, search = state.search) {
   const list = document.getElementById('convoList');
   let convos = CONVERSATIONS.filter(c => {
     const contact = getContact(c.contactId);
-    if (search && !contact.name.toLowerCase().includes(search.toLowerCase())) return false;
+    const query = String(search || '').toLowerCase().trim();
+    if (query) {
+      const searchText = [
+        contact.name,
+        contact.company,
+        contact.owner_name,
+        contact.email
+      ].join(' ').toLowerCase();
+      if (!searchText.includes(query)) return false;
+    }
     if (filter === 'unread') return c.unread > 0;
     if (filter === 'vendors')   return contact.role === 'vendor';
     if (filter === 'customers') return contact.role === 'customer';

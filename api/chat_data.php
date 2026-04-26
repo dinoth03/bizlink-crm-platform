@@ -15,6 +15,18 @@ function mapStatus(?string $accountStatus): string {
     return 'offline';
 }
 
+function resolveContactDisplayName(array $contact): string {
+    $role = strtolower((string)($contact['role'] ?? ''));
+    $fullName = trim((string)($contact['full_name'] ?? ''));
+    $businessName = trim((string)($contact['business_name'] ?? ''));
+
+    if ($role === 'vendor' && $businessName !== '') {
+        return $businessName;
+    }
+
+    return $fullName !== '' ? $fullName : 'User';
+}
+
 $currentUserStmt = $conn->prepare('SELECT user_id, full_name, role FROM users WHERE user_id = ? LIMIT 1');
 $currentUserStmt->bind_param('i', $userId);
 $currentUserStmt->execute();
@@ -56,9 +68,10 @@ if (count($allowedContactRoles) === 2) {
     while ($contact = $contactRes->fetch_assoc()) {
         $contactId = (int)$contact['user_id'];
         $contactKey = 'u' . $contactId;
+        $displayName = resolveContactDisplayName($contact);
         $initials = '';
 
-        foreach (explode(' ', $contact['full_name']) as $part) {
+        foreach (explode(' ', $displayName) as $part) {
             if ($part !== '') {
                 $initials .= strtoupper($part[0]);
             }
@@ -67,7 +80,8 @@ if (count($allowedContactRoles) === 2) {
         $contacts[$contactKey] = [
             'id' => $contactKey,
             'userId' => $contactId,
-            'name' => $contact['full_name'],
+            'name' => $displayName,
+            'owner_name' => $contact['full_name'],
             'initials' => substr($initials, 0, 2),
             'role' => $contact['role'],
             'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : '#FF8C00'),
@@ -128,8 +142,9 @@ while ($conv = $convRes->fetch_assoc()) {
     $conversationContactMap[$contactKey] = 'conv' . $conversationId;
 
     if (!isset($contacts[$contactKey])) {
+        $displayName = resolveContactDisplayName($contact);
         $initials = '';
-        foreach (explode(' ', $contact['full_name']) as $part) {
+        foreach (explode(' ', $displayName) as $part) {
             if ($part !== '') {
                 $initials .= strtoupper($part[0]);
             }
@@ -137,7 +152,8 @@ while ($conv = $convRes->fetch_assoc()) {
         $contacts[$contactKey] = [
             'id' => $contactKey,
             'userId' => $contactId,
-            'name' => $contact['full_name'],
+            'name' => $displayName,
+            'owner_name' => $contact['full_name'],
             'initials' => substr($initials, 0, 2),
             'role' => $contact['role'],
             'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : '#FF8C00'),
