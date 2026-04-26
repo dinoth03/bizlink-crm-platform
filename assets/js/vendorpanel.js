@@ -960,12 +960,12 @@ function renderTransactions() {
   }).join('');
 
   const earnings = dashboardData.rawOrders.reduce((sum, order) => sum + (order.status === 'cancelled' ? 0 : Number(order.amount || 0)), 0);
-  const platformFee = Math.round(earnings * 0.05);
+  const platformFee = 20; // Fixed fee of Rs. 20.00
   const withdrawable = Math.max(0, Math.round(earnings * 0.6));
   const paymentStatsCards = document.querySelectorAll('#page-payments .stats-grid .stat-card .stat-value');
   if (paymentStatsCards[0]) paymentStatsCards[0].textContent = `Rs. ${earnings.toLocaleString()}`;
   if (paymentStatsCards[1]) paymentStatsCards[1].textContent = `Rs. ${withdrawable.toLocaleString()}`;
-  if (paymentStatsCards[2]) paymentStatsCards[2].textContent = `Rs. ${platformFee.toLocaleString()}`;
+  if (paymentStatsCards[2]) paymentStatsCards[2].textContent = `Rs. 20,00`;
 }
 
 
