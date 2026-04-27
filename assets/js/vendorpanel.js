@@ -642,13 +642,9 @@ async function loadVendorDashboardData() {
     }
 
     if (String(identity.user.role || '').toLowerCase() !== 'vendor') {
-      const role = String(identity.user.role || '').toLowerCase();
-      const redirectMap = {
-        admin: '../admin/dashboard.html',
-        vendor: '../vendor/vendorpanel.html',
-        customer: '../customer/dashboard.html'
-      };
-      window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+      // If mismatch, go back to the router with the intended role
+      // This will trigger the "Session Conflict" page in dashboard.php
+      window.location.href = `../dashboard.php?role=vendor`;
       return;
     }
 

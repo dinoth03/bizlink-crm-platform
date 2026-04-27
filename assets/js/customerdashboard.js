@@ -501,13 +501,9 @@ async function loadCustomerDashboardData() {
     const role = String(identity.user.role || '').toLowerCase().trim();
 
     if (role !== 'customer') {
-      const redirectMap = {
-        admin: '../admin/dashboard.html',
-        vendor: '../vendor/vendorpanel.html'
-      };
-      
-      const target = redirectMap[role] || '../pages/index.html?reason=unauthorized';
-      window.location.href = target;
+      // If mismatch, go back to the router with the intended role
+      // This will trigger the "Session Conflict" page in dashboard.php
+      window.location.href = `../dashboard.php?role=customer`;
       return;
     }
 

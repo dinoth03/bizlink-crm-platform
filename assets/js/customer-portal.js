@@ -6,11 +6,9 @@
 
     const role = String(identity.user.role || '').toLowerCase().trim();
     if (role !== 'customer') {
-      const redirects = {
-        admin: '../admin/dashboard.html',
-        vendor: '../vendor/vendorpanel.html'
-      };
-      window.location.href = redirects[role] || '../pages/index.html?reason=unauthorized';
+      // If mismatch, go back to the router with the intended role
+      // This will trigger the "Session Conflict" page in dashboard.php
+      window.location.href = `../dashboard.php?role=customer`;
       return;
     }
   }

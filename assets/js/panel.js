@@ -74,12 +74,9 @@ async function initializeAdminIdentity() {
 
   const role = String(identity.user.role || '').toLowerCase();
   if (role !== 'admin') {
-    const redirectMap = {
-      admin: '../admin/dashboard.html',
-      vendor: '../vendor/vendorpanel.html',
-      customer: '../customer/dashboard.html'
-    };
-    window.location.href = redirectMap[role] || '../pages/index.html?reason=unauthorized';
+    // If mismatch, go back to the router with the intended role
+    // This will trigger the "Session Conflict" page in dashboard.php
+    window.location.href = `../dashboard.php?role=admin`;
     return;
   }
 

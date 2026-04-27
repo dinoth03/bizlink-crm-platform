@@ -674,7 +674,7 @@ function scrollToTop() {
 
 function getDashboardLink(role) {
   if (role === 'admin' || role === 'vendor' || role === 'customer') {
-    return '../dashboard.php';
+    return `../dashboard.php?role=${role}`;
   }
   return 'index.html';
 }
