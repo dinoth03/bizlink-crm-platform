@@ -1,0 +1,8 @@
+[27-Apr-2026 08:20:01 Europe/Berlin] === API REQUEST STARTED at 2026-04-27 08:20:01 from 127.0.0.1 ===
+[27-Apr-2026 08:20:01 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[27-Apr-2026 08:20:01 Europe/Berlin] Attempting connection to localhost:3306
+[27-Apr-2026 08:20:01 Europe/Berlin] Database connection successful!
+[27-Apr-2026 08:20:25 Europe/Berlin] === API REQUEST STARTED at 2026-04-27 08:20:25 from 127.0.0.1 ===
+[27-Apr-2026 08:20:25 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[27-Apr-2026 08:20:25 Europe/Berlin] Attempting connection to localhost:3306
+[27-Apr-2026 08:20:25 Europe/Berlin] Database connection successful!

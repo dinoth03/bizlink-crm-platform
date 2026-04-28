@@ -1,5 +1,6 @@
 /*  GLOBAL / VARIABLES (matching home.css, customer #FF8C00)  */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 20px; }
     body {
       font-family: 'DM Sans', sans-serif;
       background: #050a1a; color: #f0f4ff;
@@ -362,6 +363,9 @@
 
     /* responsive */
     @media (max-width: 900px) {
+    /* responsive */
+    @media (max-width: 900px) {
+      html { font-size: 18px; }
       .nav-links, .nav-cta { display: none; }
       .hamburger { display: flex; }
       .nav-links.open,
@@ -373,36 +377,94 @@
         gap: 10px;
         margin-top: 10px;
       }
-      .nav-inner {
-        flex-wrap: wrap;
-      }
-      .stat-grid { grid-template-columns: repeat(2,1fr); }
-      .two-col { grid-template-columns: 1fr; }
+      .nav-inner { flex-wrap: wrap; gap: 20px; padding: 0 16px; }
+      .logo { font-size: 1.3rem; }
+      .stat-grid { grid-template-columns: repeat(2,1fr); gap: 16px; }
+      .two-col { grid-template-columns: 1fr; gap: 20px; }
       .profile-grid { grid-template-columns: 1fr; }
+      .navbar { padding: 12px 0; }
+      .dashboard-section { padding: 100px 0 40px; }
+      .card { padding: 20px; }
+      .card-title { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 768px) {
+      html { font-size: 17px; }
+      .container { padding: 0 16px; }
+      .welcome h1 { font-size: 1.8rem; }
+      .stat-grid { grid-template-columns: repeat(2,1fr); gap: 14px; }
+      .card { padding: 18px; margin-bottom: 16px; }
+      .two-col { gap: 18px; }
+      table { font-size: 0.9rem; }
+      .btn-customer { padding: 8px 18px; font-size: 0.85rem; }
+      .btn-ghost { padding: 8px 16px; font-size: 0.85rem; }
     }
 
     @media (max-width: 620px) {
+      html { font-size: 16px; }
       .container,
       .nav-inner {
-        padding: 0 16px;
+        padding: 0 14px;
       }
-      .stat-grid {
-        grid-template-columns: 1fr;
-      }
+      .navbar { padding: 10px 0; }
+      .logo { font-size: 1.2rem; gap: 8px; }
+      .logo-icon { font-size: 1.4rem; }
+      .dashboard-section { padding: 80px 0 30px; }
+      .dashboard-header { margin-bottom: 24px; }
+      .welcome h1 { font-size: 1.6rem; }
+      .welcome p { font-size: 0.85rem; }
+      .date-badge { font-size: 0.8rem; padding: 6px 14px; }
+      .stat-grid { grid-template-columns: 1fr; gap: 12px; }
+      .stat-card { padding: 16px; }
+      .stat-card:hover { transform: translateY(-2px); }
+      .stat-number { font-size: 1.6rem; }
+      .stat-title { font-size: 0.8rem; }
+      .stat-detail { font-size: 0.7rem; }
+      .loyalty-widget { padding: 16px; margin-bottom: 18px; }
+      .loyalty-head { flex-direction: column; gap: 10px; }
+      .loyalty-head h3 { font-size: 1.1rem; }
+      .loyalty-head p { font-size: 0.85rem; }
+      .tier-badge { font-size: 0.7rem; padding: 5px 10px; }
+      .tier-perks { gap: 8px; }
+      .tier-perks span { font-size: 0.75rem; padding: 5px 10px; }
+      .two-col { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 14px; margin-bottom: 14px; }
+      .card-title { font-size: 1rem; margin-bottom: 12px; }
+      .order-item { padding: 10px 0; font-size: 0.9rem; }
+      .order-status { font-size: 0.65rem; padding: 3px 10px; }
       .all-order-row {
         flex-direction: column;
         align-items: flex-start;
+        padding: 10px 10px;
+        font-size: 0.9rem;
       }
+      .all-order-row > div { gap: 2px; }
+      .all-order-row strong { font-size: 0.9rem; }
       .all-order-row span {
         max-width: 100%;
         white-space: normal;
+        font-size: 0.85rem;
       }
       .footer-grid {
         grid-template-columns: 1fr !important;
-        gap: 24px !important;
+        gap: 18px !important;
       }
       .footer-bottom {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
+        font-size: 0.85rem;
       }
+      .marketplace-grid { grid-template-columns: 1fr; gap: 12px; }
+      .vendor-mini { padding: 12px; font-size: 0.9rem; }
+      .chart-bars { height: 80px; }
+      .chart-container { margin-top: 16px; }
+      .customer-notif-item { gap: 10px; padding: 10px 0; }
+      .customer-notif-icon { width: 28px; height: 28px; font-size: 0.9rem; }
+      .customer-notif-item strong { font-size: 0.9rem; }
+      .customer-notif-item p { font-size: 0.8rem; }
+      .btn-customer, .btn-ghost { padding: 8px 14px; font-size: 0.8rem; }
+      .btn-customer { width: auto; }
+      input, textarea, select { font-size: 16px; padding: 10px 12px; }
+      table { font-size: 0.85rem; }
+      table th, table td { padding: 8px 6px; }
     }

@@ -6,6 +6,7 @@
 
 session_start();
 require 'api/config.php';
+header('Content-Type: text/html; charset=utf-8');
 
 // Determine requested role from URL or session
 $requestedRole = strtolower(trim($_GET['role'] ?? ''));

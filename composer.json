@@ -13,9 +13,9 @@
     ]
   },
   "scripts": {
-    "test": "phpunit --configuration phpunit.xml",
-    "test:unit": "phpunit --configuration phpunit.xml --testsuite Unit",
-    "test:integration": "phpunit --configuration phpunit.xml --testsuite Integration"
+    "test": "@php vendor/bin/phpunit --configuration phpunit.xml",
+    "test:unit": "@php vendor/bin/phpunit --configuration phpunit.xml --testsuite Unit",
+    "test:integration": "@php vendor/bin/phpunit --configuration phpunit.xml --testsuite Integration"
   },
   "config": {
     "sort-packages": true

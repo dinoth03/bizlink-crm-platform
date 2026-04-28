@@ -38,7 +38,7 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { font-size: 20px; scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
   background: var(--bg-dark);
@@ -1385,21 +1385,107 @@ textarea:focus-visible,
   .settings-grid { grid-template-columns: 1fr; }
   .support-grid  { grid-template-columns: 1fr; }
 }
+
 @media (max-width: 840px) {
+  html { font-size: 18px; }
   :root { --sidebar-w: 0px; }
-  .sidebar { transform: translateX(-248px); width: 248px; }
-  .sidebar.open { transform: translateX(0); }
+  .sidebar { transform: translateX(-248px); width: 248px; z-index: 300; }
+  .sidebar.open { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); }
   .main-content { margin-left: 0; }
   .menu-toggle { display: flex; }
   .search-bar input { width: 130px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .welcome-badge-wrap { display: none; }
-}
-@media (max-width: 500px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .pages-wrap { padding: 20px 16px; }
   .topbar { padding: 0 16px; }
-  .topbar-right { gap: 8px; }
+  .topbar-right { gap: 10px; flex-wrap: wrap; }
+  .pages-wrap { padding: 20px 16px; }
+  .glass-card { padding: 18px; }
+  .card-header { gap: 10px; }
+  canvas { max-width: 100%; }
+  table { font-size: 0.9rem; }
+  .btn-ghost-sm { padding: 6px 14px; font-size: 0.8rem; }
+}
+
+@media (max-width: 640px) {
+  html { font-size: 16px; }
+  .welcome-title { font-size: 1.5rem; }
+  .section-label { font-size: 0.65rem; letter-spacing: 1px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 14px; }
+  .charts-row { gap: 16px; }
+  .glass-card { padding: 16px; margin-bottom: 16px; }
+  .card-title { font-size: 1rem; margin-bottom: 14px; }
+  .topbar-left { gap: 12px; }
+  .page-title { font-size: 1.2rem; }
   .search-bar { display: none; }
-  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .notif-panel { width: 280px; right: 10px; }
+  .btn-ghost-sm { padding: 6px 12px; font-size: 0.75rem; }
+  .table-container { overflow-x: auto; }
+  table { font-size: 0.85rem; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-label { font-size: 0.8rem; }
+  .stat-foot { font-size: 0.7rem; }
+  .welcome-banner { gap: 12px; }
+  .two-column-layout { grid-template-columns: 1fr !important; }
+  textarea, input[type="text"], input[type="email"], input[type="number"], select {
+    font-size: 16px; padding: 10px 12px;
+  }
+  .btn-primary, .btn-secondary { padding: 10px 16px; font-size: 0.85rem; }
+}
+
+@media (max-width: 500px) {
+  html { font-size: 15px; }
+  .sidebar { width: 220px; }
+  .sidebar.open { transform: translateX(0); }
+  .topbar { padding: 0 12px; height: 56px; }
+  .pages-wrap { padding: 16px 12px; }
+  .menu-toggle { display: flex; gap: 3px; }
+  .menu-toggle span { width: 20px; height: 2px; }
+  .page-title { font-size: 1rem; }
+  .welcome-title { font-size: 1.3rem; }
+  .welcome-sub { font-size: 0.8rem; }
+  .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+  .stat-card { padding: 14px; }
+  .stat-value { font-size: 1.2rem; }
+  .stat-label { font-size: 0.75rem; }
+  .glass-card { padding: 14px; margin-bottom: 14px; }
+  .card-title { font-size: 0.95rem; }
+  .card-header { flex-direction: column; gap: 8px; }
+  .chart-tabs { gap: 6px; }
+  .chart-tabs button { padding: 4px 10px; font-size: 0.75rem; }
+  .donut-legend { gap: 6px; }
+  .dl-item { font-size: 0.8rem; }
+  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { font-size: 0.8rem; }
+  table th, table td { padding: 8px 6px; }
+  .btn-ghost-sm { padding: 6px 10px; font-size: 0.7rem; }
+  .btn-primary, .btn-secondary { padding: 8px 14px; font-size: 0.8rem; width: 100%; }
+  input, textarea, select { font-size: 16px; padding: 8px 10px; }
+  .form-group { margin-bottom: 12px; }
+  .notif-panel { width: 260px; right: 8px; top: 48px; }
+  .topbar-right { gap: 6px; }
+  .topbar-right > a, .topbar-right > button { display: none; }
+  .notif-wrap { order: -1; }
+  .nav-label { display: none; }
+  .nav-item { justify-content: center; padding: 8px; }
+  .nav-badge { position: absolute; top: 0; right: 0; font-size: 0.6rem; }
+}
+
+@media (max-width: 375px) {
+  html { font-size: 14px; }
+  .topbar { padding: 0 8px; height: 52px; }
+  .pages-wrap { padding: 12px 8px; }
+  .welcome-title { font-size: 1.1rem; }
+  .stats-grid { gap: 10px; }
+  .stat-card { padding: 12px; }
+  .stat-value { font-size: 1rem; }
+  .stat-icon-wrap { font-size: 1.4rem; }
+  .glass-card { padding: 12px; margin-bottom: 12px; }
+  .card-title { font-size: 0.9rem; }
+  .page-title { font-size: 0.95rem; }
+  table { font-size: 0.75rem; }
+  table th, table td { padding: 6px 4px; }
+  .btn-ghost-sm { padding: 5px 8px; font-size: 0.65rem; }
+  .btn-primary, .btn-secondary { padding: 8px 12px; font-size: 0.75rem; }
+  input, textarea, select { font-size: 14px; padding: 6px 8px; }
+  .notif-panel { width: 240px; font-size: 0.9rem; }
 }
