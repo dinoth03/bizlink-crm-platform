@@ -397,6 +397,32 @@ function renderAllOrders(orders) {
     .join('');
 }
 
+async function loadRecommendedVendors() {
+  try {
+    const response = await fetch('../api/get_recommended_vendors.php', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.warn('Recommended vendors API returned:', response.status);
+      renderRecommendedVendors([]);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.success && data.vendors) {
+      renderRecommendedVendors(data.vendors);
+    } else {
+      renderRecommendedVendors([]);
+    }
+  } catch (error) {
+    console.warn('Failed to load recommended vendors:', error);
+    renderRecommendedVendors([]);
+  }
+}
+
 window.payOrderWithStripe = async function (orderId, buttonEl) {
   const safeOrderId = Number(orderId || 0);
   if (!safeOrderId || typeof createStripeCheckoutSession !== 'function') {
@@ -444,9 +470,12 @@ function renderRecommendedVendors(vendors) {
   container.innerHTML = vendors
     .slice(0, 4)
     .map((v, i) => {
-      const rating = Number(v.avg_rating || 0);
+      const rating = Number(v.rating || v.avg_rating || 0);
+      const vendorName = v.name || v.business_name || v.shop_name || 'Vendor';
       const ratingText = rating > 0 ? ` <span style="color:var(--customer);">${rating.toFixed(1)}★</span>` : '';
-      return `<div class="vendor-mini"><span style="font-size:1.2rem;">${emojis[i % emojis.length]}</span> ${v.shop_name}${ratingText}</div>`;
+      const vendorId = v.vendor_id || v.id || 0;
+      
+      return `<div class="vendor-mini" onclick="window.location.href='../pages/marketplace.html?vendor=${vendorId}'" style="cursor:pointer;transition:all 0.2s;"><span style="font-size:1.2rem;">${emojis[i % emojis.length]}</span> ${vendorName}${ratingText}</div>`;
     })
     .join('');
 }
@@ -519,7 +548,7 @@ async function loadCustomerDashboardData() {
       );
       renderRecentOrders([]);
       renderAllOrders([]);
-      renderRecommendedVendors([]);
+      await loadRecommendedVendors();
       await loadCustomerNotifications(customerDashboardState.customerEmail);
       return;
     }
@@ -544,7 +573,7 @@ async function loadCustomerDashboardData() {
     updateCustomerSummary(selectedCustomer, safeOrders, safeVendors);
     renderRecentOrders(safeOrders);
     renderAllOrders(safeOrders);
-    renderRecommendedVendors(safeVendors);
+    await loadRecommendedVendors();
     await loadCustomerNotifications(customerDashboardState.customerEmail);
   } catch (error) {
     console.error('Customer dashboard API load failed:', error);
@@ -555,7 +584,7 @@ async function loadCustomerDashboardData() {
     );
     renderRecentOrders([]);
     renderAllOrders([]);
-    renderRecommendedVendors([]);
+    await loadRecommendedVendors();
     await loadCustomerNotifications(customerDashboardState.customerEmail);
   }
 }
