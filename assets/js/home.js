@@ -285,3 +285,8 @@ if (chatFabWidget && chatFabTrigger && chatPopupCard) {
     }
   }, 1800);
 }
+
+/* AI CHAT FROM HOME PAGE */
+function openAIChatFromHome() {
+  window.location.href = 'chat.html?ai=true';
+}

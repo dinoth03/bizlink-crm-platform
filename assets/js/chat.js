@@ -14,6 +14,7 @@ const CONTACTS = [
   { id:'c8',  name:'GreenFarm SL',       initials:'GF', role:'vendor',   color:'#50C878', status:'away',    company:'GreenFarm SL PVT',     phone:'+94 41 234 5678', email:'info@greenfarm.lk',     province:'Southern', joined:'Apr 2023' },
   { id:'c9',  name:'Priya Fernando',     initials:'PF', role:'customer', color:'#FF8C00', status:'offline', company:'—',                    phone:'+94 72 890 1234', email:'priya@yahoo.com',        province:'Southern', joined:'Mar 2023' },
   { id:'c10', name:'Siddhalepa Wellness',initials:'SW', role:'vendor',   color:'#50C878', status:'online',  company:'Siddhalepa Wellness',  phone:'+94 11 111 2222', email:'info@siddhalepa.lk',    province:'Western',  joined:'Jan 2023' },
+  { id:'ai-bot', name:'AI Assistant', initials:'🤖', role:'bot', color:'#2196F3', status:'online', company:'BizLink AI', phone:'—', email:'ai-bot@bizlink.local', province:'—', joined:'Always' },
 ];
 
 const CONVERSATIONS = [
@@ -90,6 +91,14 @@ const CONVERSATIONS = [
     ],
     quickReplies:['You\'ll be notified via email','Check your account settings','Yes, automatically enrolled'],
   },
+  {
+    id:'ai-conv', contactId:'ai-bot', pinned:false, muted:false, unread:0, isAI:true,
+    messages:[
+      { id:'ai-m1', type:'system', text:'AI Assistant conversation started', time:'', date:'Today' },
+      { id:'ai-m2', from:'ai-bot', text:'👋 Hello! I\'m your AI Assistant. I can help you with questions about BizLink, orders, products, and more. What can I help you with today?', time:new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), date:'Today', status:'read' },
+    ],
+    quickReplies:['How do I place an order?','Tell me about featured vendors','Help with payment','Product information'],
+  },
 ];
 
 const EMOJI_LIST = ['😊','😃','😄','😁','🥰','😍','🤩','😎','🤗','👍','✅','🙏','💯','🔥','⭐','💼','📦','🚀','💰','🎉','❤️','👋','🤝','📱','💻','📊','🇱🇰','🍵','🌿','⚡'];
@@ -113,9 +122,6 @@ let state = {
   templatePanelOpen: false,
   msgSearchOpen: false,
   moreMenuOpen: false,
-  callActive: false,
-  callTimer: null,
-  callSeconds: 0,
   typingTimeout: null,
   pinned: new Set(['conv1']),
   muted: new Set(['conv5']),
@@ -175,6 +181,10 @@ function getInitials(name) {
     .map((p) => p[0].toUpperCase())
     .join('')
     .slice(0, 2) || 'ME';
+}
+
+function getAuthToken() {
+  return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
 }
 
 async function loadChatDataFromApi() {
@@ -241,6 +251,8 @@ function conversationDbId(convId) {
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const chatRoleParam = urlParams.get('chatRole');
+  const aiParam = urlParams.get('ai');
+  
   if (chatRoleParam) {
     const normalizedRole = chatRoleParam.toLowerCase();
     if (['admin', 'vendor'].includes(normalizedRole)) {
@@ -266,7 +278,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let handledInitialChatAction = false;
 
-  if (pendingTargetUserId) {
+  // Auto-open AI chat if ai=true parameter
+  if (aiParam === 'true') {
+    setTimeout(() => startAIChat(), 300);
+    handledInitialChatAction = true;
+  } else if (pendingTargetUserId) {
     const targetContact = CONTACTS.find((contact) => Number(contact.userId || 0) === Number(pendingTargetUserId));
     if (targetContact) {
       startNewChat(targetContact.id);
@@ -571,6 +587,16 @@ function sendMessage() {
   const conv = CONVERSATIONS.find(c => c.id === state.activeConvId);
   if (!conv) return;
 
+  // Check if this is an AI conversation
+  if (conv.isAI || conv.contactId === 'ai-bot') {
+    sendAIMessage(text, conv);
+    const inp = document.getElementById('composeInput');
+    inp.innerHTML = '';
+    updateSendBtn('');
+    updateCharCount('');
+    return;
+  }
+
   const msg = {
     id: 'msg_' + Date.now(),
     from: 'me',
@@ -633,6 +659,111 @@ function sendMessage() {
   if (Math.random() > 0.35) {
     setTimeout(() => simulateReply(conv), 2500 + Math.random() * 3000);
   }
+}
+
+/* AI MESSAGE HANDLER */
+async function sendAIMessage(text, conv) {
+  const userMsg = {
+    id: 'msg_' + Date.now(),
+    from: 'me',
+    text,
+    time: getCurrentTime(),
+    date: 'Today',
+    status: 'delivered',
+  };
+
+  conv.messages.push(userMsg);
+  appendMessage(userMsg, conv);
+  scrollBottom(true);
+  renderConvoList();
+
+  // Show typing indicator
+  const typingInd = document.getElementById('typingIndicator');
+  const contact = getContact(conv.contactId);
+  if (typingInd) {
+    const tiLabel = document.getElementById('tiLabel');
+    const tiAvatar = document.getElementById('tiAvatar');
+    if (tiLabel) tiLabel.textContent = `${contact.name} is typing...`;
+    if (tiAvatar) tiAvatar.style.background = contact.color;
+    typingInd.classList.remove('hidden');
+  }
+
+  // Get conversation DB ID for API call
+  const dbConversationId = conversationDbId(conv.id);
+
+  if (ME_USER_ID && dbConversationId > 0) {
+    // Use API to get AI response
+    try {
+      const response = await fetch('../api/chat_ai_bot_response.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`
+        },
+        body: JSON.stringify({
+          conversation_id: dbConversationId,
+          message_content: text
+        })
+      });
+
+      const data = await response.json();
+
+      if (typingInd) typingInd.classList.add('hidden');
+
+      if (data.success) {
+        const aiMsg = {
+          id: 'msg_' + Date.now(),
+          from: 'ai-bot',
+          text: data.data.message_content,
+          time: getCurrentTime(),
+          date: 'Today',
+          status: 'read',
+          isAI: true,
+        };
+        conv.messages.push(aiMsg);
+        appendMessage(aiMsg, conv);
+        scrollBottom(true);
+      } else {
+        showToast('AI: ' + (data.error || 'Unable to respond'), 'warn');
+      }
+    } catch (err) {
+      if (typingInd) typingInd.classList.add('hidden');
+      console.error('AI API Error:', err);
+      // Fallback to local AI response
+      simulateAIReply(conv, contact);
+    }
+  } else {
+    // Fallback: Simulate AI response
+    if (typingInd) typingInd.classList.add('hidden');
+    setTimeout(() => simulateAIReply(conv, contact), 800 + Math.random() * 1200);
+  }
+}
+
+function simulateAIReply(conv, contact) {
+  const responses = [
+    '👋 Thanks for reaching out! How can I help you further?',
+    'That\'s a great question! Let me assist you with that.',
+    '💡 I understand. Here\'s what I can help you with:',
+    '✅ I\'ll be happy to help you with that!',
+    '📱 Feel free to ask me anything about BizLink services and products.',
+    'Got it! Let me provide you with more information.',
+  ];
+
+  const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+  const aiMsg = {
+    id: 'msg_' + Date.now(),
+    from: 'ai-bot',
+    text: randomResponse,
+    time: getCurrentTime(),
+    date: 'Today',
+    status: 'read',
+    isAI: true,
+  };
+
+  conv.messages.push(aiMsg);
+  appendMessage(aiMsg, conv);
+  scrollBottom(true);
 }
 
 function appendMessage(msg, conv) {
@@ -912,8 +1043,6 @@ function renderInfoPanel(contact) {
     <div class="ip-section">
       <div class="ip-section-title">Actions</div>
       <div class="ip-actions">
-        <button class="ip-action-btn primary" onclick="toggleCallMenu()">📞 Voice Call</button>
-        <button class="ip-action-btn" onclick="toggleVideoCall()">📹 Video Call</button>
         <button class="ip-action-btn" onclick="muteConvo()">🔇 Mute Chat</button>
         <button class="ip-action-btn" onclick="pinConvo()">📌 Pin Chat</button>
         <button class="ip-action-btn" onclick="blockContact()" style="color:var(--customer)">🚫 Block</button>
@@ -1136,51 +1265,59 @@ function startNewChat(contactId) {
     });
 }
 
-/* CALL SYSTEM */
-function toggleCallMenu() {
-  if (!state.activeConvId) return;
-  const conv = CONVERSATIONS.find(c => c.id === state.activeConvId);
-  const contact = getContact(conv.contactId);
-  startCall(contact, 'voice');
-}
-function toggleVideoCall() {
-  if (!state.activeConvId) return;
-  const conv = CONVERSATIONS.find(c => c.id === state.activeConvId);
-  const contact = getContact(conv.contactId);
-  startCall(contact, 'video');
+/* AI CHAT SYSTEM */
+async function startAIChat() {
+  const existing = CONVERSATIONS.find(c => c.contactId === 'ai-bot');
+
+  if (existing) {
+    closeNewChat();
+    openConversation(existing.id);
+    return;
+  }
+
+  // If no API is available, use the default AI conversation
+  if (!ME_USER_ID || isGuestMode) {
+    closeNewChat();
+    state.activeConvId = 'ai-conv';
+    openConversation('ai-conv');
+    return;
+  }
+
+  // Try to start AI chat via API
+  try {
+    const response = await fetch('../api/chat_start_conversation.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({ target_user_id: 999 }) // AI Bot user ID
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      closeNewChat();
+      const convId = data.data.conversation_key || (`conv${data.data.conversation_id}`);
+      await loadChatDataFromApi();
+      renderConvoList();
+      openConversation(convId);
+      showToast('Connected to AI Assistant! 🤖', 'success');
+    } else {
+      showToast('Could not connect to AI. Using local mode.', 'warn');
+      closeNewChat();
+      state.activeConvId = 'ai-conv';
+      openConversation('ai-conv');
+    }
+  } catch (err) {
+    console.error('AI Chat Error:', err);
+    closeNewChat();
+    state.activeConvId = 'ai-conv';
+    openConversation('ai-conv');
+  }
 }
 
-function startCall(contact, type) {
-  const overlay = document.getElementById('callOverlay');
-  const avatar  = document.getElementById('callAvatar');
-  avatar.style.background = contact.color;
-  avatar.textContent = contact.initials;
-  document.getElementById('callName').textContent = contact.name;
-  document.getElementById('callStatus').textContent = type === 'video' ? '📹 Video calling…' : '📞 Calling…';
-  document.getElementById('callTimer').classList.add('hidden');
-  overlay.classList.remove('hidden');
-  state.callActive = true;
-  state.callSeconds = 0;
 
-  // Simulate answer
-  setTimeout(() => {
-    if (!state.callActive) return;
-    document.getElementById('callStatus').textContent = type === 'video' ? '📹 Video call in progress' : '📞 Connected';
-    document.getElementById('callTimer').classList.remove('hidden');
-    state.callTimer = setInterval(() => {
-      state.callSeconds++;
-      document.getElementById('callTimer').textContent = formatTime(state.callSeconds);
-    }, 1000);
-  }, 2500);
-}
-
-function endCall() {
-  clearInterval(state.callTimer);
-  state.callActive = false;
-  document.getElementById('callOverlay').classList.add('hidden');
-  showToast('📞 Call ended · ' + formatTime(state.callSeconds), 'info');
-  state.callSeconds = 0;
-}
 
 function toggleMute(btn) { btn.classList.toggle('active'); showToast(btn.classList.contains('active') ? '🔇 Muted' : '🎤 Unmuted', 'info'); }
 function toggleSpeaker(btn) { btn.classList.toggle('active'); showToast(btn.classList.contains('active') ? '🔊 Speaker on' : '🔈 Earpiece', 'info'); }
@@ -1250,7 +1387,6 @@ function handleGlobalKey(e) {
     if (state.emojiPickerOpen) toggleEmojiPicker();
     if (state.templatePanelOpen) closeTemplates();
     if (state.msgSearchOpen) toggleMsgSearch();
-    if (state.callActive) endCall();
     document.getElementById('modalBackdrop').classList.add('hidden');
     closeRail();
   }

@@ -2,3 +2,18 @@
 vendor/
 .phpunit.cache/
 .phpunit.result.cache
+
+# Environment variables - NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Log files
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

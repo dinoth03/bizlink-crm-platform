@@ -60,6 +60,7 @@
       <button class="fchip"        data-filter="vendors"  onclick="setFilter('vendors',this)">Vendors</button>
       <button class="fchip"        data-filter="customers" onclick="setFilter('customers',this)">Customers</button>
       <button class="fchip"        data-filter="admin"    onclick="setFilter('admin',this)">Admin</button>
+      <button class="fchip ai-chip" onclick="startAIChat()" title="Chat with AI Assistant">🤖 AI</button>
     </div>
 
     <!-- Conversation List -->
@@ -119,12 +120,6 @@
         <div class="ch-actions">
           <button class="ch-btn" id="searchToggleBtn" onclick="toggleMsgSearch()" title="Search messages">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          </button>
-          <button class="ch-btn" onclick="toggleCallMenu()" title="Voice call" id="callBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.48-.93c.59-.37 1.388-.457 2.11-.45.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17z"/></svg>
-          </button>
-          <button class="ch-btn" onclick="toggleVideoCall()" title="Video call">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
           </button>
           <button class="ch-btn" onclick="toggleInfoPanel()" title="Contact info" id="infoPanelBtn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -260,26 +255,7 @@
 <!--TOAST-->
 <div class="toast-stack" id="toastStack"></div>
 
-<!--CALL OVERLAY-->
-<div class="call-overlay hidden" id="callOverlay">
-  <div class="call-box">
-    <div class="call-avatar" id="callAvatar"></div>
-    <div class="call-name" id="callName"></div>
-    <div class="call-status" id="callStatus">Calling…</div>
-    <div class="call-timer hidden" id="callTimer">00:00</div>
-    <div class="call-actions">
-      <button class="ca-btn mute-btn" onclick="toggleMute(this)" title="Mute">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      </button>
-      <button class="ca-btn end-btn" onclick="endCall()" title="End call">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.48-.93c.59-.37 1.388-.457 2.11-.45.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17z"/></svg>
-      </button>
-      <button class="ca-btn spk-btn" onclick="toggleSpeaker(this)" title="Speaker">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
+
 
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/chat.js"></script>

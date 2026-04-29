@@ -200,6 +200,25 @@ button{cursor:pointer;font-family:var(--font-b);border:none;background:none;}
   padding:1px 6px;border-radius:20px;line-height:1.4;
 }
 
+/* ─ AI Button ─ */
+.ai-chip{
+  background:rgba(33,150,243,0.12);
+  border-color:rgba(33,150,243,0.28);
+  color:#42a5f5;
+  font-weight:700;
+  transition:all var(--tb);
+}
+.ai-chip:hover{
+  background:rgba(33,150,243,0.18);
+  border-color:rgba(33,150,243,0.42);
+  color:#64b5f6;
+}
+.ai-chip.active{
+  background:rgba(33,150,243,0.2);
+  border-color:rgba(33,150,243,0.5);
+  color:#42a5f5;
+}
+
 /* ─ Conversation List ─ */
 .convo-list{
   flex:1;overflow-y:auto;padding:6px 10px;

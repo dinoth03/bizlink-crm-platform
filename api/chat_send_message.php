@@ -1,4 +1,4 @@
-<?php
+ <?php
 require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';

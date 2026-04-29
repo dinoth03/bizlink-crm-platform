@@ -1,5 +1,10 @@
 <?php
 // ============================================
+// ENVIRONMENT VARIABLES LOADER
+// ============================================
+require_once 'env_loader.php';
+
+// ============================================
 // ERROR REPORTING - Enable all error logging
 // ============================================
 error_reporting(E_ALL);
