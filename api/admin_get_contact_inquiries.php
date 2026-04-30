@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 // Enforce admin-only access
 try {
-    requireAuth($conn, 'admin');
+    requireAuth(['admin']);
 } catch (Throwable $e) {
     apiError('AUTH_REQUIRED', $e->getMessage(), 401);
 }

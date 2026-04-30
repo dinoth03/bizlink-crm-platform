@@ -56,9 +56,11 @@ const PRODUCTS = [
 
   // ── IT Services ──
   { id:35, name:"Website Design & Development", cat:"it", emoji:"🌐", image:"../assets/images/Website Design & Development.webp", company:"PixelStudio Lanka", price:45000, oldPrice:60000, rating:4.9, reviews:76, badge:"hot", isNew:false, tags:["Web","Design","Service"], desc:"Professional website design for Sri Lankan SMEs. Mobile-responsive, SEO-ready, and integrated with BizLink CRM. Starting from Rs. 45,000.", delivery:"Service · Timeline: 2–4 weeks", isService:true },
+  { id:36, name:"Cloud Hosting – 1 Year Business Plan", cat:"it", emoji:"☁️", image:"../assets/images/Cloud Hosting - 1 Year Business Plan.webp", company:"CloudHost SL", price:18000, oldPrice:24000, rating:4.6, reviews:52, badge:"sale", isNew:false, tags:["Hosting","Cloud","SSD"], desc:"Reliable cloud web hosting with 99.9% uptime SLA. Includes free SSL, 10GB SSD, and dedicated Sri Lankan support.", delivery:"Service · Activation: Same day", isService:true },
 
   // ── Marketing ──
   { id:37, name:"Social Media Management – Monthly", cat:"marketing", emoji:"📣", image:"../assets/images/Social Media Management – Monthly.jpg", company:"Digital Compass SL", price:25000, oldPrice:null, rating:4.7, reviews:34, badge:"", isNew:true, tags:["Social Media","Facebook","Marketing"], desc:"Full social media management covering Facebook, Instagram, and WhatsApp Business. Content creation and monthly reports included.", delivery:"Service · Remote", isService:true },
+  { id:38, name:"Branded Flyer Design (10 designs)", cat:"marketing", emoji:"🎨", image:"../assets/images/Branded Flyer Design (10 designs).webp", company:"CraftPrint Lanka", price:8500, oldPrice:12000, rating:4.5, reviews:48, badge:"sale", isNew:false, tags:["Graphic Design","Flyer","Branding"], desc:"Professional graphic design for business flyers, menus, and promotional materials. Print-ready files delivered digitally.", delivery:"Service · Delivery: 3–5 business days", isService:true },
 
   // ── Accounting ──
   { id:39, name:"Monthly Bookkeeping Service", cat:"accounting", emoji:"📊", image:"../assets/images/Monthly Bookkeeping Service.jpg", company:"AccuCount Lanka", price:12000, oldPrice:null, rating:4.8, reviews:41, badge:"new", isNew:true, tags:["Bookkeeping","Accounting","Monthly"], desc:"Full monthly bookkeeping and financial reporting for small businesses. Reconciled accounts, tax-ready statements, BizLink integrated.", delivery:"Service · Remote · Island-wide", isService:true },
@@ -165,6 +167,95 @@ const CATEGORY_IMAGE_FALLBACKS = {
   other: '../assets/images/galaxybook.webp'
 };
 
+const LOCAL_IMAGE_FILES = new Set([
+  '50kg-ultratech-premium-cement.webp',
+  '55-vegetable-seeds-variOrganic Vegetable Seeds Pack.webp',
+  'A4 Printing Paper – 5 Ream Box.webp',
+  'Annual Tax Filing & Compliance.webp',
+  'batik.webp',
+  'Branded Flyer Design (10 designs).webp',
+  'Brother Printer Ink Set (4-colour).jpg',
+  'Brother Printer Ink Set (4-colour).webp',
+  'Bubble Wrap Roll 50m.jpg',
+  'Casio Scientific Calculator.webp',
+  'cctv.jpg',
+  'Ceylon Black Tea – 1kg Premium.webp',
+  'Cloud Hosting - 1 Year Business Plan.webp',
+  'coconut.webp',
+  'Coir Rope – 100m Roll.webp',
+  'Cold Chain Logistics – Perishables.png',
+  'Cold-Pressed Coconut Oil 1L.webp',
+  'Digital Blood Pressure Monitor - Copy.webp',
+  'Digital Blood Pressure Monitor.webp',
+  'Drip Irrigation Starter Kit.jpg',
+  'Electric Power Drill 800W.jpg',
+  'Ergonomic Office Chair.webp',
+  'Floor Tiles – Marble Finish 60x60cm.webp',
+  'Food-Cold-Chain-Logistics-Market.webp',
+  'FreshGro Mart.png',
+  'galaxybook.webp',
+  'Herbal Ayurvedic Oil – 100ml.jpg',
+  'Herbal Ayurvedic Oil – 100ml.webp',
+  'Industrial Fan 36in Heavy Duty.webp',
+  'Industrial Safety Gloves (12 pairs).webp',
+  'Island-Wide Courier – Per Shipment.jpg',
+  'Jumbo Cardboard Box (10 pcs).webp',
+  'Kraft Paper Bags (100 pcs).jpg',
+  'lamp.webp',
+  'mens-linen-shirt.webp',
+  'Monthly Bookkeeping Service.jpg',
+  'Moringa Leaf Powder - 250g.webp',
+  'Moringa Leaf Powder – 250g.webp',
+  'Organic Fertilizer 25kg Bag.jpg',
+  'Organic Fertilizer 25kg Bag.webp',
+  'Organic Jaggery.webp',
+  'Organic Vegetable Seeds Pack.webp',
+  'Paddy Thresher Machine – Small.webp',
+  'POS-System.jpg',
+  'Roof Sheet Aluminum – 10ft.webp',
+  "Rubber Tapper's Tool Set.avif",
+  "Rubber Tapper's Tool Set.webp",
+  'saree.jpg',
+  'shoes.webp',
+  'Social Media Management – Monthly.jpg',
+  'solarlight.jpg',
+  'sony.jpg',
+  'Spice Mix Bundle – 6 Varieties.webp',
+  'Stainless Steel Water Bottle 1L.jpg',
+  'Steel Rebar – 12mm (per bundle).avif',
+  'table.webp',
+  'TeakWoodCoffeeTable.webp',
+  'TechZone Electronics add.png',
+  'UPS.webp',
+  'Website Design & Development.webp'
+]);
+
+// Products using these known placeholder/demo images are hidden from marketplace cards.
+const BLOCKED_IMAGE_FILES = new Set([
+  'Food-Cold-Chain-Logistics-Market.webp'
+]);
+
+function normalizeProductKey(product) {
+  const name = String(product?.name || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return name;
+}
+
+function hasValidLocalImage(product) {
+  const src = String(product?.image || '').trim();
+  if (!src || /^https?:\/\//i.test(src)) {
+    return false;
+  }
+  const decoded = decodeURI(src);
+  if (!decoded.includes('../assets/images/')) {
+    return false;
+  }
+  const filename = decoded.split('/').pop() || '';
+  if (BLOCKED_IMAGE_FILES.has(filename)) {
+    return false;
+  }
+  return LOCAL_IMAGE_FILES.has(filename);
+}
+
 function resolveApiProductImage(product, category) {
   const candidate = String(product.image || product.image_url || product.product_image || product.thumbnail || '').trim();
   if (candidate) {
@@ -255,20 +346,18 @@ function mapApiProduct(product, index) {
 }
 
 function mergeCatalogProducts(staticProducts, apiProducts) {
-  const merged = [...(Array.isArray(staticProducts) ? staticProducts : [])];
-  const existingKeys = new Set(
-    merged.map((product) => `${String(product.name || '').trim().toLowerCase()}|${String(product.company || '').trim().toLowerCase()}`)
-  );
+  const seen = new Set();
+  const merged = [];
 
-  (Array.isArray(apiProducts) ? apiProducts : []).forEach((product) => {
-    const key = `${String(product.name || '').trim().toLowerCase()}|${String(product.company || '').trim().toLowerCase()}`;
-    if (!existingKeys.has(key)) {
-      merged.push(product);
-      existingKeys.add(key);
-    }
+  [...(Array.isArray(staticProducts) ? staticProducts : []), ...(Array.isArray(apiProducts) ? apiProducts : [])].forEach((product) => {
+    const key = normalizeProductKey(product);
+    if (!key || key === '|') return;
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push(product);
   });
 
-  return merged;
+  return merged.filter(hasValidLocalImage);
 }
 
 function updateMarketplaceCounts(products, categories) {
@@ -322,7 +411,7 @@ async function loadMarketplaceData() {
     console.error('Failed to load marketplace data from API:', error);
   }
 
-  state.catalog = [...PRODUCTS];
+  state.catalog = [...PRODUCTS].filter(hasValidLocalImage);
   updateMarketplaceCounts(getCatalog(), []);
   return false;
 }
