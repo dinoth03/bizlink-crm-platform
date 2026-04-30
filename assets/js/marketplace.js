@@ -27,56 +27,54 @@ const PRODUCTS = [
   // ── Agriculture ──
   { id:17, name:"Organic Vegetable Seeds Pack", cat:"agriculture", emoji:"🌱", image:"../assets/images/Organic Vegetable Seeds Pack.webp", company:"GreenFarm SL", price:650, oldPrice:null, rating:4.5, reviews:89, badge:"new", isNew:true, tags:["Seeds","Organic","Vegetables"], desc:"Mixed vegetable seed collection suitable for Sri Lankan climate. Includes tomato, capsicum, bean, and bitter gourd varieties.", delivery:"Island-wide: 2–4 days" },
   { id:18, name:"Drip Irrigation Starter Kit", cat:"agriculture", emoji:"💧", image:"../assets/images/Drip Irrigation Starter Kit.jpg", company:"AgroTech Lanka", price:8500, oldPrice:11000, rating:4.7, reviews:41, badge:"sale", isNew:false, tags:["Irrigation","Drip","Farm"], desc:"Complete drip irrigation system for home gardens and small farms. Water-efficient and easy to set up across all soil types.", delivery:"Island-wide: 3–5 days" },
-  { id:19, name:"Organic Fertilizer 25kg Bag", cat:"agriculture", emoji:"🌿", image:"../assets/images/Organic Fertilizer 25kg Bag.webp", company:"NatureFarm Supplies", price:2200, oldPrice:null, rating:4.4, reviews:67, badge:"", isNew:false, tags:["Fertilizer","Organic","Soil"], desc:"Certified organic compost fertilizer. Improves soil quality and crop yield — approved by Sri Lanka's Department of Agriculture.", delivery:"Island-wide: 3–5 days" },
-  { id:20, name:"Rubber Tapper's Tool Set", cat:"agriculture", emoji:"🔧", image:"../assets/images/Rubber Tapper's Tool Set.avif", company:"Kegalle Rubber Co.", price:3400, oldPrice:null, rating:4.3, reviews:28, badge:"", isNew:false, tags:["Rubber","Tools","Agriculture"], desc:"Professional rubber tapping knives and collection cups from Kegalle's rubber industry leaders. Built for durability.", delivery:"Island-wide: 3–5 days" },
+  { id:19, name:"Organic Fertilizer 25kg Bag", cat:"agriculture", emoji:"🌿", image:"../assets/images/Organic Fertilizer 25kg Bag.jpg", company:"NatureFarm Supplies", price:2200, oldPrice:null, rating:4.4, reviews:67, badge:"", isNew:false, tags:["Fertilizer","Organic","Soil"], desc:"Certified organic compost fertilizer. Improves soil quality and crop yield — approved by Sri Lanka's Department of Agriculture.", delivery:"Island-wide: 3–5 days" },
+  { id:20, name:"Rubber Tapper's Tool Set", cat:"agriculture", emoji:"🔧", image:"../assets/images/Rubber Tapper's Tool Set.webp", company:"Kegalle Rubber Co.", price:3400, oldPrice:null, rating:4.3, reviews:28, badge:"", isNew:false, tags:["Rubber","Tools","Agriculture"], desc:"Professional rubber tapping knives and collection cups from Kegalle's rubber industry leaders. Built for durability.", delivery:"Island-wide: 3–5 days" },
 
   // ── Construction ──
-  { id:21, name:"Cement – 50kg Premium Bag", cat:"construction", emoji:"🧱", image:"https://images.unsplash.com/photo-1581092162562-40038e57c2dd?auto=format&fit=crop&w=600&q=80", company:"Lanka Cement PVT", price:1750, oldPrice:2000, rating:4.6, reviews:95, badge:"hot", isNew:false, tags:["Cement","Building","Construction"], desc:"High-grade Portland cement for residential and commercial construction. Bulk pricing available for contractors.", delivery:"Delivery by negotiation · Colombo & suburbs" },
-  { id:22, name:"Steel Rebar – 12mm (per bundle)", cat:"construction", emoji:"🔩", image:"https://images.unsplash.com/photo-1578926314433-c6f7f1af2650?auto=format&fit=crop&w=600&q=80", company:"SteelMaster SL", price:42000, oldPrice:null, rating:4.4, reviews:31, badge:"", isNew:false, tags:["Steel","Rebar","Structural"], desc:"Grade 60 deformed steel bars for reinforced concrete construction. Meets Sri Lanka Standards Institution (SLSI) specifications.", delivery:"Colombo & Western Province" },
-  { id:23, name:"Roof Sheet Aluminum – 10ft", cat:"construction", emoji:"🏚️", image:"https://images.unsplash.com/photo-1493857671505-72967e2e2760?auto=format&fit=crop&w=600&q=80", company:"MetalRoof Lanka", price:3200, oldPrice:3800, rating:4.5, reviews:48, badge:"sale", isNew:false, tags:["Roofing","Aluminum","Sheet"], desc:"Corrugated aluminum roofing sheets. Rust-proof, heat-resistant, ideal for all Sri Lankan weather conditions.", delivery:"Island-wide: 4–7 days" },
+  { id:21, name:"Cement – 50kg Premium Bag", cat:"construction", emoji:"🧱", image:"../assets/images/50kg-ultratech-premium-cement.webp", company:"Lanka Cement PVT", price:1750, oldPrice:2000, rating:4.6, reviews:95, badge:"hot", isNew:false, tags:["Cement","Building","Construction"], desc:"High-grade Portland cement for residential and commercial construction. Bulk pricing available for contractors.", delivery:"Delivery by negotiation · Colombo & suburbs" },
+  { id:22, name:"Steel Rebar – 12mm (per bundle)", cat:"construction", emoji:"🔩", image:"../assets/images/Steel Rebar – 12mm (per bundle).avif", company:"SteelMaster SL", price:42000, oldPrice:null, rating:4.4, reviews:31, badge:"", isNew:false, tags:["Steel","Rebar","Structural"], desc:"Grade 60 deformed steel bars for reinforced concrete construction. Meets Sri Lanka Standards Institution (SLSI) specifications.", delivery:"Colombo & Western Province" },
+  { id:23, name:"Roof Sheet Aluminum – 10ft", cat:"construction", emoji:"🏚️", image:"../assets/images/Roof Sheet Aluminum – 10ft.webp", company:"MetalRoof Lanka", price:3200, oldPrice:3800, rating:4.5, reviews:48, badge:"sale", isNew:false, tags:["Roofing","Aluminum","Sheet"], desc:"Corrugated aluminum roofing sheets. Rust-proof, heat-resistant, ideal for all Sri Lankan weather conditions.", delivery:"Island-wide: 4–7 days" },
 
   // ── Health ──
   { id:24, name:"Herbal Ayurvedic Oil – 100ml", cat:"health", emoji:"🌿", image:"../assets/images/Herbal Ayurvedic Oil – 100ml.webp", company:"Siddhalepa Wellness", price:780, oldPrice:null, rating:4.8, reviews:245, badge:"hot", isNew:false, tags:["Ayurvedic","Herbal","Oil"], desc:"Traditional Sri Lankan ayurvedic massage oil made from 24 medicinal herbs. Relieves body aches and promotes wellbeing.", delivery:"Island-wide: 2–3 days" },
   { id:25, name:"Digital Blood Pressure Monitor", cat:"health", emoji:"💊", image:"../assets/images/Digital Blood Pressure Monitor.webp", company:"MedPlus Lanka", price:6500, oldPrice:8000, rating:4.7, reviews:112, badge:"sale", isNew:false, tags:["Medical","BP","Digital"], desc:"Clinically accurate blood pressure monitor. Easy to use for home monitoring — endorsed by Sri Lankan health professionals.", delivery:"Island-wide: 2–3 days" },
-  { id:26, name:"Moringa Leaf Powder – 250g", cat:"health", emoji:"🌱", image:"../assets/images/Moringa Leaf Powder – 250g.webp", company:"Superfood SL", price:890, oldPrice:null, rating:4.6, reviews:88, badge:"new", isNew:true, tags:["Moringa","Superfood","Organic"], desc:"Pure dried moringa leaf powder from certified organic farms. Rich in iron, vitamins A, C, and K — a Sri Lankan superfood.", delivery:"Island-wide: 2–3 days" },
+  { id:26, name:"Moringa Leaf Powder – 250g", cat:"health", emoji:"🌱", image:"../assets/images/Moringa Leaf Powder - 250g.webp", company:"Superfood SL", price:890, oldPrice:null, rating:4.6, reviews:88, badge:"new", isNew:true, tags:["Moringa","Superfood","Organic"], desc:"Pure dried moringa leaf powder from certified organic farms. Rich in iron, vitamins A, C, and K — a Sri Lankan superfood.", delivery:"Island-wide: 2–3 days" },
 
   // ── Office Supplies ──
   { id:27, name:"Ergonomic Office Chair", cat:"office", emoji:"🪑", image:"../assets/images/Ergonomic Office Chair.webp", company:"WorkSpace Lanka", price:18500, oldPrice:24000, rating:4.6, reviews:73, badge:"sale", isNew:false, tags:["Chair","Ergonomic","Office"], desc:"Lumbar-support office chair with adjustable height and armrests. Designed for long working hours — ideal for BizLink users.", delivery:"Colombo: 2–3 days · Island: 5–7 days" },
   { id:28, name:"A4 Printing Paper – 5 Ream Box", cat:"office", emoji:"📄", image:"../assets/images/A4 Printing Paper – 5 Ream Box.webp", company:"PaperPlus SL", price:4200, oldPrice:null, rating:4.3, reviews:156, badge:"", isNew:false, tags:["Paper","A4","Stationery"], desc:"High-brightness 80gsm A4 paper. Suitable for laser and inkjet printers. Bulk supply for offices and businesses.", delivery:"Island-wide: 2–4 days" },
-  { id:29, name:"Brother Printer Ink Set (4-colour)", cat:"office", emoji:"🖨️", image:"../assets/images/Brother Printer Ink Set (4-colour).webp", company:"PrintTech Lanka", price:3800, oldPrice:4500, rating:4.5, reviews:44, badge:"", isNew:false, tags:["Ink","Printer","Brother"], desc:"Original Brother printer ink cartridge set — Black, Cyan, Magenta, Yellow. Compatible with popular Brother MFC series.", delivery:"Island-wide: 2–3 days" },
+  { id:29, name:"Brother Printer Ink Set (4-colour)", cat:"office", emoji:"🖨️", image:"../assets/images/Brother Printer Ink Set (4-colour).jpg", company:"PrintTech Lanka", price:3800, oldPrice:4500, rating:4.5, reviews:44, badge:"", isNew:false, tags:["Ink","Printer","Brother"], desc:"Original Brother printer ink cartridge set — Black, Cyan, Magenta, Yellow. Compatible with popular Brother MFC series.", delivery:"Island-wide: 2–3 days" },
 
   // ── Industrial ──
-  { id:30, name:"Industrial Safety Gloves (12 pairs)", cat:"industrial", emoji:"🧤", image:"https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=600&q=80", company:"SafeWork Lanka", price:1800, oldPrice:null, rating:4.4, reviews:38, badge:"", isNew:false, tags:["Safety","Gloves","Industrial"], desc:"Heavy-duty cut-resistant gloves for factory, construction, and industrial workers. Meets international safety standards.", delivery:"Island-wide: 3–5 days" },
-  { id:31, name:"Electric Power Drill 800W", cat:"industrial", emoji:"🔨", image:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80", company:"ProTools Lanka", price:14500, oldPrice:17500, rating:4.7, reviews:62, badge:"sale", isNew:false, tags:["Drill","Power Tool","Industrial"], desc:"Professional 800W electric drill for heavy-duty use. Ideal for construction sites, workshops, and industrial applications.", delivery:"Island-wide: 2–4 days" },
-  { id:32, name:"Industrial Fan 36\" Heavy Duty", cat:"industrial", emoji:"💨", image:"https://images.unsplash.com/photo-1585576912902-e93b9f173f3f?auto=format&fit=crop&w=600&q=80", company:"CoolAir Industrial", price:22000, oldPrice:null, rating:4.3, reviews:19, badge:"", isNew:false, tags:["Fan","Cooling","Industrial"], desc:"Large industrial pedestal fan for warehouses, factories, and large workshops. Energy-efficient motor with 3-speed control.", delivery:"Colombo & suburbs: 3–5 days" },
+  { id:30, name:"Industrial Safety Gloves (12 pairs)", cat:"industrial", emoji:"🧤", image:"../assets/images/Industrial Safety Gloves (12 pairs).webp", company:"SafeWork Lanka", price:1800, oldPrice:null, rating:4.4, reviews:38, badge:"", isNew:false, tags:["Safety","Gloves","Industrial"], desc:"Heavy-duty cut-resistant gloves for factory, construction, and industrial workers. Meets international safety standards.", delivery:"Island-wide: 3–5 days" },
+  { id:31, name:"Electric Power Drill 800W", cat:"industrial", emoji:"🔨", image:"../assets/images/Electric Power Drill 800W.jpg", company:"ProTools Lanka", price:14500, oldPrice:17500, rating:4.7, reviews:62, badge:"sale", isNew:false, tags:["Drill","Power Tool","Industrial"], desc:"Professional 800W electric drill for heavy-duty use. Ideal for construction sites, workshops, and industrial applications.", delivery:"Island-wide: 2–4 days" },
+  { id:32, name:"Industrial Fan 36\" Heavy Duty", cat:"industrial", emoji:"💨", image:"../assets/images/Industrial Fan 36in Heavy Duty.webp", company:"CoolAir Industrial", price:22000, oldPrice:null, rating:4.3, reviews:19, badge:"", isNew:false, tags:["Fan","Cooling","Industrial"], desc:"Large industrial pedestal fan for warehouses, factories, and large workshops. Energy-efficient motor with 3-speed control.", delivery:"Colombo & suburbs: 3–5 days" },
 
   // ── Packaging ──
-  { id:33, name:"Kraft Paper Bags (100 pcs)", cat:"packaging", emoji:"🛍️", image:"https://images.unsplash.com/photo-1565521409834-b0b767f0ae0c?auto=format&fit=crop&w=600&q=80", company:"EcoPack Lanka", price:1600, oldPrice:null, rating:4.5, reviews:87, badge:"new", isNew:true, tags:["Bags","Kraft","Eco"], desc:"Eco-friendly kraft paper bags for retail shops, bakeries, and restaurants. Customizable with your brand name — MOQ 100.", delivery:"Island-wide: 2–3 days" },
-  { id:34, name:"Bubble Wrap Roll 50m", cat:"packaging", emoji:"📦", image:"https://images.unsplash.com/photo-1585254725176-bed249b84d83?auto=format&fit=crop&w=600&q=80", company:"PackSecure SL", price:2400, oldPrice:3000, rating:4.4, reviews:41, badge:"sale", isNew:false, tags:["Bubble Wrap","Packaging","Shipping"], desc:"Heavy-duty bubble wrap roll for safe product shipping. Ideal for electronics, ceramics, and fragile export goods.", delivery:"Island-wide: 2–4 days" },
+  { id:33, name:"Kraft Paper Bags (100 pcs)", cat:"packaging", emoji:"🛍️", image:"../assets/images/Kraft Paper Bags (100 pcs).jpg", company:"EcoPack Lanka", price:1600, oldPrice:null, rating:4.5, reviews:87, badge:"new", isNew:true, tags:["Bags","Kraft","Eco"], desc:"Eco-friendly kraft paper bags for retail shops, bakeries, and restaurants. Customizable with your brand name — MOQ 100.", delivery:"Island-wide: 2–3 days" },
+  { id:34, name:"Bubble Wrap Roll 50m", cat:"packaging", emoji:"📦", image:"../assets/images/Bubble Wrap Roll 50m.jpg", company:"PackSecure SL", price:2400, oldPrice:3000, rating:4.4, reviews:41, badge:"sale", isNew:false, tags:["Bubble Wrap","Packaging","Shipping"], desc:"Heavy-duty bubble wrap roll for safe product shipping. Ideal for electronics, ceramics, and fragile export goods.", delivery:"Island-wide: 2–4 days" },
 
   // ── IT Services ──
-  { id:35, name:"Website Design & Development", cat:"it", emoji:"🌐", image:"https://images.unsplash.com/photo-1499334794326-6d5ee46dad65?auto=format&fit=crop&w=600&q=80", company:"PixelStudio Lanka", price:45000, oldPrice:60000, rating:4.9, reviews:76, badge:"hot", isNew:false, tags:["Web","Design","Service"], desc:"Professional website design for Sri Lankan SMEs. Mobile-responsive, SEO-ready, and integrated with BizLink CRM. Starting from Rs. 45,000.", delivery:"Service · Timeline: 2–4 weeks", isService:true },
-  { id:36, name:"Cloud Hosting – 1 Year Business Plan", cat:"it", emoji:"☁️", image:"https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", company:"CloudHost SL", price:18000, oldPrice:24000, rating:4.6, reviews:52, badge:"sale", isNew:false, tags:["Hosting","Cloud","SSD"], desc:"Reliable cloud web hosting with 99.9% uptime SLA. Includes free SSL, 10GB SSD, and dedicated Sri Lankan support.", delivery:"Service · Activation: Same day", isService:true },
+  { id:35, name:"Website Design & Development", cat:"it", emoji:"🌐", image:"../assets/images/Website Design & Development.webp", company:"PixelStudio Lanka", price:45000, oldPrice:60000, rating:4.9, reviews:76, badge:"hot", isNew:false, tags:["Web","Design","Service"], desc:"Professional website design for Sri Lankan SMEs. Mobile-responsive, SEO-ready, and integrated with BizLink CRM. Starting from Rs. 45,000.", delivery:"Service · Timeline: 2–4 weeks", isService:true },
 
   // ── Marketing ──
-  { id:37, name:"Social Media Management – Monthly", cat:"marketing", emoji:"📣", image:"https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80", company:"Digital Compass SL", price:25000, oldPrice:null, rating:4.7, reviews:34, badge:"", isNew:true, tags:["Social Media","Facebook","Marketing"], desc:"Full social media management covering Facebook, Instagram, and WhatsApp Business. Content creation and monthly reports included.", delivery:"Service · Remote", isService:true },
-  { id:38, name:"Branded Flyer Design (10 designs)", cat:"marketing", emoji:"🎨", image:"https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600&q=80", company:"CraftPrint Lanka", price:8500, oldPrice:12000, rating:4.5, reviews:48, badge:"sale", isNew:false, tags:["Graphic Design","Flyer","Branding"], desc:"Professional graphic design for business flyers, menus, and promotional materials. Print-ready files delivered digitally.", delivery:"Service · Delivery: 3–5 business days", isService:true },
+  { id:37, name:"Social Media Management – Monthly", cat:"marketing", emoji:"📣", image:"../assets/images/Social Media Management – Monthly.jpg", company:"Digital Compass SL", price:25000, oldPrice:null, rating:4.7, reviews:34, badge:"", isNew:true, tags:["Social Media","Facebook","Marketing"], desc:"Full social media management covering Facebook, Instagram, and WhatsApp Business. Content creation and monthly reports included.", delivery:"Service · Remote", isService:true },
 
   // ── Accounting ──
-  { id:39, name:"Monthly Bookkeeping Service", cat:"accounting", emoji:"📊", image:"https://images.unsplash.com/photo-1554224311-beee415c15ac?auto=format&fit=crop&w=600&q=80", company:"AccuCount Lanka", price:12000, oldPrice:null, rating:4.8, reviews:41, badge:"new", isNew:true, tags:["Bookkeeping","Accounting","Monthly"], desc:"Full monthly bookkeeping and financial reporting for small businesses. Reconciled accounts, tax-ready statements, BizLink integrated.", delivery:"Service · Remote · Island-wide", isService:true },
-  { id:40, name:"Annual Tax Filing & Compliance", cat:"accounting", emoji:"📋", image:"https://images.unsplash.com/photo-1590080876614-02539079422d?auto=format&fit=crop&w=600&q=80", company:"TaxPro Lanka", price:35000, oldPrice:42000, rating:4.7, reviews:27, badge:"sale", isNew:false, tags:["Tax","Compliance","IRD"], desc:"Complete annual tax return preparation and IRD compliance for Sri Lankan businesses. Includes VAT filing and business registration support.", delivery:"Service · Island-wide", isService:true },
+  { id:39, name:"Monthly Bookkeeping Service", cat:"accounting", emoji:"📊", image:"../assets/images/Monthly Bookkeeping Service.jpg", company:"AccuCount Lanka", price:12000, oldPrice:null, rating:4.8, reviews:41, badge:"new", isNew:true, tags:["Bookkeeping","Accounting","Monthly"], desc:"Full monthly bookkeeping and financial reporting for small businesses. Reconciled accounts, tax-ready statements, BizLink integrated.", delivery:"Service · Remote · Island-wide", isService:true },
+  { id:40, name:"Annual Tax Filing & Compliance", cat:"accounting", emoji:"📋", image:"../assets/images/Annual Tax Filing & Compliance.webp", company:"TaxPro Lanka", price:35000, oldPrice:42000, rating:4.7, reviews:27, badge:"sale", isNew:false, tags:["Tax","Compliance","IRD"], desc:"Complete annual tax return preparation and IRD compliance for Sri Lankan businesses. Includes VAT filing and business registration support.", delivery:"Service · Island-wide", isService:true },
 
   // ── Logistics ──
-  { id:41, name:"Island-Wide Courier – Per Shipment", cat:"logistics", emoji:"🚚", image:"https://images.unsplash.com/photo-1578747323512-1ed1f1dc0c30?auto=format&fit=crop&w=600&q=80", company:"SwiftMove SL", price:350, oldPrice:null, rating:4.6, reviews:312, badge:"hot", isNew:false, tags:["Courier","Delivery","Island-wide"], desc:"Reliable door-to-door island-wide delivery service. Track your shipment in real time through BizLink's partner portal.", delivery:"Service · 2–4 business days", isService:true },
-  { id:42, name:"Cold Chain Logistics – Perishables", cat:"logistics", emoji:"❄️", image:"https://images.unsplash.com/photo-1584183645094-487e3c21a5dc?auto=format&fit=crop&w=600&q=80", company:"CoolChain Lanka", price:1800, oldPrice:null, rating:4.4, reviews:18, badge:"new", isNew:true, tags:["Cold Chain","Perishable","Food"], desc:"Temperature-controlled delivery for food products, dairy, and pharmaceuticals. Serving Colombo and Western Province.", delivery:"Service · Colombo & suburbs", isService:true },
+  { id:41, name:"Island-Wide Courier – Per Shipment", cat:"logistics", emoji:"🚚", image:"../assets/images/Island-Wide Courier – Per Shipment.jpg", company:"SwiftMove SL", price:350, oldPrice:null, rating:4.6, reviews:312, badge:"hot", isNew:false, tags:["Courier","Delivery","Island-wide"], desc:"Reliable door-to-door island-wide delivery service. Track your shipment in real time through BizLink's partner portal.", delivery:"Service · 2–4 business days", isService:true },
+  { id:42, name:"Cold Chain Logistics – Perishables", cat:"logistics", emoji:"❄️", image:"../assets/images/Cold Chain Logistics – Perishables.png", company:"CoolChain Lanka", price:1800, oldPrice:null, rating:4.4, reviews:18, badge:"new", isNew:true, tags:["Cold Chain","Perishable","Food"], desc:"Temperature-controlled delivery for food products, dairy, and pharmaceuticals. Serving Colombo and Western Province.", delivery:"Service · Colombo & suburbs", isService:true },
 
   // ── Extra products to round out ──
-  { id:43, name:"Paddy Thresher Machine – Small", cat:"agriculture", emoji:"🌾", image:"https://images.unsplash.com/photo-1556766833-2a5c82a6b0a6?auto=format&fit=crop&w=600&q=80", company:"AgroMech Lanka", price:95000, oldPrice:110000, rating:4.5, reviews:15, badge:"", isNew:false, tags:["Machine","Paddy","Farm"], desc:"Compact paddy threshing machine for small-scale rice farmers. Reduces harvest time by 80%. Spare parts available island-wide.", delivery:"Island-wide: 5–10 days · Assembly included" },
-  { id:44, name:"Coir Rope – 100m Roll", cat:"agriculture", emoji:"🌴", image:"https://images.unsplash.com/photo-1531693022064-7fb39b97db97?auto=format&fit=crop&w=600&q=80", company:"Southern Coir Co.", price:1100, oldPrice:null, rating:4.3, reviews:44, badge:"", isNew:false, tags:["Coir","Rope","Natural"], desc:"Natural coir rope made from Sri Lanka's finest coconut husk. Used in agriculture, construction, and traditional crafts.", delivery:"Island-wide: 2–4 days" },
-  { id:45, name:"Floor Tiles – Marble Finish 60x60cm", cat:"construction", emoji:"🏗️", image:"https://images.unsplash.com/photo-1578926314433-c6f7f1af2650?auto=format&fit=crop&w=600&q=80", company:"Ceramic Lanka", price:480, oldPrice:null, rating:4.4, reviews:61, badge:"", isNew:false, tags:["Tiles","Floor","Marble"], desc:"Premium marble-finish porcelain tiles. Price per tile. Minimum order 50 tiles. Ideal for residential and commercial projects.", delivery:"Colombo: 3–5 days · Island: 7–10 days" },
-  { id:46, name:"Casio Scientific Calculator", cat:"office", emoji:"🔢", image:"https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80", company:"EduSupplies SL", price:2200, oldPrice:2800, rating:4.7, reviews:132, badge:"", isNew:false, tags:["Calculator","Casio","Education"], desc:"Casio FX-991ES Plus scientific calculator. Required for A/L exams and professional accounting work. Authentic with warranty.", delivery:"Island-wide: 2–3 days" },
-  { id:47, name:"Stainless Steel Water Bottle 1L", cat:"health", emoji:"💧", image:"https://images.unsplash.com/photo-1602143407151-7e536f085b97?auto=format&fit=crop&w=600&q=80", company:"PureLife Lanka", price:1450, oldPrice:null, rating:4.5, reviews:95, badge:"new", isNew:true, tags:["Water Bottle","Steel","Eco"], desc:"BPA-free double-walled stainless steel water bottle. Keeps beverages cold for 24h, hot for 12h. Eco-friendly alternative to plastic.", delivery:"Island-wide: 2–3 days" },
-  { id:48, name:"Jumbo Cardboard Box (10 pcs)", cat:"packaging", emoji:"📦", image:"https://images.unsplash.com/photo-1515811340770-24477517c5f2?auto=format&fit=crop&w=600&q=80", company:"BoxCraft Lanka", price:1900, oldPrice:null, rating:4.2, reviews:29, badge:"", isNew:false, tags:["Cardboard","Box","Shipping"], desc:"Heavy-duty jumbo corrugated cardboard boxes. Ideal for e-commerce shipping and warehouse storage. Custom sizes available.", delivery:"Island-wide: 2–3 days" },
+  { id:43, name:"Paddy Thresher Machine – Small", cat:"agriculture", emoji:"🌾", image:"../assets/images/Paddy Thresher Machine – Small.webp", company:"AgroMech Lanka", price:95000, oldPrice:110000, rating:4.5, reviews:15, badge:"", isNew:false, tags:["Machine","Paddy","Farm"], desc:"Compact paddy threshing machine for small-scale rice farmers. Reduces harvest time by 80%. Spare parts available island-wide.", delivery:"Island-wide: 5–10 days · Assembly included" },
+  { id:44, name:"Coir Rope – 100m Roll", cat:"agriculture", emoji:"🌴", image:"../assets/images/Coir Rope – 100m Roll.webp", company:"Southern Coir Co.", price:1100, oldPrice:null, rating:4.3, reviews:44, badge:"", isNew:false, tags:["Coir","Rope","Natural"], desc:"Natural coir rope made from Sri Lanka's finest coconut husk. Used in agriculture, construction, and traditional crafts.", delivery:"Island-wide: 2–4 days" },
+  { id:45, name:"Floor Tiles – Marble Finish 60x60cm", cat:"construction", emoji:"🏗️", image:"../assets/images/Floor Tiles – Marble Finish 60x60cm.webp", company:"Ceramic Lanka", price:480, oldPrice:null, rating:4.4, reviews:61, badge:"", isNew:false, tags:["Tiles","Floor","Marble"], desc:"Premium marble-finish porcelain tiles. Price per tile. Minimum order 50 tiles. Ideal for residential and commercial projects.", delivery:"Colombo: 3–5 days · Island: 7–10 days" },
+  { id:46, name:"Casio Scientific Calculator", cat:"office", emoji:"🔢", image:"../assets/images/Casio Scientific Calculator.webp", company:"EduSupplies SL", price:2200, oldPrice:2800, rating:4.7, reviews:132, badge:"", isNew:false, tags:["Calculator","Casio","Education"], desc:"Casio FX-991ES Plus scientific calculator. Required for A/L exams and professional accounting work. Authentic with warranty.", delivery:"Island-wide: 2–3 days" },
+  { id:47, name:"Stainless Steel Water Bottle 1L", cat:"health", emoji:"💧", image:"../assets/images/Stainless Steel Water Bottle 1L.jpg", company:"PureLife Lanka", price:1450, oldPrice:null, rating:4.5, reviews:95, badge:"new", isNew:true, tags:["Water Bottle","Steel","Eco"], desc:"BPA-free double-walled stainless steel water bottle. Keeps beverages cold for 24h, hot for 12h. Eco-friendly alternative to plastic.", delivery:"Island-wide: 2–3 days" },
+  { id:48, name:"Jumbo Cardboard Box (10 pcs)", cat:"packaging", emoji:"📦", image:"../assets/images/Jumbo Cardboard Box (10 pcs).webp", company:"BoxCraft Lanka", price:1900, oldPrice:null, rating:4.2, reviews:29, badge:"", isNew:false, tags:["Cardboard","Box","Shipping"], desc:"Heavy-duty jumbo corrugated cardboard boxes. Ideal for e-commerce shipping and warehouse storage. Custom sizes available.", delivery:"Island-wide: 2–3 days" },
 ];
 
 /*STATE*/
@@ -155,15 +153,15 @@ const CATEGORY_IMAGE_FALLBACKS = {
   home: '../assets/images/TeakWoodCoffeeTable.webp',
   grocery: '../assets/images/Ceylon Black Tea – 1kg Premium.webp',
   agriculture: '../assets/images/Organic Vegetable Seeds Pack.webp',
-  construction: '../assets/images/Cement – 50kg Premium Bag.webp',
+  construction: '../assets/images/50kg-ultratech-premium-cement.webp',
   health: '../assets/images/Herbal Ayurvedic Oil – 100ml.webp',
   office: '../assets/images/Ergonomic Office Chair.webp',
-  industrial: '../assets/images/UPS.webp',
+  industrial: '../assets/images/Industrial Fan 36in Heavy Duty.webp',
   packaging: '../assets/images/A4 Printing Paper – 5 Ream Box.webp',
-  it: '../assets/images/POS-System.jpg',
-  marketing: '../assets/images/sony.jpg',
-  accounting: '../assets/images/solarlight.jpg',
-  logistics: '../assets/images/Drip Irrigation Starter Kit.jpg',
+  it: '../assets/images/Website Design & Development.webp',
+  marketing: '../assets/images/Social Media Management – Monthly.jpg',
+  accounting: '../assets/images/Monthly Bookkeeping Service.jpg',
+  logistics: '../assets/images/Island-Wide Courier – Per Shipment.jpg',
   other: '../assets/images/galaxybook.webp'
 };
 
@@ -174,12 +172,12 @@ function resolveApiProductImage(product, category) {
       return candidate;
     }
     if (candidate.startsWith('../') || candidate.startsWith('./') || candidate.startsWith('/')) {
-      return candidate;
+      return encodeURI(candidate);
     }
-    return `../assets/images/${candidate}`;
+    return encodeURI(`../assets/images/${candidate}`);
   }
 
-  return CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other;
+  return encodeURI(CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other);
 }
 
 function toCategorySlug(value) {
@@ -399,6 +397,38 @@ function initCheckoutGuard() {
   });
 }
 
+async function initMarketplaceAuthUI() {
+  try {
+    if (typeof apiRequest !== 'function') return;
+
+    const authResult = await apiRequest('auth_me.php', { method: 'GET' }, false);
+    const payload = authResult && authResult.data ? authResult.data : null;
+    const user = payload && payload.success && payload.data ? payload.data.user : null;
+
+    if (user) {
+      const signinBtn = document.querySelector('.nav-signin');
+      if (signinBtn) {
+        const name = user.full_name || user.username || user.email || 'Dashboard';
+        signinBtn.textContent = 'Hi, ' + name.split(' ')[0];
+        
+        const role = String(user.role).toLowerCase();
+        if (role === 'customer') {
+          signinBtn.href = '../customer/dashboard.html';
+        } else if (role === 'vendor') {
+          signinBtn.href = '../vendor/dashboard.php';
+        } else if (role === 'admin') {
+          signinBtn.href = '../admin/dashboard.php';
+        } else {
+          signinBtn.href = '../customer/dashboard.html';
+        }
+        signinBtn.classList.add('logged-in');
+      }
+    }
+  } catch (error) {
+    // silently fail if not logged in or api error
+  }
+}
+
 /*INIT*/
 document.addEventListener('DOMContentLoaded', () => {
   // Always render the built-in catalog immediately.
@@ -407,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavScroll();
   initBackToTop();
   initCheckoutGuard();
+  initMarketplaceAuthUI();
 
   // Hydrate from API when available, but never block first paint.
   loadMarketplaceData().then(() => {
@@ -643,7 +674,7 @@ function renderCard(p, i) {
   return `
     <div class="prod-card" style="animation-delay:${delay}s" onclick="openModal(${p.id})">
       <div class="card-img-wrap">
-        <img class="card-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80'" />
+        <img class="card-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80'" />
         <div class="card-img-actions">
           <button class="card-action-btn ${isWished ? 'wishlisted' : ''}"
             onclick="toggleWishlistItem(event, ${p.id})"
@@ -736,7 +767,7 @@ function openModal(id) {
   document.getElementById('modalInner').innerHTML = `
     <div class="modal-img-col">
       <div class="modal-img-badge-wrap">${badgeHtml}${newBadge}${serviceBadge}</div>
-      <img class="modal-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=900&q=80'" />
+      <img class="modal-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=900&q=80'" />
       <div class="modal-img-actions">
         <button class="modal-act-btn" onclick="toggleWishlistItem(event, ${p.id})" title="Wishlist">
           ${isWished ? '❤️' : '🤍'}

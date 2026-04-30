@@ -31,7 +31,11 @@ class GoogleGenerativeAIHelper {
             // Build the request payload
             $payload = [
                 'contents' => $this->buildContents($userMessage, $conversationHistory),
-                'system' => $this->getSystemInstruction(),
+                'systemInstruction' => [
+                    'parts' => [[
+                        'text' => $this->getSystemInstruction(),
+                    ]],
+                ],
                 'generationConfig' => [
                     'temperature' => 0.3,  // Lower for more direct answers
                     'topP' => 0.9,
