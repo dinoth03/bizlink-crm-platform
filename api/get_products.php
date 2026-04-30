@@ -76,12 +76,13 @@ $whereClause = ' WHERE 1=1';
 $params = [];
 $types = [];
 
-if ($isAuthenticated && $userRole === 'vendor') {
+if (isset($_GET['own_only']) && $_GET['own_only'] == '1' && $isAuthenticated && $userRole === 'vendor') {
     // Vendors should only see their own catalog in vendor dashboard contexts.
     $whereClause .= ' AND v.user_id = ?';
     $params[] = $userId;
     $types[] = 'i';
 } else {
+    // In all other contexts (like the public marketplace), only show active products.
     $whereClause .= ' AND p.is_active = 1';
 }
 

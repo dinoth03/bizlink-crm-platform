@@ -411,9 +411,19 @@ async function createMarketplaceStripeCheckout(productId, quantity = 1) {
 }
 
 // Get All Products
-async function getProducts() {
+async function getProducts(params = {}) {
     try {
-        const result = await apiRequest('get_products.php');
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                query.set(key, value);
+            }
+        });
+
+        const queryString = query.toString();
+        const url = 'get_products.php' + (queryString ? '?' + queryString : '');
+        
+        const result = await apiRequest(url);
         if (!result) return null;
         const data = result.data || {};
         if (data.success) {

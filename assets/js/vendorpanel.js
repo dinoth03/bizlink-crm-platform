@@ -314,24 +314,7 @@ const DISTRICTS = ['Colombo','Gampaha','Kandy','Galle','Matara','Jaffna','Kurune
 const CUSTOMER_NAMES = ['Nimali Perera','Kasun Fernando','Kavya Rajapaksa','Thilini Dissanayake','Amal Bandara','Sanjaya Silva','Pooja Wickramasinghe','Ravindu Gunawardena','Chamari Herath','Dinesh Jayawardena','Hasini Ranaweera','Tharindu Samarasinghe'];
 
 // Sri Lankan product photos (Unsplash free-to-use)
-const PRODUCTS = [
-  { name:'Ceylon Black Tea 500g', emoji:'🍵', price:850, stock:142, sku:'TEA-001', discount:10, status:'active',
-    img:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&q=80' },
-  { name:'Coconut Oil 1L', emoji:'🥥', price:1200, stock:3, sku:'COC-002', discount:0, status:'active',
-    img:'https://images.unsplash.com/photo-1526887520775-4b14b8aed897?w=400&q=80' },
-  { name:'Handmade Batik Sarong', emoji:'🎨', price:3500, stock:28, sku:'BAT-003', discount:15, status:'active',
-    img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-  { name:'Cinnamon Sticks 200g', emoji:'🌿', price:450, stock:0, sku:'CIN-004', discount:0, status:'out',
-    img:'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80' },
-  { name:'Ayurvedic Body Oil', emoji:'🧴', price:2200, stock:67, sku:'AYU-005', discount:20, status:'active',
-    img:'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80' },
-  { name:'Cardamom 100g', emoji:'🌱', price:680, stock:89, sku:'CAR-006', discount:0, status:'active',
-    img:'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80' },
-  { name:'Wooden Elephant Carving', emoji:'🐘', price:4800, stock:12, sku:'WOD-007', discount:5, status:'active',
-    img:'https://images.unsplash.com/photo-1585016495481-91613b765117?w=400&q=80' },
-  { name:'Lemongrass Soap Bar', emoji:'🧼', price:320, stock:0, sku:'SOP-008', discount:0, status:'out',
-    img:'https://images.unsplash.com/photo-1612196808214-b7e239e5f6b8?w=400&q=80' },
-];
+const PRODUCTS = [];
 
 // Customer photos (diverse portraits from Unsplash)
 const CUSTOMER_PHOTOS = [
@@ -501,7 +484,7 @@ function mapApiProduct(row, index) {
     stock,
     sku: `PRD-${String(row.product_id).padStart(3, '0')}`,
     discount: 0,
-    status: Number(row.product_status) === 1 ? (stock > 0 ? 'active' : 'out') : 'draft',
+    status: (Number(row.product_status) === 1 || row.is_active == 1) ? (stock > 0 ? 'active' : 'out') : 'draft',
     img: imageUrl || ''
   };
 }
@@ -651,17 +634,23 @@ async function loadVendorDashboardData() {
     dashboardData.sessionUser = identity.user;
     dashboardData.sessionProfile = identity.profile || null;
 
-    const [vendors, orders, products, customers] = await Promise.all([getVendors(), getOrders(), getProducts(), getCustomers()]);
+    const [vendors, orders, products, customers] = await Promise.all([
+      getVendors(), 
+      getOrders(), 
+      getProducts({ own_only: 1 }), 
+      getCustomers()
+    ]);
     if (vendors && orders && products) {
       dashboardData.vendors = vendors;
       const mappedOrders = orders.map(mapApiOrder);
       const activeVendor = pickActiveVendor(vendors, mappedOrders);
-      const vendorName = activeVendor ? activeVendor.vendor_name : null;
       dashboardData.orders = filterVendorOrders(mappedOrders, activeVendor);
       dashboardData.rawOrders = [...dashboardData.orders];
-      dashboardData.products = products
-        .filter((p) => !vendorName || p.shop_name === vendorName)
-        .map(mapApiProduct);
+      
+      // No longer filtering by shop_name on frontend as API handles it via own_only=1
+      dashboardData.products = products.map(mapApiProduct);
+      allProducts = [...dashboardData.products];
+
       dashboardData.customers = customers || [];
       dashboardData.activeVendor = activeVendor;
       dashboardData.loadedFromApi = true;
@@ -749,9 +738,10 @@ function filterOrders(filter, btn) {
 
 
 // RENDER PRODUCTS (with images)
-let allProducts = [...PRODUCTS];
+let allProducts = [];
 
-function renderProducts(list = allProducts) {
+function renderProducts(list = null) {
+  if (list === null) list = allProducts;
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
   if (list.length === 0) {
@@ -1338,7 +1328,7 @@ window.addEventListener('load', async () => {
   document.body.style.opacity = '1';
   await loadVendorDashboardData();
   await loadVendorNotifications(dashboardData.activeVendor);
-  allProducts = [...dashboardData.products];
+  // allProducts is already set inside loadVendorDashboardData
   onPageActivate('dashboard');
 });
 

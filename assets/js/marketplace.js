@@ -352,12 +352,21 @@ function mergeCatalogProducts(staticProducts, apiProducts) {
   [...(Array.isArray(staticProducts) ? staticProducts : []), ...(Array.isArray(apiProducts) ? apiProducts : [])].forEach((product) => {
     const key = normalizeProductKey(product);
     if (!key || key === '|') return;
-    if (seen.has(key)) return;
+    
+    // For de-duplication, we prefer API products over static ones if names match
+    if (seen.has(key)) {
+      if (product.source === 'api') {
+        const idx = merged.findIndex(p => normalizeProductKey(p) === key);
+        if (idx !== -1) merged[idx] = product;
+      }
+      return;
+    }
+    
     seen.add(key);
     merged.push(product);
   });
 
-  return merged.filter(hasValidLocalImage);
+  return merged;
 }
 
 function updateMarketplaceCounts(products, categories) {
