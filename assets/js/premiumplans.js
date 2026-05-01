@@ -136,11 +136,49 @@ document.querySelectorAll('.pricing-card, .faq-item, .comparison-table').forEach
  * Track plan selection
  */
 document.querySelectorAll('.btn-plan').forEach(btn => {
-  btn.addEventListener('click', function(e) {
-    const planName = this.closest('.pricing-card').querySelector('.plan-name').textContent;
-    const price = this.closest('.pricing-card').querySelector('.price').textContent;
+  btn.addEventListener('click', async function(e) {
+    // If it's the Enterprise plan, don't handle with Stripe (custom quote)
+    if (this.classList.contains('enterprise')) return;
+
+    e.preventDefault();
     
-    // Log for analytics or store selection
-    console.log(`User selected: ${planName} - ${price}`);
+    const planName = this.closest('.pricing-card').querySelector('.plan-name').textContent.toLowerCase();
+    const billingToggle = document.getElementById('billingToggle');
+    const billing = billingToggle.classList.contains('active') ? 'annual' : 'monthly';
+    
+    // Check if logged in as vendor
+    try {
+      const response = await fetch('../api/auth_me.php');
+      const auth = await response.json();
+      
+      if (!auth.success || auth.user.role !== 'vendor') {
+        window.location.href = 'index.html?redirect=premiumplans.html';
+        return;
+      }
+
+      // Start checkout
+      this.textContent = 'Connecting...';
+      this.style.opacity = '0.7';
+      this.style.pointerEvents = 'none';
+
+      const checkoutRes = await fetch('../api/create_premium_checkout_session.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planName, billing: billing })
+      });
+      const result = await checkoutRes.json();
+      
+      if (result.success && result.data.checkout_url) {
+        window.location.href = result.data.checkout_url;
+      } else {
+        alert(result.message || 'Payment setup failed. Please try again.');
+        this.textContent = 'Try Again';
+        this.style.opacity = '1';
+        this.style.pointerEvents = 'auto';
+      }
+    } catch (err) {
+      console.error(err);
+      window.location.href = 'index.html?redirect=premiumplans.html';
+    }
   });
 });

@@ -1330,6 +1330,13 @@ window.addEventListener('load', async () => {
   await loadVendorNotifications(dashboardData.activeVendor);
   // allProducts is already set inside loadVendorDashboardData
   onPageActivate('dashboard');
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    setTimeout(() => {
+      window.alert('Premium Plan Activated! 💎\nThank you for upgrading. Your premium features are now available.');
+    }, 500);
+  }
 });
 
 console.log('%c BizLink Vendor Dashboard 🇱🇰 ', 'background: #50C878; color: white; font-size: 14px; padding: 8px 16px; border-radius: 4px;');
