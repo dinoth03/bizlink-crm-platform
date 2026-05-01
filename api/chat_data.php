@@ -39,16 +39,17 @@ if (!$currentUser) {
 }
 
 $allowedContactRolesMap = [
-    'admin' => ['vendor', 'customer'],
-    'vendor' => ['admin', 'customer'],
-    'customer' => ['admin', 'vendor'],
+    'admin' => ['vendor', 'customer', 'bot'],
+    'vendor' => ['admin', 'customer', 'bot'],
+    'customer' => ['admin', 'vendor', 'bot'],
 ];
 
 $allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];
 $contacts = [];
 $conversations = [];
 
-if (count($allowedContactRoles) === 2) {
+if (count($allowedContactRoles) >= 2) {
+    $rolePlaceholders = implode(',', array_fill(0, count($allowedContactRoles), '?'));
     $contactSql = "
     SELECT u.user_id, u.full_name, u.role, u.email, u.phone, u.province, u.account_status, u.created_at,
            v.business_name
@@ -56,12 +57,15 @@ if (count($allowedContactRoles) === 2) {
     LEFT JOIN vendors v ON v.user_id = u.user_id
     WHERE u.user_id <> ?
       AND u.deleted_at IS NULL
-      AND u.role IN (?, ?)
+      AND u.role IN ($rolePlaceholders)
       AND (u.account_status IS NULL OR u.account_status IN ('active', 'pending_verification'))
     ORDER BY u.full_name ASC
     ";
     $contactStmt = $conn->prepare($contactSql);
-    $contactStmt->bind_param('iss', $userId, $allowedContactRoles[0], $allowedContactRoles[1]);
+    
+    $bindTypes = 'i' . str_repeat('s', count($allowedContactRoles));
+    $bindArgs = array_merge([$userId], $allowedContactRoles);
+    $contactStmt->bind_param($bindTypes, ...$bindArgs);
     $contactStmt->execute();
     $contactRes = $contactStmt->get_result();
 
@@ -84,7 +88,7 @@ if (count($allowedContactRoles) === 2) {
             'owner_name' => $contact['full_name'],
             'initials' => substr($initials, 0, 2),
             'role' => $contact['role'],
-            'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : '#FF8C00'),
+            'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : ($contact['role'] === 'bot' ? '#2196F3' : '#FF8C00')),
             'status' => mapStatus($contact['account_status']),
             'company' => $contact['business_name'] ?: '—',
             'phone' => $contact['phone'] ?: '—',
@@ -155,7 +159,7 @@ while ($conv = $convRes->fetch_assoc()) {
             'owner_name' => $contact['full_name'],
             'initials' => substr($initials, 0, 2),
             'role' => $contact['role'],
-            'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : '#FF8C00'),
+            'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : ($contact['role'] === 'bot' ? '#2196F3' : '#FF8C00')),
             'status' => mapStatus($contact['account_status']),
             'company' => $contact['business_name'] ?: '—',
             'phone' => $contact['phone'] ?: '—',

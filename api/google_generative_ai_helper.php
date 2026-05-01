@@ -24,16 +24,17 @@ class GoogleGenerativeAIHelper {
      * 
      * @param string $userMessage The user's message
      * @param array $conversationHistory Previous messages for context (optional)
+     * @param string $context Real-time database context (optional)
      * @return array Response data with generated text
      */
-    public function generateResponse($userMessage, $conversationHistory = []) {
+    public function generateResponse($userMessage, $conversationHistory = [], $context = '') {
         try {
             // Build the request payload
             $payload = [
                 'contents' => $this->buildContents($userMessage, $conversationHistory),
                 'systemInstruction' => [
                     'parts' => [[
-                        'text' => $this->getSystemInstruction(),
+                        'text' => $this->getSystemInstruction($context),
                     ]],
                 ],
                 'generationConfig' => [
@@ -99,9 +100,11 @@ class GoogleGenerativeAIHelper {
 
     /**
      * Get system instruction for direct, focused answers
+     * 
+     * @param string $context Database context
      */
-    private function getSystemInstruction() {
-        return <<<'SYSTEM'
+    private function getSystemInstruction($context = '') {
+        $instruction = <<<'SYSTEM'
 You are BizLink AI Assistant - a helpful customer service AI for BizLink CRM Platform.
 
 INSTRUCTIONS FOR ANSWERING:
@@ -114,20 +117,30 @@ INSTRUCTIONS FOR ANSWERING:
 7. Be professional and friendly
 8. Use simple, clear language
 
+FOCUS AREAS:
+- PRODUCTS: Provide details about products, prices, and stock from the context.
+- VENDORS: Provide details about who sells what, their categories, and contact info.
+
 EXAMPLES:
 - User: "What's your refund policy?" → Answer ONLY the refund policy, nothing else
-- User: "How do I track my order?" → Provide ONLY the tracking method
-- User: "Tell me about shipping" → Answer shipping questions ONLY
+- User: "Do you have any rice cookers?" → Provide ONLY the rice cooker info and who sells it
+- User: "Who are the vendors?" → List the vendors from the context
 
 FORBIDDEN:
 - DO NOT add "Is there anything else I can help?" unless asked
-- DO NOT suggest products or services
+- DO NOT suggest products or services not in context
 - DO NOT add marketing messages
 - DO NOT provide lengthy explanations when a short answer works
-- DO NOT include greetings or pleasantries unless appropriate
 
 Focus on being helpful, direct, and respectful.
 SYSTEM;
+
+        if (!empty($context)) {
+            $instruction .= "\n\nDATABASE CONTEXT (REAL-TIME DATA):\n" . $context;
+            $instruction .= "\n\nIMPORTANT: Use the provided DATABASE CONTEXT to answer the user accurately. If the info is not in the context, refer them to support.";
+        }
+
+        return $instruction;
     }
 
     /**

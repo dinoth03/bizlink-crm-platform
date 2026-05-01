@@ -263,12 +263,12 @@ function resolveApiProductImage(product, category) {
       return candidate;
     }
     if (candidate.startsWith('../') || candidate.startsWith('./') || candidate.startsWith('/')) {
-      return encodeURI(candidate);
+      return candidate;
     }
-    return encodeURI(`../assets/images/${candidate}`);
+    return `../assets/images/${candidate}`;
   }
 
-  return encodeURI(CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other);
+  return CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other;
 }
 
 function toCategorySlug(value) {
@@ -506,19 +506,23 @@ async function initMarketplaceAuthUI() {
     if (user) {
       const signinBtn = document.querySelector('.nav-signin');
       if (signinBtn) {
-        const name = user.full_name || user.username || user.email || 'Dashboard';
-        signinBtn.textContent = 'Hi, ' + name.split(' ')[0];
-        
         const role = String(user.role).toLowerCase();
+        
         if (role === 'customer') {
+          const name = user.full_name || user.username || user.email || 'Customer';
+          signinBtn.textContent = 'Hi, ' + name.split(' ')[0];
           signinBtn.href = '../customer/dashboard.html';
         } else if (role === 'vendor') {
+          signinBtn.textContent = 'Dashboard';
           signinBtn.href = '../vendor/dashboard.php';
         } else if (role === 'admin') {
+          signinBtn.textContent = 'Dashboard';
           signinBtn.href = '../admin/dashboard.php';
         } else {
+          signinBtn.textContent = 'Dashboard';
           signinBtn.href = '../customer/dashboard.html';
         }
+        
         signinBtn.classList.add('logged-in');
       }
     }

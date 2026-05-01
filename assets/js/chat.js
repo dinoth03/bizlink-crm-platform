@@ -691,7 +691,7 @@ async function sendAIMessage(text, conv) {
   // Get conversation DB ID for API call
   const dbConversationId = conversationDbId(conv.id);
 
-  if (ME_USER_ID && dbConversationId > 0) {
+  if (ME_USER_ID) {
     // Use API to get AI response
     try {
       const response = await fetch('../api/chat_ai_bot_response.php', {
@@ -711,6 +711,13 @@ async function sendAIMessage(text, conv) {
       if (typingInd) typingInd.classList.add('hidden');
 
       if (data.success) {
+        // Sync conversation ID if it was a new one
+        if (data.data.conversation_id && conv.id === 'ai-conv') {
+          const realConvId = 'conv' + data.data.conversation_id;
+          conv.id = realConvId;
+          state.activeConvId = realConvId;
+        }
+
         const aiMsg = {
           id: 'msg_' + Date.now(),
           from: 'ai-bot',
@@ -723,6 +730,7 @@ async function sendAIMessage(text, conv) {
         conv.messages.push(aiMsg);
         appendMessage(aiMsg, conv);
         scrollBottom(true);
+        renderConvoList();
       } else {
         showToast('AI: ' + (data.error || 'Unable to respond'), 'warn');
       }

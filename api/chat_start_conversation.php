@@ -35,9 +35,9 @@ if (!$targetUser) {
 $role = strtolower((string)($current['role'] ?? ''));
 $targetRole = strtolower((string)($targetUser['role'] ?? ''));
 $allowedMap = [
-    'admin' => ['vendor', 'customer'],
-    'vendor' => ['admin', 'customer'],
-    'customer' => ['admin', 'vendor'],
+    'admin' => ['vendor', 'customer', 'bot'],
+    'vendor' => ['admin', 'customer', 'bot'],
+    'customer' => ['admin', 'vendor', 'bot'],
 ];
 
 if (!in_array($targetRole, $allowedMap[$role] ?? [], true)) {
@@ -71,7 +71,9 @@ if ($existing) {
 }
 
 $conversationType = 'vendor_customer';
-if (($role === 'admin' && $targetRole === 'vendor') || ($role === 'vendor' && $targetRole === 'admin')) {
+if ($targetRole === 'bot') {
+    $conversationType = 'ai_bot';
+} elseif (($role === 'admin' && $targetRole === 'vendor') || ($role === 'vendor' && $targetRole === 'admin')) {
     $conversationType = 'admin_vendor';
 } elseif (($role === 'admin' && $targetRole === 'customer') || ($role === 'customer' && $targetRole === 'admin')) {
     $conversationType = 'admin_customer';
