@@ -34,10 +34,11 @@ if (!$targetUser) {
 
 $role = strtolower((string)($current['role'] ?? ''));
 $targetRole = strtolower((string)($targetUser['role'] ?? ''));
+$allRoles = ['admin', 'vendor', 'customer', 'bot'];
 $allowedMap = [
-    'admin' => ['vendor', 'customer', 'bot'],
-    'vendor' => ['admin', 'customer', 'bot'],
-    'customer' => ['admin', 'vendor', 'bot'],
+    'admin' => $allRoles,
+    'vendor' => $allRoles,
+    'customer' => $allRoles,
 ];
 
 if (!in_array($targetRole, $allowedMap[$role] ?? [], true)) {

@@ -271,6 +271,39 @@ function createVendorPaymentNotification(mysqli $conn, int $orderId, float $amou
     $notifStmt->close();
 }
 
+function handlePremiumSubscriptionSuccess(mysqli $conn, int $userId, string $plan, string $billing): void {
+    if ($userId <= 0) return;
+
+    $days = ($billing === 'annual') ? 365 : 30;
+    
+    $stmt = $conn->prepare(
+        'UPDATE vendors 
+         SET is_premium = 1, 
+             premium_expiry_date = DATE_ADD(IFNULL(premium_expiry_date, CURDATE()), INTERVAL ? DAY),
+             updated_at = NOW() 
+         WHERE user_id = ? LIMIT 1'
+    );
+    
+    if ($stmt) {
+        $stmt->bind_param('ii', $days, $userId);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    // Notify user
+    $title = 'Premium Plan Activated! 💎';
+    $message = "Congratulations! Your " . ucfirst($plan) . " (" . ucfirst($billing) . ") plan is now active. Enjoy your premium features.";
+    $notifStmt = $conn->prepare(
+        'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, priority)
+         VALUES (?, "system", ?, ?, "premium", "high")'
+    );
+    if ($notifStmt) {
+        $notifStmt->bind_param('iss', $userId, $title, $message);
+        $notifStmt->execute();
+        $notifStmt->close();
+    }
+}
+
 $orderId = extractOrderIdFromStripeEvent($eventObject);
 $checkoutSessionId = (string)($eventObject['id'] ?? '');
 $paymentIntentId = (string)($eventObject['payment_intent'] ?? '');
@@ -285,17 +318,28 @@ if ($eventType === 'checkout.session.completed' || $eventType === 'checkout.sess
         'checkout_status' => (string)($eventObject['status'] ?? '')
     ]);
 
-    upsertStripePaymentRecord($conn, [
-        'order_id' => $orderId,
-        'amount' => $amountTotal,
-        'payment_status' => 'completed',
-        'payment_intent_id' => $paymentIntentId,
-        'checkout_session_id' => $checkoutSessionId,
-        'gateway_response' => $gatewayResponse
-    ]);
+    if ($orderId > 0) {
+        upsertStripePaymentRecord($conn, [
+            'order_id' => $orderId,
+            'amount' => $amountTotal,
+            'payment_status' => 'completed',
+            'payment_intent_id' => $paymentIntentId,
+            'checkout_session_id' => $checkoutSessionId,
+            'gateway_response' => $gatewayResponse
+        ]);
 
-    updateOrderPaymentStatus($conn, $orderId, 'paid');
-    createVendorPaymentNotification($conn, $orderId, $amountTotal, $eventCurrency);
+        updateOrderPaymentStatus($conn, $orderId, 'paid');
+        createVendorPaymentNotification($conn, $orderId, $amountTotal, $eventCurrency);
+    }
+
+    // Handle Premium Plans
+    $metadata = (array)($eventObject['metadata'] ?? []);
+    if (($metadata['type'] ?? '') === 'premium_subscription') {
+        $userId = (int)($metadata['user_id'] ?? 0);
+        $plan = (string)($metadata['plan'] ?? '');
+        $billing = (string)($metadata['billing'] ?? '');
+        handlePremiumSubscriptionSuccess($conn, $userId, $plan, $billing);
+    }
 }
 
 if ($eventType === 'payment_intent.payment_failed') {
@@ -364,3 +408,4 @@ apiSuccess([
 ], 'Webhook processed.', 'STRIPE_WEBHOOK_PROCESSED', 200);
 
 $conn->close();
+?>

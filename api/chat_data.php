@@ -38,10 +38,12 @@ if (!$currentUser) {
     apiError('USER_NOT_FOUND', 'Current user not found.', 404);
 }
 
+$allRoles = ['admin', 'vendor', 'customer', 'bot'];
 $allowedContactRolesMap = [
-    'admin' => ['vendor', 'customer', 'bot'],
-    'vendor' => ['admin', 'customer', 'bot'],
-    'customer' => ['admin', 'vendor', 'bot'],
+    'admin' => $allRoles,
+    'vendor' => $allRoles,
+    'customer' => $allRoles,
+    'bot' => $allRoles,
 ];
 
 $allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];

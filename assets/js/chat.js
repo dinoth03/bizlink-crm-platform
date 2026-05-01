@@ -321,7 +321,8 @@ function renderConvoList(filter = state.filter, search = state.search) {
         contact.name,
         contact.company,
         contact.owner_name,
-        contact.email
+        contact.email,
+        contact.role
       ].join(' ').toLowerCase();
       if (!searchText.includes(query)) return false;
     }
@@ -357,7 +358,8 @@ function renderConvoList(filter = state.filter, search = state.search) {
         contact.name,
         contact.company,
         contact.owner_name,
-        contact.email
+        contact.email,
+        contact.role
       ].join(' ').toLowerCase();
       return searchText.includes(query);
     });
@@ -389,6 +391,7 @@ function renderNewContactItem(contact, i) {
       <div class="ci-content">
         <div class="ci-row1">
           <span class="ci-name">${contact.name}</span>
+          <span class="ci-role-badge">${contact.role}</span>
         </div>
         <div class="ci-row2">
           <span class="ci-preview">Start a new conversation</span>
@@ -417,6 +420,7 @@ function renderConvoItem(conv, i) {
       <div class="ci-content">
         <div class="ci-row1">
           <span class="ci-name">${contact.name}</span>
+          <span class="ci-role-badge">${contact.role}</span>
           <span class="ci-time">${lastMsg.time || ''}</span>
         </div>
         <div class="ci-row2">

@@ -282,6 +282,12 @@ button{cursor:pointer;font-family:var(--font-b);border:none;background:none;}
 .ci-content{flex:1;min-width:0;}
 .ci-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .ci-name{font-size:.84rem;font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ci-role-badge{
+  font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  padding:1px 6px;border-radius:4px;background:var(--surface-hh);color:var(--t3);
+  margin-left:6px;border:1px solid var(--border);
+}
+.convo-item:hover .ci-role-badge{color:var(--t2);border-color:var(--border-h);}
 .ci-time{font-size:.68rem;color:var(--t3);flex-shrink:0;margin-left:6px;}
 .ci-row2{display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .ci-preview{
