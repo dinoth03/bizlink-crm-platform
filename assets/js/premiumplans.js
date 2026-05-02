@@ -4,10 +4,77 @@ Handles billing toggle, FAQ accordion, and pricing updates
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  applySelectionFromUrl();
   initBillingToggle();
   initFAQ();
   initNavbar();
 });
+
+function applySelectionFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const selectedPlan = (params.get('plan') || '').toLowerCase();
+  const selectedBilling = (params.get('billing') || '').toLowerCase();
+
+  if (selectedBilling === 'annual') {
+    const toggle = document.getElementById('billingToggle');
+    if (toggle && !toggle.classList.contains('active')) {
+      toggle.classList.add('active');
+      const prices = document.querySelectorAll('.monthly-price');
+      prices.forEach(priceEl => {
+        const annualPrice = priceEl.dataset.annual;
+        const billingNote = priceEl.nextElementSibling;
+        priceEl.textContent = `Rs. ${parseInt(annualPrice).toLocaleString()}`;
+        if (billingNote && billingNote.classList.contains('price-note')) {
+          const monthlyCost = Math.round(parseInt(annualPrice) / 12);
+          billingNote.textContent = `Billed annually (Rs. ${monthlyCost}/month)`;
+        }
+      });
+    }
+  }
+
+  if (selectedPlan) {
+    const selectedButton = document.querySelector(`.btn-plan[data-plan="${selectedPlan}"]`);
+    const selectedCard = selectedButton ? selectedButton.closest('.pricing-card') : null;
+    if (selectedCard) {
+      selectedCard.classList.add('selected-plan');
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+
+function getSelectedPaymentContext() {
+  let sessionPayment = null;
+  try {
+    const raw = sessionStorage.getItem('premiumSelectedPaymentMethod');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        sessionPayment = {
+          hint: String(parsed.hint || '').trim(),
+          last4: String(parsed.last4 || '').trim(),
+          brand: String(parsed.brand || '').trim(),
+          type: String(parsed.type || '').trim()
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to read selected payment method from sessionStorage.', e);
+  }
+
+  const pageParams = new URLSearchParams(window.location.search);
+  const fallbackPayment = {
+    hint: (pageParams.get('payment_method_hint') || '').trim(),
+    last4: (pageParams.get('payment_last4') || '').trim(),
+    brand: (pageParams.get('payment_brand') || '').trim(),
+    type: (pageParams.get('payment_type') || '').trim()
+  };
+
+  if (sessionPayment && (sessionPayment.hint || sessionPayment.last4 || sessionPayment.brand || sessionPayment.type)) {
+    return sessionPayment;
+  }
+
+  return fallbackPayment;
+}
 
 /**
  * Billing Toggle - Switch between monthly and annual pricing
@@ -141,10 +208,24 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
     if (this.classList.contains('enterprise')) return;
 
     e.preventDefault();
-    
-    const planName = this.closest('.pricing-card').querySelector('.plan-name').textContent.toLowerCase();
+
+    const planName = (this.dataset.plan || this.closest('.pricing-card').querySelector('.plan-name').textContent).toLowerCase();
     const billingToggle = document.getElementById('billingToggle');
     const billing = billingToggle.classList.contains('active') ? 'annual' : 'monthly';
+    const selectedPayment = getSelectedPaymentContext();
+    const paymentMethodHint = selectedPayment.hint;
+    const paymentLast4 = selectedPayment.last4;
+    const paymentBrand = selectedPayment.brand;
+    const paymentType = selectedPayment.type;
+
+    const redirectParams = new URLSearchParams({ plan: planName, billing: billing });
+    if (paymentMethodHint) redirectParams.set('payment_method_hint', paymentMethodHint);
+    if (paymentLast4) redirectParams.set('payment_last4', paymentLast4);
+    if (paymentBrand) redirectParams.set('payment_brand', paymentBrand);
+    if (paymentType) redirectParams.set('payment_type', paymentType);
+
+    const redirectTarget = `premiumplans.html?${redirectParams.toString()}`;
+    const originalText = this.textContent;
     
     // Check if logged in as vendor
     try {
@@ -152,7 +233,7 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
       const auth = await response.json();
       
       if (!auth.success || auth.user.role !== 'vendor') {
-        window.location.href = 'index.html?redirect=premiumplans.html';
+        window.location.href = `index.html?redirect=${encodeURIComponent(redirectTarget)}`;
         return;
       }
 
@@ -161,10 +242,16 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
       this.style.opacity = '0.7';
       this.style.pointerEvents = 'none';
 
+      const checkoutPayload = { plan: planName, billing: billing };
+      if (paymentMethodHint) checkoutPayload.payment_method_hint = paymentMethodHint;
+      if (paymentLast4) checkoutPayload.payment_last4 = paymentLast4;
+      if (paymentBrand) checkoutPayload.payment_brand = paymentBrand;
+      if (paymentType) checkoutPayload.payment_type = paymentType;
+
       const checkoutRes = await fetch('../api/create_premium_checkout_session.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planName, billing: billing })
+        body: JSON.stringify(checkoutPayload)
       });
       const result = await checkoutRes.json();
       
@@ -172,13 +259,13 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
         window.location.href = result.data.checkout_url;
       } else {
         alert(result.message || 'Payment setup failed. Please try again.');
-        this.textContent = 'Try Again';
+        this.textContent = originalText;
         this.style.opacity = '1';
         this.style.pointerEvents = 'auto';
       }
     } catch (err) {
       console.error(err);
-      window.location.href = 'index.html?redirect=premiumplans.html';
+      window.location.href = `index.html?redirect=${encodeURIComponent(redirectTarget)}`;
     }
   });
 });

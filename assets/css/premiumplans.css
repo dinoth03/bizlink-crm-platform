@@ -268,6 +268,11 @@ body {
   box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
 }
 
+.pricing-card.selected-plan {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.35), 0 20px 40px rgba(102, 126, 234, 0.2);
+}
+
 .pricing-card.popular {
   border-color: #667eea;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
@@ -355,6 +360,21 @@ body {
   border: none;
   font-size: 1rem;
   margin-bottom: 20px;
+}
+
+.btn-plan-link {
+  display: inline-block;
+  text-align: center;
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-top: -10px;
+  margin-bottom: 18px;
+  transition: color 0.2s;
+}
+
+.btn-plan-link:hover {
+  color: #667eea;
 }
 
 .btn-plan.starter {

@@ -133,6 +133,41 @@
   }
 
   function initPayments() {
+    const parseCardFromRow = (row) => {
+      if (!row) return null;
+
+      const labelCell = row.querySelector('.card-label');
+      const typeCell = row.children[1];
+      const labelText = (labelCell ? labelCell.textContent : '').replace(/\s+Default\s*$/i, '').trim();
+      const typeText = (typeCell ? typeCell.textContent : '').trim();
+
+      if (!labelText) return null;
+
+      const last4Match = labelText.match(/(\d{4})(?!.*\d)/);
+      const brandMatch = labelText.match(/(Visa|Mastercard|Amex)/i);
+      const brand = brandMatch ? brandMatch[1].toLowerCase() : 'card';
+      const last4 = last4Match ? last4Match[1] : '0000';
+      const type = typeText ? typeText.toLowerCase() : 'unknown';
+
+      return {
+        hint: `${brand}_${last4}`,
+        brand,
+        last4,
+        type
+      };
+    };
+
+    const getSelectedCard = () => {
+      const defaultBadge = document.querySelector('.default-badge.card');
+      const defaultRow = defaultBadge ? defaultBadge.closest('tr') : null;
+      if (defaultRow) {
+        return parseCardFromRow(defaultRow);
+      }
+
+      const firstRow = document.querySelector('tbody tr');
+      return parseCardFromRow(firstRow);
+    };
+
     document.querySelectorAll('[data-set-default-card]').forEach((btn) => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.default-badge.card').forEach((el) => el.remove());
@@ -152,6 +187,36 @@
       btn.addEventListener('click', () => {
         const row = btn.closest('tr');
         if (row) row.remove();
+      });
+    });
+
+    document.querySelectorAll('[data-premium-plan-link]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const selectedCard = getSelectedCard();
+        const url = new URL(link.getAttribute('href'), window.location.href);
+
+        if (selectedCard) {
+          try {
+            sessionStorage.setItem('premiumSelectedPaymentMethod', JSON.stringify({
+              hint: selectedCard.hint,
+              last4: selectedCard.last4,
+              brand: selectedCard.brand,
+              type: selectedCard.type,
+              ts: Date.now()
+            }));
+          } catch (storageError) {
+            console.warn('Unable to persist selected payment method in sessionStorage.', storageError);
+          }
+
+          url.searchParams.set('payment_method_hint', selectedCard.hint);
+          url.searchParams.set('payment_last4', selectedCard.last4);
+          url.searchParams.set('payment_brand', selectedCard.brand);
+          url.searchParams.set('payment_type', selectedCard.type);
+        }
+
+        window.location.href = url.toString();
       });
     });
   }

@@ -30,6 +30,10 @@ requireRateLimit($conn, $clientIp, 'stripe_premium_by_ip', 10, 900);
 $payload = readJsonPayload();
 $plan = trim(strtolower((string)($payload['plan'] ?? '')));
 $billing = trim(strtolower((string)($payload['billing'] ?? 'monthly')));
+$paymentMethodHint = trim(strtolower((string)($payload['payment_method_hint'] ?? '')));
+$paymentLast4 = trim((string)($payload['payment_last4'] ?? ''));
+$paymentBrand = trim(strtolower((string)($payload['payment_brand'] ?? '')));
+$paymentType = trim(strtolower((string)($payload['payment_type'] ?? '')));
 
 $validPlans = ['starter', 'professional'];
 if (!in_array($plan, $validPlans, true)) {
@@ -39,6 +43,22 @@ if (!in_array($plan, $validPlans, true)) {
 $validBilling = ['monthly', 'annual'];
 if (!in_array($billing, $validBilling, true)) {
     apiError('VALIDATION_ERROR', 'Invalid billing period.', 422);
+}
+
+if ($paymentMethodHint !== '' && !preg_match('/^[a-z0-9_\-]{3,40}$/', $paymentMethodHint)) {
+    apiError('VALIDATION_ERROR', 'Invalid payment method hint.', 422);
+}
+
+if ($paymentLast4 !== '' && !preg_match('/^[0-9]{4}$/', $paymentLast4)) {
+    apiError('VALIDATION_ERROR', 'Invalid card last4 value.', 422);
+}
+
+if ($paymentBrand !== '' && !preg_match('/^[a-z0-9_\- ]{2,24}$/', $paymentBrand)) {
+    apiError('VALIDATION_ERROR', 'Invalid payment brand value.', 422);
+}
+
+if ($paymentType !== '' && !preg_match('/^[a-z0-9_\- ]{2,24}$/', $paymentType)) {
+    apiError('VALIDATION_ERROR', 'Invalid payment type value.', 422);
 }
 
 // Define Prices (in LKR)
@@ -91,6 +111,26 @@ if ($customerEmail !== '') {
     $stripePayload['customer_email'] = $customerEmail;
 }
 
+if ($paymentMethodHint !== '') {
+    $stripePayload['metadata[payment_method_hint]'] = $paymentMethodHint;
+    $stripePayload['payment_intent_data[metadata][payment_method_hint]'] = $paymentMethodHint;
+}
+
+if ($paymentLast4 !== '') {
+    $stripePayload['metadata[payment_last4]'] = $paymentLast4;
+    $stripePayload['payment_intent_data[metadata][payment_last4]'] = $paymentLast4;
+}
+
+if ($paymentBrand !== '') {
+    $stripePayload['metadata[payment_brand]'] = $paymentBrand;
+    $stripePayload['payment_intent_data[metadata][payment_brand]'] = $paymentBrand;
+}
+
+if ($paymentType !== '') {
+    $stripePayload['metadata[payment_type]'] = $paymentType;
+    $stripePayload['payment_intent_data[metadata][payment_type]'] = $paymentType;
+}
+
 $stripeResult = stripeApiRequest('POST', 'checkout/sessions', $cfg['secret_key'], $stripePayload);
 if (!$stripeResult['ok']) {
     apiError('STRIPE_CREATE_SESSION_FAILED', $stripeResult['error'] ?: 'Failed to create Stripe session.', 502);
@@ -109,6 +149,7 @@ apiSuccess([
     'checkout_url' => $checkoutUrl,
     'plan' => $plan,
     'billing' => $billing,
+    'selected_payment_method' => $paymentMethodHint,
     'amount' => $amount,
     'currency' => 'LKR',
     'publishable_key' => $cfg['publishable_key']
