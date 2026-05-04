@@ -4,7 +4,7 @@ require 'config.php';
 require_once 'api_helpers.php';
 
 // Require authentication
-requireAuth();
+requireAuth(['customer']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);

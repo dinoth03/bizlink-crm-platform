@@ -54,11 +54,10 @@
     </div>
 
     <!-- Filter chips -->
-    <div class="filter-chips">
+      <div class="filter-chips">
       <button class="fchip active" data-filter="all"      onclick="setFilter('all',this)">All</button>
       <button class="fchip"        data-filter="unread"   onclick="setFilter('unread',this)">Unread <span class="fchip-count" id="unreadCount">3</span></button>
       <button class="fchip"        data-filter="vendors"  onclick="setFilter('vendors',this)">Vendors</button>
-      <button class="fchip"        data-filter="customers" onclick="setFilter('customers',this)">Customers</button>
       <button class="fchip"        data-filter="admin"    onclick="setFilter('admin',this)">Admin</button>
       <button class="fchip ai-chip" onclick="startAIChat()" title="Chat with AI Assistant">🤖 AI</button>
     </div>
@@ -102,6 +101,17 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Start a conversation
       </button>
+    </div>
+
+    <div class="empty-state hidden" id="accessDeniedState">
+      <div class="es-glow"></div>
+      <div class="es-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M8 8l8 8"/><path d="M16 8l-8 8"/></svg>
+      </div>
+      <h2 class="es-title">Chat Locked</h2>
+      <p class="es-body">Chat is available only for customers to message vendors and admin. Other account types cannot use this chat system.</p>
+      <p class="es-sin">Customer support messaging only</p>
+      <a class="es-btn" href="home.html">Back to Home</a>
     </div>
 
     <!-- ── ACTIVE CHAT ── -->

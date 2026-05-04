@@ -4,7 +4,7 @@ require 'config.php';
 require_once 'api_helpers.php';
 
 // Require authentication
-requireAuth();
+requireAuth(['customer']);
 
 $userId = getCurrentUser()['user_id'];
 
@@ -38,12 +38,8 @@ if (!$currentUser) {
     apiError('USER_NOT_FOUND', 'Current user not found.', 404);
 }
 
-$allRoles = ['admin', 'vendor', 'customer', 'bot'];
 $allowedContactRolesMap = [
-    'admin' => $allRoles,
-    'vendor' => $allRoles,
-    'customer' => $allRoles,
-    'bot' => $allRoles,
+    'customer' => ['vendor', 'admin'],
 ];
 
 $allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];

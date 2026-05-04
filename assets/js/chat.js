@@ -132,6 +132,9 @@ let pendingTargetUserId = null;
 
 let ME_USER_ID = null;
 let isGuestMode = false;
+let accessDeniedMode = false;
+
+const CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
 
 function renderCurrentUserBadge() {
   const ruName = document.querySelector('.ru-name');
@@ -174,6 +177,31 @@ function enableGuestMode(reason = '') {
   }
 }
 
+function showChatAccessDenied(reason = '') {
+  accessDeniedMode = true;
+  isGuestMode = false;
+  ME_USER_ID = null;
+
+  const shell = document.querySelector('.shell');
+  const denied = document.getElementById('accessDeniedState');
+  const emptyState = document.getElementById('emptyState');
+  const chatWindow = document.getElementById('chatWindow');
+
+  if (shell) shell.classList.add('chat-locked');
+  if (denied) denied.classList.remove('hidden');
+  if (emptyState) emptyState.classList.add('hidden');
+  if (chatWindow) chatWindow.classList.add('hidden');
+
+  const leftRail = document.getElementById('leftRail');
+  const infoPanel = document.getElementById('infoPanel');
+  if (leftRail) leftRail.style.display = 'none';
+  if (infoPanel) infoPanel.style.display = 'none';
+
+  if (reason) {
+    console.info('Chat access denied:', reason);
+  }
+}
+
 function getInitials(name) {
   return (name || '')
     .split(' ')
@@ -192,12 +220,22 @@ async function loadChatDataFromApi() {
     const response = await fetch('../api/chat_data.php');
     const payload = await response.json();
 
-    if (response.status === 401 || response.status === 429) {
-      enableGuestMode('auth_api_unavailable');
+    if (response.status === 401 || response.status === 403) {
+      showChatAccessDenied('chat_api_forbidden');
+      return false;
+    }
+
+    if (response.status === 429) {
+      showChatAccessDenied('chat_api_rate_limited');
       return false;
     }
 
     if (!payload.success) {
+      return false;
+    }
+
+    if (String(payload.current_user?.role || '').toLowerCase() !== 'customer') {
+      showChatAccessDenied('customer_only_chat');
       return false;
     }
 
@@ -220,7 +258,7 @@ async function loadChatDataFromApi() {
 
 async function bootstrapChatIdentity() {
   if (typeof authMe !== 'function') {
-    renderCurrentUserBadge();
+    showChatAccessDenied('auth_context_missing');
     return false;
   }
 
@@ -229,13 +267,17 @@ async function bootstrapChatIdentity() {
     if (identity && identity.user) {
       ME_USER_ID = Number(identity.user.user_id || 0) || ME_USER_ID;
       applyChatIdentity(identity.user);
+      if (String(identity.user.role || '').toLowerCase() !== 'customer') {
+        showChatAccessDenied('role_not_customer');
+        return false;
+      }
       return true;
     }
   } catch (error) {
     console.error('Failed to load authenticated chat identity:', error);
   }
 
-  renderCurrentUserBadge();
+  showChatAccessDenied('auth_identity_missing');
   return false;
 }
 
@@ -266,7 +308,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   await bootstrapChatIdentity();
-  await loadChatDataFromApi();
+  if (!accessDeniedMode) {
+    await loadChatDataFromApi();
+  }
+
+  if (accessDeniedMode) {
+    return;
+  }
+
+  // If API is not active and we have static data, ensure customers are not shown
+  // when the current user is a customer (we only allow vendor/admin contacts)
+  try {
+    if ((ME.role || '').toLowerCase() === 'customer') {
+      filterStaticContactsForCustomer();
+    }
+  } catch (e) {
+    console.error('filterStaticContactsForCustomer failed', e);
+  }
 
   renderConvoList();
   renderEmojiPicker();
@@ -312,10 +370,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 function renderConvoList(filter = state.filter, search = state.search) {
   const list = document.getElementById('convoList');
   const query = String(search || '').toLowerCase().trim();
+  const allowedRoles = getAllowedChatRoles();
 
   // 1. Filter existing conversations
   let convos = CONVERSATIONS.filter(c => {
     const contact = getContact(c.contactId);
+    if (!allowedRoles.includes(contact.role)) return false;
     if (query) {
       const searchText = [
         contact.name,
@@ -345,6 +405,7 @@ function renderConvoList(filter = state.filter, search = state.search) {
   // 2. If searching, also find matching contacts who don't have a conversation yet
   if (query) {
     const matchingContacts = CONTACTS.filter(contact => {
+      if (!allowedRoles.includes(contact.role)) return false;
       // Exclude if already in a conversation
       if (CONVERSATIONS.some(c => c.contactId === contact.id)) return false;
 
@@ -1172,11 +1233,39 @@ function clearSearch() {
 }
 
 function filterContacts(val) {
-  const filtered = CONTACTS.filter(c =>
+  const filtered = getVisibleContacts().filter(c =>
     c.name.toLowerCase().includes(val.toLowerCase()) ||
     (c.company || '').toLowerCase().includes(val.toLowerCase())
   );
   renderContactGrid(filtered);
+}
+
+function getAllowedChatRoles() {
+  if (accessDeniedMode) return [];
+  return CHAT_ALLOWED_CONTACT_ROLES.slice();
+}
+
+function getVisibleContacts() {
+  const allowedRoles = getAllowedChatRoles();
+  return CONTACTS.filter(contact => allowedRoles.includes(contact.role));
+}
+
+function filterStaticContactsForCustomer() {
+  const allowed = new Set(CHAT_ALLOWED_CONTACT_ROLES);
+  // Remove contacts not matching allowed roles
+  for (let i = CONTACTS.length - 1; i >= 0; i--) {
+    if (!allowed.has(String(CONTACTS[i].role).toLowerCase())) {
+      CONTACTS.splice(i, 1);
+    }
+  }
+
+  // Remove conversations involving removed contacts
+  for (let i = CONVERSATIONS.length - 1; i >= 0; i--) {
+    const contact = getContact(CONVERSATIONS[i].contactId);
+    if (!contact || !allowed.has(String(contact.role).toLowerCase())) {
+      CONVERSATIONS.splice(i, 1);
+    }
+  }
 }
 
 function renderContactGrid(contacts) {
@@ -1199,20 +1288,32 @@ function renderContactGrid(contacts) {
 
 /* NEW CHAT MODAL */
 function openNewChat(roleFilter = null) {
-  document.getElementById('modalBackdrop').classList.remove('hidden');
-  document.getElementById('contactSearch').value = '';
-  if (roleFilter && ['admin', 'vendor'].includes(String(roleFilter).toLowerCase())) {
-    renderContactGrid(CONTACTS.filter((contact) => contact.role === String(roleFilter).toLowerCase()));
+  if (accessDeniedMode) {
+    showChatAccessDenied('blocked_open_new_chat');
     return;
   }
-  renderContactGrid(CONTACTS);
+  document.getElementById('modalBackdrop').classList.remove('hidden');
+  document.getElementById('contactSearch').value = '';
+  if (roleFilter && CHAT_ALLOWED_CONTACT_ROLES.includes(String(roleFilter).toLowerCase())) {
+    renderContactGrid(getVisibleContacts().filter((contact) => contact.role === String(roleFilter).toLowerCase()));
+    return;
+  }
+  renderContactGrid(getVisibleContacts());
 }
 function closeNewChat(e) {
   if (!e || e.target === document.getElementById('modalBackdrop'))
     document.getElementById('modalBackdrop').classList.add('hidden');
 }
 function startNewChat(contactId) {
+  if (accessDeniedMode) {
+    showChatAccessDenied('blocked_start_new_chat');
+    return;
+  }
   const contact = getContact(contactId);
+  if (!CHAT_ALLOWED_CONTACT_ROLES.includes(String(contact?.role || '').toLowerCase())) {
+    showToast('Customers can only message vendors and admin.', 'warn');
+    return;
+  }
   const existing = CONVERSATIONS.find(c => c.contactId === contactId);
 
   if (existing) {
@@ -1243,18 +1344,15 @@ function startNewChat(contactId) {
   })
     .then(async (res) => ({ status: res.status, payload: await res.json() }))
     .then(async ({ status, payload }) => {
-      if (status === 401 || status === 429) {
-        enableGuestMode('start_conversation_requires_auth');
+      if (status === 401 || status === 403) {
+        showChatAccessDenied('start_conversation_forbidden');
         closeNewChat();
-        const fallbackContact = getContact(contactId);
-        const newConv = {
-          id: 'conv_' + Date.now(), contactId,
-          pinned:false, muted:false, unread:0,
-          messages:[{ id:'m1', type:'system', text:`Conversation with ${fallbackContact.name} started`, time:getCurrentTime(), date:'Today' }],
-          quickReplies:['Hello! How can I help you?','Thank you for contacting us!'],
-        };
-        CONVERSATIONS.unshift(newConv);
-        openConversation(newConv.id);
+        return;
+      }
+
+      if (status === 429) {
+        showChatAccessDenied('start_conversation_rate_limited');
+        closeNewChat();
         return;
       }
 
@@ -1279,6 +1377,14 @@ function startNewChat(contactId) {
 
 /* AI CHAT SYSTEM */
 async function startAIChat() {
+  if (accessDeniedMode) {
+    showChatAccessDenied('blocked_ai_chat');
+    return;
+  }
+
+  showToast('AI chat is disabled for customer-only messaging.', 'info');
+  return;
+
   const existing = CONVERSATIONS.find(c => c.contactId === 'ai-bot');
 
   if (existing) {

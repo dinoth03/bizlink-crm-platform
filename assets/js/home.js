@@ -1,3 +1,46 @@
+// ---- Fetch Homepage Statistics ----
+async function loadHomepageStats() {
+  try {
+    const response = await fetch('../api/get_homepage_stats.php');
+    const data = await response.json();
+    
+    if (data.success && data.data) {
+      const { vendors, customers, industries } = data.data;
+      
+      // Update data-target attributes based on original value
+      const statNums = document.querySelectorAll('.stat-num');
+      statNums.forEach(el => {
+        const originalTarget = el.dataset.target;
+        if (originalTarget === '500') {
+          el.dataset.target = vendors;
+        } else if (originalTarget === '12000') {
+          el.dataset.target = customers;
+        } else if (originalTarget === '25') {
+          el.dataset.target = industries;
+        }
+      });
+      
+      return true;
+    }
+  } catch (error) {
+    console.warn('Failed to load homepage statistics:', error);
+  }
+  return false;
+}
+
+// Load stats BEFORE setting up counter animation
+async function initializeStats() {
+  await loadHomepageStats();
+  setupCounterAnimation();
+}
+
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeStats);
+} else {
+  initializeStats();
+}
+
 // ---- Navbar scroll effect ----
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
@@ -45,19 +88,21 @@ const revealObserver = new IntersectionObserver((entries) => {
 revealElements.forEach(el => revealObserver.observe(el));
 
 //  Counter Animation
-const counters = document.querySelectorAll('.stat-num');
+function setupCounterAnimation() {
+  const counters = document.querySelectorAll('.stat-num');
 
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const target = parseInt(entry.target.dataset.target);
-      animateCounter(entry.target, target);
-      counterObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.5 });
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = parseInt(entry.target.dataset.target);
+        animateCounter(entry.target, target);
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
 
-counters.forEach(counter => counterObserver.observe(counter));
+  counters.forEach(counter => counterObserver.observe(counter));
+}
 
 function animateCounter(el, target) {
   let start = 0;

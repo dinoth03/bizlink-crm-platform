@@ -3,7 +3,7 @@ require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
 
-requireAuth(['admin', 'vendor', 'customer']);
+requireAuth(['customer']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -34,11 +34,8 @@ if (!$targetUser) {
 
 $role = strtolower((string)($current['role'] ?? ''));
 $targetRole = strtolower((string)($targetUser['role'] ?? ''));
-$allRoles = ['admin', 'vendor', 'customer', 'bot'];
 $allowedMap = [
-    'admin' => $allRoles,
-    'vendor' => $allRoles,
-    'customer' => $allRoles,
+    'customer' => ['vendor', 'admin'],
 ];
 
 if (!in_array($targetRole, $allowedMap[$role] ?? [], true)) {
@@ -71,14 +68,7 @@ if ($existing) {
     ], 'Conversation already exists.', 'CHAT_CONVERSATION_EXISTS');
 }
 
-$conversationType = 'vendor_customer';
-if ($targetRole === 'bot') {
-    $conversationType = 'ai_bot';
-} elseif (($role === 'admin' && $targetRole === 'vendor') || ($role === 'vendor' && $targetRole === 'admin')) {
-    $conversationType = 'admin_vendor';
-} elseif (($role === 'admin' && $targetRole === 'customer') || ($role === 'customer' && $targetRole === 'admin')) {
-    $conversationType = 'admin_customer';
-}
+$conversationType = 'customer_support';
 
 $subject = trim($current['full_name'] . ' and ' . $targetUser['full_name'] . ' chat');
 
