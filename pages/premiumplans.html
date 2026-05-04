@@ -56,97 +56,187 @@
 <!--PRICING SECTION-->
 <section class="section pricing-section">
   <div class="container">
-    <div class="section-label">PRICING</div>
-    <h2 class="section-title">Plans for Every <span class="gradient-text">Business Size</span></h2>
-    <p class="section-sub">Start free, upgrade when you're ready</p>
+    <div class="section-label">CHOOSE YOUR ROLE</div>
+    <h2 class="section-title"><span class="gradient-text">Separate Plans</span> for Customers & Vendors</h2>
+    <p class="section-sub">Find the perfect plan tailored to your role on BizLink</p>
 
-    <!-- BILLING TOGGLE (Monthly / Annual) -->
-    <div class="billing-toggle">
-      <span class="toggle-label">Billed Monthly</span>
-      <div class="toggle-switch" id="billingToggle">
-        <div class="toggle-slider"></div>
-      </div>
-      <span class="toggle-label">Billed Annually <span class="save-badge">Save 20%</span></span>
+    <!-- ROLE TABS -->
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="switchRole('customer')">
+        <span class="role-emoji">🛍️</span>
+        <span>Customer Plans</span>
+      </button>
+      <button class="role-tab" onclick="switchRole('vendor')">
+        <span class="role-emoji">🏪</span>
+        <span>Vendor Plans</span>
+      </button>
     </div>
 
-    <!-- PRICING CARDS GRID -->
-    <div class="pricing-grid">
+    <!-- CUSTOMER PLANS SECTION -->
+    <div class="role-plans-section" id="customer-plans" style="display: block;">
+      <div class="section-label" style="margin-top: 30px;">FOR CUSTOMERS</div>
+      <h3 style="margin-bottom: 24px; font-size: 1.5rem;">Enhance Your Shopping Experience</h3>
 
-      <!-- STARTER PLAN -->
-      <div class="pricing-card starter-card">
-        <div class="plan-header">
-          <div class="plan-icon">🚀</div>
-          <div class="plan-name">Starter</div>
-          <p class="plan-desc">Perfect for getting started</p>
+      <div class="pricing-grid">
+        <!-- BASIC CUSTOMER PLAN -->
+        <div class="pricing-card starter-card">
+          <div class="plan-header">
+            <div class="plan-icon">✨</div>
+            <div class="plan-name">Basic Shopper</div>
+            <p class="plan-desc">Browse and shop freely</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">FREE</span>
+            <p class="enterprise-note">Forever free tier</p>
+          </div>
+          <a href="index.html" class="btn-plan starter">Get Started</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> Browse all products</li>
+            <li><span class="feature-icon">✓</span> Create wishlist</li>
+            <li><span class="feature-icon">✓</span> Chat with vendors</li>
+            <li><span class="feature-icon">✓</span> View ratings & reviews</li>
+            <li><span class="feature-icon">✓</span> Track orders</li>
+            <li><span class="feature-icon">✗</span> Bulk ordering</li>
+            <li><span class="feature-icon">✗</span> Priority support</li>
+          </ul>
         </div>
-        <div class="pricing-display">
-          <span class="price monthly-price" data-monthly="2999" data-annual="35988">Rs. 2,999</span>
-          <span class="price-period">/month</span>
-          <span class="price-note">Billed monthly</span>
+
+        <!-- PREMIUM CUSTOMER PLAN (POPULAR) -->
+        <div class="pricing-card professional-card popular">
+          <div class="popular-badge">Most Popular ⭐</div>
+          <div class="plan-header">
+            <div class="plan-icon">⭐</div>
+            <div class="plan-name">Premium Member</div>
+            <p class="plan-desc">Exclusive benefits & discounts</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">Rs. 999</span>
+            <span class="price-period">/month</span>
+            <p class="enterprise-note">or Rs. 9,990/year (Save 17%)</p>
+          </div>
+          <a href="../customer/payment-methods.html?plan=premium-member" class="btn-plan professional">Upgrade Now</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> 10% discount on all orders</li>
+            <li><span class="feature-icon">✓</span> Free shipping (min. orders)</li>
+            <li><span class="feature-icon">✓</span> Early access to sales</li>
+            <li><span class="feature-icon">✓</span> Priority customer support</li>
+            <li><span class="feature-icon">✓</span> Exclusive member deals</li>
+            <li><span class="feature-icon">✓</span> Bulk ordering (10% extra discount)</li>
+            <li><span class="feature-icon">✓</span> Monthly cashback rewards</li>
+          </ul>
         </div>
-        <a href="index.html" class="btn-plan starter" data-plan="starter">Start Free Trial</a>
-        <a href="../customer/payment-methods.html?from=premiumplans&amp;plan=starter" class="btn-plan-link">Choose Payment Method</a>
-        <div class="divider"></div>
-        <ul class="features-list">
-          <li><span class="feature-icon">✓</span> Up to 50 contacts</li>
-          <li><span class="feature-icon">✓</span> Basic CRM tools</li>
-          <li><span class="feature-icon">✓</span> Email support</li>
-          <li><span class="feature-icon">✓</span> Mobile app access</li>
-          <li><span class="feature-icon">✗</span> Advanced analytics</li>
-          <li><span class="feature-icon">✗</span> API access</li>
-        </ul>
+
+        <!-- VIP CUSTOMER PLAN -->
+        <div class="pricing-card enterprise-card">
+          <div class="plan-header">
+            <div class="plan-icon">👑</div>
+            <div class="plan-name">VIP Buyer</div>
+            <p class="plan-desc">Maximum savings & perks</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">Rs. 4,999</span>
+            <span class="price-period">/month</span>
+            <p class="enterprise-note">or Rs. 49,990/year (Save 17%)</p>
+          </div>
+          <a href="../customer/payment-methods.html?plan=vip-buyer" class="btn-plan enterprise">Become VIP</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> Everything in Premium Member</li>
+            <li><span class="feature-icon">✓</span> 20% discount on all orders</li>
+            <li><span class="feature-icon">✓</span> Free shipping (all orders)</li>
+            <li><span class="feature-icon">✓</span> VIP customer manager</li>
+            <li><span class="feature-icon">✓</span> 24/7 priority support</li>
+            <li><span class="feature-icon">✓</span> Exclusive VIP events access</li>
+            <li><span class="feature-icon">✓</span> Monthly gift vouchers</li>
+          </ul>
+        </div>
       </div>
+    </div>
 
-      <!-- PROFESSIONAL PLAN (POPULAR) -->
-      <div class="pricing-card professional-card popular">
-        <div class="popular-badge">Most Popular ⭐</div>
-        <div class="plan-header">
-          <div class="plan-icon">📈</div>
-          <div class="plan-name">Professional</div>
-          <p class="plan-desc">For growing businesses</p>
+    <!-- VENDOR PLANS SECTION -->
+    <div class="role-plans-section" id="vendor-plans" style="display: none;">
+      <div class="section-label" style="margin-top: 30px;">FOR VENDORS</div>
+      <h3 style="margin-bottom: 24px; font-size: 1.5rem;">Grow Your Business on BizLink</h3>
+
+      <div class="pricing-grid">
+        <!-- STARTER VENDOR PLAN -->
+        <div class="pricing-card starter-card">
+          <div class="plan-header">
+            <div class="plan-icon">🚀</div>
+            <div class="plan-name">Starter Vendor</div>
+            <p class="plan-desc">Start selling today</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">FREE</span>
+            <p class="enterprise-note">Setup your shop free</p>
+          </div>
+          <a href="index.html?role=vendor" class="btn-plan starter">Register as Vendor</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> List up to 50 products</li>
+            <li><span class="feature-icon">✓</span> Basic shop profile</li>
+            <li><span class="feature-icon">✓</span> Customer messaging</li>
+            <li><span class="feature-icon">✓</span> Basic sales dashboard</li>
+            <li><span class="feature-icon">✓</span> Email support</li>
+            <li><span class="feature-icon">✗</span> Featured listings</li>
+            <li><span class="feature-icon">✗</span> Advanced analytics</li>
+          </ul>
         </div>
-        <div class="pricing-display">
-          <span class="price monthly-price" data-monthly="7999" data-annual="95988">Rs. 7,999</span>
-          <span class="price-period">/month</span>
-          <span class="price-note">Billed monthly</span>
+
+        <!-- PROFESSIONAL VENDOR PLAN (POPULAR) -->
+        <div class="pricing-card professional-card popular">
+          <div class="popular-badge">Most Popular ⭐</div>
+          <div class="plan-header">
+            <div class="plan-icon">📈</div>
+            <div class="plan-name">Growth Plan</div>
+            <p class="plan-desc">Expand your reach</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">Rs. 4,999</span>
+            <span class="price-period">/month</span>
+            <p class="enterprise-note">or Rs. 49,990/year (Save 17%)</p>
+          </div>
+          <a href="../vendor/payment-methods.html?plan=growth" class="btn-plan professional">Upgrade Now</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> Unlimited products</li>
+            <li><span class="feature-icon">✓</span> Premium shop profile</li>
+            <li><span class="feature-icon">✓</span> Featured listings (2x/month)</li>
+            <li><span class="feature-icon">✓</span> Advanced analytics</li>
+            <li><span class="feature-icon">✓</span> Customer CRM tools</li>
+            <li><span class="feature-icon">✓</span> Bulk order management</li>
+            <li><span class="feature-icon">✓</span> 24-hour support</li>
+          </ul>
         </div>
-        <a href="index.html" class="btn-plan professional" data-plan="professional">Get Started Now</a>
-        <a href="../customer/payment-methods.html?from=premiumplans&amp;plan=professional" class="btn-plan-link">Choose Payment Method</a>
-        <div class="divider"></div>
-        <ul class="features-list">
-          <li><span class="feature-icon">✓</span> Unlimited contacts</li>
-          <li><span class="feature-icon">✓</span> Advanced CRM & automation</li>
-          <li><span class="feature-icon">✓</span> Priority email & chat support</li>
-          <li><span class="feature-icon">✓</span> Advanced analytics dashboard</li>
-          <li><span class="feature-icon">✓</span> Custom reports</li>
-          <li><span class="feature-icon">✗</span> API access</li>
-        </ul>
+
+        <!-- ENTERPRISE VENDOR PLAN -->
+        <div class="pricing-card enterprise-card">
+          <div class="plan-header">
+            <div class="plan-icon">🏆</div>
+            <div class="plan-name">Enterprise Seller</div>
+            <p class="plan-desc">Maximum visibility & tools</p>
+          </div>
+          <div class="pricing-display">
+            <span class="price">Rs. 14,999</span>
+            <span class="price-period">/month</span>
+            <p class="enterprise-note">or Rs. 149,990/year (Save 17%)</p>
+          </div>
+          <a href="../vendor/payment-methods.html?plan=enterprise" class="btn-plan enterprise">Become Enterprise</a>
+          <div class="divider"></div>
+          <ul class="features-list">
+            <li><span class="feature-icon">✓</span> Everything in Growth Plan</li>
+            <li><span class="feature-icon">✓</span> Unlimited featured listings</li>
+            <li><span class="feature-icon">✓</span> Prime shop placement</li>
+            <li><span class="feature-icon">✓</span> Dedicated seller manager</li>
+            <li><span class="feature-icon">✓</span> 24/7 priority phone support</li>
+            <li><span class="feature-icon">✓</span> Custom analytics reports</li>
+            <li><span class="feature-icon">✓</span> API access for integrations</li>
+          </ul>
+        </div>
       </div>
-
-      <!-- ENTERPRISE PLAN -->
-      <div class="pricing-card enterprise-card">
-        <div class="plan-header">
-          <div class="plan-icon">🏢</div>
-          <div class="plan-name">Enterprise</div>
-          <p class="plan-desc">For large organizations</p>
-        </div>
-        <div class="pricing-display">
-          <span class="price">Custom Pricing</span>
-          <p class="enterprise-note">Contact our sales team for a personalized quote</p>
-        </div>
-        <a href="contact.html" class="btn-plan enterprise">Contact Sales</a>
-        <div class="divider"></div>
-        <ul class="features-list">
-          <li><span class="feature-icon">✓</span> Everything in Professional</li>
-          <li><span class="feature-icon">✓</span> Full API access</li>
-          <li><span class="feature-icon">✓</span> Dedicated account manager</li>
-          <li><span class="feature-icon">✓</span> Custom integrations</li>
-          <li><span class="feature-icon">✓</span> White-label solution</li>
-          <li><span class="feature-icon">✓</span> 24/7 phone support</li>
-        </ul>
-      </div>
-
-    </div> <!-- end pricing-grid -->
+    </div> <!-- end vendor-plans -->
   </div>
 </section>
 
@@ -154,112 +244,186 @@
 <section class="section features-comparison">
   <div class="container">
     <h2 class="section-title">Detailed Feature <span class="gradient-text">Comparison</span></h2>
-    <p class="section-sub">See what's included in each plan</p>
+    <p class="section-sub">See what's included in each role's plans</p>
 
-    <div class="comparison-table-wrap">
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th class="starter-col">Starter</th>
-            <th class="professional-col">Professional</th>
-            <th class="enterprise-col">Enterprise</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="section-row"><td colspan="4"><strong>Core CRM Features</strong></td></tr>
-          <tr>
-            <td>Contact Management</td>
-            <td class="center">Up to 50</td>
-            <td class="center">✓ Unlimited</td>
-            <td class="center">✓ Unlimited</td>
-          </tr>
-          <tr>
-            <td>Deal Tracking</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>Task & Activity Management</td>
-            <td class="center">✓ Basic</td>
-            <td class="center">✓ Advanced</td>
-            <td class="center">✓ Advanced</td>
-          </tr>
+    <!-- CUSTOMER COMPARISON TABLE -->
+    <div id="comparison-customer" style="display: block;">
+      <h3 style="margin: 32px 0 16px; font-size: 1.25rem;">Customer Plans – Features & Benefits</h3>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="starter-col">Basic Shopper</th>
+              <th class="professional-col">Premium Member</th>
+              <th class="enterprise-col">VIP Buyer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="section-row"><td colspan="4"><strong>Shopping & Browsing</strong></td></tr>
+            <tr>
+              <td>Browse Products</td>
+              <td class="center">✓ Unlimited</td>
+              <td class="center">✓ Unlimited</td>
+              <td class="center">✓ Unlimited</td>
+            </tr>
+            <tr>
+              <td>Create Wishlists</td>
+              <td class="center">✓ Yes</td>
+              <td class="center">✓ Unlimited</td>
+              <td class="center">✓ Unlimited</td>
+            </tr>
+            <tr>
+              <td>Order Tracking</td>
+              <td class="center">✓ Basic</td>
+              <td class="center">✓ Real-time</td>
+              <td class="center">✓ Real-time</td>
+            </tr>
 
-          <tr class="section-row"><td colspan="4"><strong>Communication & Integration</strong></td></tr>
-          <tr>
-            <td>Email Integration</td>
-            <td class="center">✓ Basic</td>
-            <td class="center">✓ Full</td>
-            <td class="center">✓ Full</td>
-          </tr>
-          <tr>
-            <td>Built-in Chat</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>SMS Notifications</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Limited</td>
-            <td class="center">✓ Unlimited</td>
-          </tr>
+            <tr class="section-row"><td colspan="4"><strong>Discounts & Savings</strong></td></tr>
+            <tr>
+              <td>Discount Rate</td>
+              <td class="center">No discount</td>
+              <td class="center">10%</td>
+              <td class="center">20%</td>
+            </tr>
+            <tr>
+              <td>Free Shipping</td>
+              <td class="center">✗</td>
+              <td class="center">Min. orders</td>
+              <td class="center">✓ All orders</td>
+            </tr>
+            <tr>
+              <td>Bulk Ordering</td>
+              <td class="center">✗</td>
+              <td class="center">✓ +10% discount</td>
+              <td class="center">✓ +15% discount</td>
+            </tr>
+            <tr>
+              <td>Monthly Rewards</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Cashback</td>
+              <td class="center">✓ Vouchers</td>
+            </tr>
 
-          <tr class="section-row"><td colspan="4"><strong>Analytics & Reporting</strong></td></tr>
-          <tr>
-            <td>Basic Reports</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>Advanced Analytics</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>Custom Reports</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Yes</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>API Access</td>
-            <td class="center">✗</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Full</td>
-          </tr>
+            <tr class="section-row"><td colspan="4"><strong>Support & Services</strong></td></tr>
+            <tr>
+              <td>Chat with Vendors</td>
+              <td class="center">✓ Yes</td>
+              <td class="center">✓ Priority</td>
+              <td class="center">✓ VIP priority</td>
+            </tr>
+            <tr>
+              <td>Customer Support</td>
+              <td class="center">Email only</td>
+              <td class="center">24-hour email</td>
+              <td class="center">✓ 24/7 Support</td>
+            </tr>
+            <tr>
+              <td>Dedicated Manager</td>
+              <td class="center">✗</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Yes</td>
+            </tr>
+            <tr>
+              <td>Early Sale Access</td>
+              <td class="center">✗</td>
+              <td class="center">✓ 24hrs early</td>
+              <td class="center">✓ 48hrs early</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-          <tr class="section-row"><td colspan="4"><strong>Support & Extras</strong></td></tr>
-          <tr>
-            <td>Email Support</td>
-            <td class="center">✓ 48h</td>
-            <td class="center">✓ 24h</td>
-            <td class="center">✓ 24/7</td>
-          </tr>
-          <tr>
-            <td>Phone Support</td>
-            <td class="center">✗</td>
-            <td class="center">✗</td>
-            <td class="center">✓ 24/7</td>
-          </tr>
-          <tr>
-            <td>Dedicated Manager</td>
-            <td class="center">✗</td>
-            <td class="center">✗</td>
-            <td class="center">✓ Yes</td>
-          </tr>
-          <tr>
-            <td>Data Import/Export</td>
-            <td class="center">✓ Limited</td>
-            <td class="center">✓ Unlimited</td>
-            <td class="center">✓ Unlimited</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- VENDOR COMPARISON TABLE -->
+    <div id="comparison-vendor" style="display: none;">
+      <h3 style="margin: 32px 0 16px; font-size: 1.25rem;">Vendor Plans – Features & Benefits</h3>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="starter-col">Starter Vendor</th>
+              <th class="professional-col">Growth Plan</th>
+              <th class="enterprise-col">Enterprise Seller</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="section-row"><td colspan="4"><strong>Product Listing & Shop</strong></td></tr>
+            <tr>
+              <td>Product Listings</td>
+              <td class="center">Up to 50</td>
+              <td class="center">✓ Unlimited</td>
+              <td class="center">✓ Unlimited</td>
+            </tr>
+            <tr>
+              <td>Shop Profile</td>
+              <td class="center">✓ Basic</td>
+              <td class="center">✓ Premium</td>
+              <td class="center">✓ Prime placement</td>
+            </tr>
+            <tr>
+              <td>Featured Listings</td>
+              <td class="center">✗</td>
+              <td class="center">2x/month</td>
+              <td class="center">✓ Unlimited</td>
+            </tr>
+
+            <tr class="section-row"><td colspan="4"><strong>Analytics & CRM</strong></td></tr>
+            <tr>
+              <td>Sales Dashboard</td>
+              <td class="center">✓ Basic</td>
+              <td class="center">✓ Advanced</td>
+              <td class="center">✓ Advanced +</td>
+            </tr>
+            <tr>
+              <td>Analytics Reports</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Yes</td>
+              <td class="center">✓ Custom reports</td>
+            </tr>
+            <tr>
+              <td>Customer CRM Tools</td>
+              <td class="center">Basic messaging</td>
+              <td class="center">✓ Full tools</td>
+              <td class="center">✓ Advanced CRM</td>
+            </tr>
+            <tr>
+              <td>Bulk Order Management</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Yes</td>
+              <td class="center">✓ Yes</td>
+            </tr>
+
+            <tr class="section-row"><td colspan="4"><strong>Support & Integrations</strong></td></tr>
+            <tr>
+              <td>Customer Support</td>
+              <td class="center">Email (24h)</td>
+              <td class="center">24-hour priority</td>
+              <td class="center">✓ 24/7 priority phone</td>
+            </tr>
+            <tr>
+              <td>Dedicated Manager</td>
+              <td class="center">✗</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Yes</td>
+            </tr>
+            <tr>
+              <td>API Access</td>
+              <td class="center">✗</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Full access</td>
+            </tr>
+            <tr>
+              <td>Custom Integrations</td>
+              <td class="center">✗</td>
+              <td class="center">✗</td>
+              <td class="center">✓ Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
@@ -269,35 +433,139 @@
   <div class="container">
     <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
 
-    <div class="faq-grid">
-      <div class="faq-item" onclick="toggleFAQ(this)">
-        <div class="faq-question">
-          <span>Can I switch plans anytime?</span>
-          <span class="faq-icon">+</span>
+    <!-- CUSTOMER FAQ -->
+    <div id="faq-customer" style="display: block;">
+      <h3 style="margin-bottom: 24px; font-size: 1.25rem;">Customers: Your Questions Answered</h3>
+      <div class="faq-grid">
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What's the difference between Premium Member and VIP Buyer?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Premium Members get 10% discount + free shipping on minimum orders. VIP Buyers get 20% discount on ALL orders, free shipping always, a dedicated manager, 24/7 support, and exclusive events access.
+          </div>
         </div>
-        <div class="faq-answer">
-          Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll adjust your billing accordingly.
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>Can I switch between Premium and VIP plans?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes! You can upgrade or downgrade anytime. Changes take effect immediately, and we'll adjust your next billing cycle accordingly.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>Do discounts apply to bulk orders?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes. Premium Members get an additional 10% discount on bulk orders, and VIP Buyers get an additional 15% discount on top of their 20% VIP discount.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What payment methods do you accept?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            We accept credit cards (Visa, Mastercard), debit cards, and local Sri Lankan payment methods including bank transfers and eZ Cash.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What if I'm not satisfied with my purchase?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            We offer hassle-free returns within 14 days. Premium and VIP members get priority handling. Contact our customer support team for assistance.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>Can I cancel my plan anytime?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, you can cancel your plan anytime with no penalties. Your benefits remain active until the end of your current billing cycle.
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="faq-item" onclick="toggleFAQ(this)">
-        <div class="faq-question">
-          <span>Do you offer refunds?</span>
-          <span class="faq-icon">+</span>
+    <!-- VENDOR FAQ -->
+    <div id="faq-vendor" style="display: none;">
+      <h3 style="margin-bottom: 24px; font-size: 1.25rem;">Vendors: Your Questions Answered</h3>
+      <div class="faq-grid">
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What are featured listings and how do they help?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Featured listings appear prominently on the marketplace homepage and category pages, giving your products maximum visibility. Growth Plan vendors get 2 featured listings per month; Enterprise sellers get unlimited.
+          </div>
         </div>
-        <div class="faq-answer">
-          We offer a 30-day money-back guarantee on all plans. If you're not satisfied, we'll refund your payment in full.
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>How many products can I list as a Starter vendor?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Starter vendors can list up to 50 products. Upgrade to Growth Plan or Enterprise Seller for unlimited product listings.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What kind of analytics will I get?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Starter vendors get basic sales data. Growth Plan includes detailed analytics on views, clicks, conversions, and customer behavior. Enterprise sellers get custom analytics reports tailored to their business.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>Can I manage customer relationships on BizLink?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Growth Plan and Enterprise sellers get full CRM tools to track customer interactions, manage bulk orders, and build loyalty. Starter vendors can message customers directly through the platform.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>What's included in the dedicated seller manager for Enterprise?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Your dedicated manager helps optimize your shop setup, suggests growth strategies, troubleshoots issues, and ensures you get maximum value from BizLink. They're available for priority support calls.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>Can I integrate my own systems with BizLink?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            API access is available only for Enterprise sellers, allowing you to integrate inventory, accounting, and fulfillment systems directly with BizLink.
+          </div>
         </div>
       </div>
-
-      <div class="faq-item" onclick="toggleFAQ(this)">
-        <div class="faq-question">
-          <span>What payment methods do you accept?</span>
-          <span class="faq-icon">+</span>
-        </div>
-        <div class="faq-answer">
-          We accept credit cards (Visa, Mastercard), debit cards, and local Sri Lankan payment methods including bank transfers and eZ Cash.
-        </div>
+    </div>
+  </div>
+</section>
       </div>
 
       <div class="faq-item" onclick="toggleFAQ(this)">
@@ -336,13 +604,29 @@
 <!--CTA SECTION-->
 <section class="section cta-section">
   <div class="container">
-    <div class="cta-card">
-      <h2>Ready to Transform Your Business?</h2>
-      <p>Join thousands of Sri Lankan businesses using BizLink to manage customers, sales, and operations.</p>
-      <div class="cta-actions">
-        <a href="index.html" class="btn-hero-primary">Start Your Free Trial</a>
-        <a href="contact.html" class="btn-hero-outline">Schedule a Demo</a>
-        <a href="../customer/payment-methods.html?from=premiumplans" class="btn-hero-outline">Manage Payment Methods</a>
+    <!-- CUSTOMER CTA -->
+    <div id="cta-customer" style="display: block;">
+      <div class="cta-card">
+        <h2>Ready to Shop Smarter on BizLink?</h2>
+        <p>Upgrade your account and unlock exclusive discounts, free shipping, and VIP rewards.</p>
+        <div class="cta-actions">
+          <a href="../customer/payment-methods.html?from=premiumplans" class="btn-hero-primary">Upgrade My Account</a>
+          <a href="home.html" class="btn-hero-outline">Continue Shopping</a>
+          <a href="contact.html" class="btn-hero-outline">Need Help?</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDOR CTA -->
+    <div id="cta-vendor" style="display: none;">
+      <div class="cta-card">
+        <h2>Ready to Grow Your Business on BizLink?</h2>
+        <p>Upgrade your vendor plan and reach more customers with featured listings, analytics, and seller tools.</p>
+        <div class="cta-actions">
+          <a href="index.html?role=vendor" class="btn-hero-primary">Start as Vendor</a>
+          <a href="../vendor/payment-methods.html?from=premiumplans" class="btn-hero-outline">Upgrade Existing Shop</a>
+          <a href="contact.html" class="btn-hero-outline">Request Demo</a>
+        </div>
       </div>
     </div>
   </div>

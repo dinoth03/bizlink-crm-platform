@@ -1,14 +1,92 @@
 /*
 BizLink Premium Plans - Interactive Features
-Handles billing toggle, FAQ accordion, and pricing updates
+Handles role switching (customer/vendor), FAQ accordion, and pricing updates
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  initRoleTabs();
   applySelectionFromUrl();
   initBillingToggle();
   initFAQ();
   initNavbar();
 });
+
+/**
+ * Role Switching - Switch between Customer and Vendor plan views
+ */
+function switchRole(role) {
+  const validRoles = ['customer', 'vendor'];
+  if (!validRoles.includes(role)) return;
+
+  // Update tab active state
+  document.querySelectorAll('.role-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  if (event && event.target) {
+    event.target.closest('.role-tab').classList.add('active');
+  }
+
+  // Hide all plan sections, comparison tables, FAQ, and CTA
+  document.getElementById('customer-plans').style.display = 'none';
+  document.getElementById('vendor-plans').style.display = 'none';
+  document.getElementById('comparison-customer').style.display = 'none';
+  document.getElementById('comparison-vendor').style.display = 'none';
+  document.getElementById('faq-customer').style.display = 'none';
+  document.getElementById('faq-vendor').style.display = 'none';
+  document.getElementById('cta-customer').style.display = 'none';
+  document.getElementById('cta-vendor').style.display = 'none';
+
+  // Show selected role's content
+  if (role === 'customer') {
+    document.getElementById('customer-plans').style.display = 'block';
+    document.getElementById('comparison-customer').style.display = 'block';
+    document.getElementById('faq-customer').style.display = 'block';
+    document.getElementById('cta-customer').style.display = 'block';
+    document.querySelectorAll('.role-tab')[0].classList.add('active');
+  } else if (role === 'vendor') {
+    document.getElementById('vendor-plans').style.display = 'block';
+    document.getElementById('comparison-vendor').style.display = 'block';
+    document.getElementById('faq-vendor').style.display = 'block';
+    document.getElementById('cta-vendor').style.display = 'block';
+    document.querySelectorAll('.role-tab')[1].classList.add('active');
+  }
+
+  // Store preference
+  localStorage.setItem('bizlinkPlanRole', role);
+
+  // Scroll to plans section
+  const plansSection = document.querySelector('.pricing-section');
+  if (plansSection) {
+    plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function initRoleTabs() {
+  // Check if user has a stored preference
+  const savedRole = localStorage.getItem('bizlinkPlanRole') || 'customer';
+  
+  // Check URL parameter
+  const params = new URLSearchParams(window.location.search);
+  const urlRole = params.get('role');
+  
+  const roleToShow = urlRole || savedRole;
+  
+  // Set initial state
+  const tabs = document.querySelectorAll('.role-tab');
+  if (tabs.length > 0) {
+    tabs.forEach((tab, index) => {
+      const isCustomer = tab.textContent.includes('Customer');
+      if ((roleToShow === 'customer' && isCustomer) || (roleToShow === 'vendor' && !isCustomer)) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Trigger initial display
+    switchRole(roleToShow);
+  }
+}
 
 function applySelectionFromUrl() {
   const params = new URLSearchParams(window.location.search);
