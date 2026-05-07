@@ -4,15 +4,11 @@
 const ME = { id:'me', name:'Your Name', initials:'YN', role:'user', color:'#000080' };
 
 const CONTACTS = [
-  { id:'c1',  name:'Amara Perera',       initials:'AP', role:'customer', color:'#FF8C00', status:'online',  company:'—',                    phone:'+94 77 234 5678', email:'amara@gmail.com',       province:'Western',  joined:'Jan 2024' },
   { id:'c2',  name:'Lanka Tech Hub',     initials:'LT', role:'vendor',   color:'#50C878', status:'online',  company:'Lanka Tech Hub PVT',   phone:'+94 11 456 7890', email:'sales@lankatechhub.lk', province:'Western',  joined:'Mar 2023' },
-  { id:'c3',  name:'Suresh Nimal',       initials:'SN', role:'customer', color:'#FF8C00', status:'away',    company:'—',                    phone:'+94 71 345 6789', email:'suresh@gmail.com',      province:'Central',  joined:'Feb 2024' },
   { id:'c4',  name:'Kandy Weaves',       initials:'KW', role:'vendor',   color:'#50C878', status:'offline', company:'Kandy Weaves PVT',     phone:'+94 81 567 8901', email:'hello@kandyweaves.lk',  province:'Central',  joined:'Dec 2022' },
   { id:'c5',  name:'Nuwara Tea Estate',  initials:'NT', role:'vendor',   color:'#50C878', status:'online',  company:'Nuwara Tea Estate Ltd', phone:'+94 52 678 9012', email:'info@nuwaratea.lk',     province:'Central',  joined:'Jun 2023' },
-  { id:'c6',  name:'Dilani Bandara',     initials:'DB', role:'customer', color:'#FF8C00', status:'online',  company:'—',                    phone:'+94 76 456 7890', email:'dilani@gmail.com',       province:'Western',  joined:'Nov 2022' },
   { id:'c7',  name:'Support Team',       initials:'ST', role:'admin',    color:'#000080', status:'online',  company:'BizLink Admin',        phone:'+94 11 000 0000', email:'support@bizlink.lk',    province:'Western',  joined:'2022' },
   { id:'c8',  name:'GreenFarm SL',       initials:'GF', role:'vendor',   color:'#50C878', status:'away',    company:'GreenFarm SL PVT',     phone:'+94 41 234 5678', email:'info@greenfarm.lk',     province:'Southern', joined:'Apr 2023' },
-  { id:'c9',  name:'Priya Fernando',     initials:'PF', role:'customer', color:'#FF8C00', status:'offline', company:'—',                    phone:'+94 72 890 1234', email:'priya@yahoo.com',        province:'Southern', joined:'Mar 2023' },
   { id:'c10', name:'Siddhalepa Wellness',initials:'SW', role:'vendor',   color:'#50C878', status:'online',  company:'Siddhalepa Wellness',  phone:'+94 11 111 2222', email:'info@siddhalepa.lk',    province:'Western',  joined:'Jan 2023' },
   { id:'ai-bot', name:'AI Assistant', initials:'🤖', role:'bot', color:'#2196F3', status:'online', company:'BizLink AI', phone:'—', email:'ai-bot@bizlink.local', province:'—', joined:'Always' },
 ];
@@ -33,18 +29,7 @@ const CONVERSATIONS = [
     ],
     quickReplies:['I\'ll check and get back','Please send the spec sheet','Let\'s schedule a call'],
   },
-  {
-    id:'conv2', contactId:'c1', pinned:false, muted:false, unread:1,
-    messages:[
-      { id:'m1', from:'c1',  text:'Hi! I placed an order yesterday (#BL-9941) but haven\'t received a confirmation email yet.', time:'9:30 AM', date:'Today', status:'read' },
-      { id:'m2', from:'me',  text:'Hi Amara! I\'m checking that right now for you.',                               time:'9:32 AM', date:'Today',     status:'read' },
-      { id:'m3', from:'me',  text:'I can see your order is confirmed and processing. The email may have gone to spam — could you check there?', time:'9:33 AM', date:'Today', status:'read' },
-      { id:'m4', from:'c1',  text:'Oh found it in spam! Thank you so much 😊',                                     time:'9:35 AM', date:'Today',     status:'read' },
-      { id:'m5', from:'me',  text:'Happy to help! Your order will ship within 1–2 business days.',                 time:'9:36 AM', date:'Today',     status:'delivered' },
-      { id:'m6', from:'c1',  text:'Wonderful. Also, do you have the Galaxy Pro in Silver?',                        time:'9:40 AM', date:'Today',     status:'unread' },
-    ],
-    quickReplies:['Yes, we have it in stock','Let me check availability','I\'ll confirm shortly'],
-  },
+
   {
     id:'conv3', contactId:'c5', pinned:false, muted:false, unread:0,
     messages:[
@@ -70,27 +55,8 @@ const CONVERSATIONS = [
     ],
     quickReplies:['Sounds great!','What\'s the timeline?','Please send an update'],
   },
-  {
-    id:'conv5', contactId:'c3', pinned:false, muted:true, unread:0,
-    messages:[
-      { id:'m1', from:'c3',  text:'Hello, I need help with my return request for order #BL-9840.',                time:'3:20 PM', date:'Mon',       status:'read' },
-      { id:'m2', from:'me',  text:'Hi Suresh! I can see your order. What\'s the reason for the return?',         time:'3:25 PM', date:'Mon',       status:'read' },
-      { id:'m3', from:'c3',  text:'The item arrived damaged. The packaging was torn.',                             time:'3:27 PM', date:'Mon',       status:'read' },
-      { id:'m4', from:'me',  text:'I\'m sorry to hear that. I\'ve initiated a replacement order at no cost. You\'ll receive a confirmation email shortly.', time:'3:30 PM', date:'Mon', status:'read' },
-      { id:'m5', from:'c3',  text:'Thank you so much! Great service.',                                            time:'3:32 PM', date:'Mon',       status:'read' },
-    ],
-    quickReplies:['How can I help further?','Your case has been resolved','Please rate your experience'],
-  },
-  {
-    id:'conv6', contactId:'c6', pinned:false, muted:false, unread:0,
-    messages:[
-      { id:'m1', from:'c6',  text:'Hi! I wanted to ask about the new loyalty program for customers.',             time:'11:00 AM', date:'Mon',      status:'read' },
-      { id:'m2', from:'me',  text:'Hi Dilani! The loyalty program launches next month. Customers earn points on every purchase.', time:'11:05 AM', date:'Mon', status:'read' },
-      { id:'m3', from:'c6',  text:'That sounds amazing! Will existing customers be enrolled automatically?',      time:'11:08 AM', date:'Mon',      status:'read' },
-      { id:'m4', from:'me',  text:'Yes, all registered customers will be enrolled automatically.',                 time:'11:10 AM', date:'Mon',      status:'read' },
-    ],
-    quickReplies:['You\'ll be notified via email','Check your account settings','Yes, automatically enrolled'],
-  },
+
+
   {
     id:'ai-conv', contactId:'ai-bot', pinned:false, muted:false, unread:0, isAI:true,
     messages:[
@@ -134,7 +100,7 @@ let ME_USER_ID = null;
 let isGuestMode = false;
 let accessDeniedMode = false;
 
-const CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
+let CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
 
 function renderCurrentUserBadge() {
   const ruName = document.querySelector('.ru-name');
@@ -234,10 +200,22 @@ async function loadChatDataFromApi() {
       return false;
     }
 
-    if (String(payload.current_user?.role || '').toLowerCase() !== 'customer') {
-      showChatAccessDenied('customer_only_chat');
+    if (!['customer', 'vendor', 'admin'].includes(String(payload.current_user?.role || '').toLowerCase())) {
+      showChatAccessDenied('unauthorized_role');
       return false;
     }
+
+    // Set allowed contact roles based on current user's role
+    const currentRole = String(payload.current_user.role).toLowerCase();
+    if (currentRole === 'customer') {
+      CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
+    } else if (currentRole === 'vendor') {
+      CHAT_ALLOWED_CONTACT_ROLES = ['customer', 'admin'];
+    } else if (currentRole === 'admin') {
+      CHAT_ALLOWED_CONTACT_ROLES = ['customer', 'vendor', 'admin'];
+    }
+
+    renderRoleFilterChips(currentRole);
 
     isGuestMode = false;
     ME_USER_ID = Number(payload.current_user.id);
@@ -267,8 +245,8 @@ async function bootstrapChatIdentity() {
     if (identity && identity.user) {
       ME_USER_ID = Number(identity.user.user_id || 0) || ME_USER_ID;
       applyChatIdentity(identity.user);
-      if (String(identity.user.role || '').toLowerCase() !== 'customer') {
-        showChatAccessDenied('role_not_customer');
+      if (!['customer', 'vendor', 'admin'].includes(String(identity.user.role || '').toLowerCase())) {
+        showChatAccessDenied('role_unauthorized');
         return false;
       }
       return true;
@@ -291,6 +269,13 @@ function conversationDbId(convId) {
 
 /*INIT*/
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initial filter of static data
+  try {
+    filterStaticContactsByRole();
+  } catch (e) {
+    console.error('filterStaticContactsByRole failed', e);
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const chatRoleParam = urlParams.get('chatRole');
   const aiParam = urlParams.get('ai');
@@ -316,16 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // If API is not active and we have static data, ensure customers are not shown
-  // when the current user is a customer (we only allow vendor/admin contacts)
-  try {
-    if ((ME.role || '').toLowerCase() === 'customer') {
-      filterStaticContactsForCustomer();
-    }
-  } catch (e) {
-    console.error('filterStaticContactsForCustomer failed', e);
-  }
-
+  // Data is already filtered above or by API
   renderConvoList();
   renderEmojiPicker();
   renderTemplates();
@@ -1250,11 +1226,39 @@ function getVisibleContacts() {
   return CONTACTS.filter(contact => allowedRoles.includes(contact.role));
 }
 
-function filterStaticContactsForCustomer() {
-  const allowed = new Set(CHAT_ALLOWED_CONTACT_ROLES);
+function renderRoleFilterChips(userRole) {
+  const container = document.querySelector('.filter-chips');
+  if (!container) return;
+
+  const currentFilter = state.filter;
+  const unreadCount = document.getElementById('unreadCount')?.textContent || '0';
+
+  let html = `
+    <button class="fchip ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="fchip ${currentFilter === 'unread' ? 'active' : ''}" data-filter="unread" onclick="setFilter('unread',this)">Unread <span class="fchip-count" id="unreadCount">${unreadCount}</span></button>
+  `;
+
+  if (userRole === 'customer' || userRole === 'admin') {
+    html += `<button class="fchip ${currentFilter === 'vendors' ? 'active' : ''}" data-filter="vendors" onclick="setFilter('vendors',this)">Vendors</button>`;
+  }
+  
+  if (userRole === 'vendor' || userRole === 'admin') {
+    html += `<button class="fchip ${currentFilter === 'customers' ? 'active' : ''}" data-filter="customers" onclick="setFilter('customers',this)">Customers</button>`;
+  }
+
+  html += `<button class="fchip ${currentFilter === 'admin' ? 'active' : ''}" data-filter="admin" onclick="setFilter('admin',this)">Admin</button>`;
+  html += `<button class="fchip ai-chip" onclick="startAIChat()" title="Chat with AI Assistant">🤖 AI</button>`;
+
+  container.innerHTML = html;
+}
+
+function filterStaticContactsByRole() {
+  const allowed = new Set(CHAT_ALLOWED_CONTACT_ROLES.map(r => String(r).toLowerCase()));
   // Remove contacts not matching allowed roles
   for (let i = CONTACTS.length - 1; i >= 0; i--) {
-    if (!allowed.has(String(CONTACTS[i].role).toLowerCase())) {
+    const role = String(CONTACTS[i].role || '').toLowerCase();
+    // Keep bot and allowed roles
+    if (role !== 'bot' && !allowed.has(role)) {
       CONTACTS.splice(i, 1);
     }
   }
@@ -1262,7 +1266,8 @@ function filterStaticContactsForCustomer() {
   // Remove conversations involving removed contacts
   for (let i = CONVERSATIONS.length - 1; i >= 0; i--) {
     const contact = getContact(CONVERSATIONS[i].contactId);
-    if (!contact || !allowed.has(String(contact.role).toLowerCase())) {
+    const role = String(contact.role || '').toLowerCase();
+    if (role !== 'bot' && !allowed.has(role)) {
       CONVERSATIONS.splice(i, 1);
     }
   }
@@ -1311,7 +1316,7 @@ function startNewChat(contactId) {
   }
   const contact = getContact(contactId);
   if (!CHAT_ALLOWED_CONTACT_ROLES.includes(String(contact?.role || '').toLowerCase())) {
-    showToast('Customers can only message vendors and admin.', 'warn');
+    showToast('You are not authorized to message this user role.', 'warn');
     return;
   }
   const existing = CONVERSATIONS.find(c => c.contactId === contactId);

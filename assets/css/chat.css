@@ -90,6 +90,19 @@ button{cursor:pointer;font-family:var(--font-b);border:none;background:none;}
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);
 }
 
+/* Chat Locked State */
+.chat-locked .left-rail,
+.chat-locked .chat-main .chat-window,
+.chat-locked .info-panel {
+  display: none !important;
+}
+.chat-locked .chat-main {
+  flex: 1;
+}
+.chat-locked .empty-state.hidden {
+  display: flex !important;
+}
+
 /* ─── Shell ─── */
 .shell{
   position:relative;z-index:1;

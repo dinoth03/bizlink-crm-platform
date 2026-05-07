@@ -404,12 +404,43 @@ function updateMarketplaceCounts(products, categories) {
   });
 }
 
+async function getMarketplaceStats() {
+  try {
+    if (typeof API_BASE === 'string') {
+      const payload = await fetchJsonWithTimeout(API_BASE + 'get_homepage_stats.php');
+      if (payload && payload.success && payload.data) {
+        return payload.data;
+      }
+    }
+  } catch (error) {
+    if (error && error.name === 'AbortError') {
+      console.debug('Marketplace stats API timeout');
+    } else {
+      console.debug('Marketplace stats API read failed:', error?.message || error);
+    }
+  }
+
+  return null;
+}
+
+function updateMarketplaceHeroStats(stats, fallbackProducts = []) {
+  const heroCounters = document.querySelectorAll('.hs-num');
+  const productCount = Number(stats?.products ?? fallbackProducts.length ?? 0);
+  const vendorCount = Number(stats?.vendors ?? new Set(fallbackProducts.map((p) => p.company)).size ?? 0);
+  const provinceCount = Number(stats?.provinces ?? 0);
+
+  if (heroCounters[0]) heroCounters[0].setAttribute('data-target', String(productCount));
+  if (heroCounters[1]) heroCounters[1].setAttribute('data-target', String(vendorCount));
+  if (heroCounters[2]) heroCounters[2].setAttribute('data-target', String(provinceCount));
+}
+
 async function loadMarketplaceData() {
   try {
-    const [apiProducts, apiCategories, apiOrders] = await Promise.all([
+    const [apiProducts, apiCategories, apiOrders, marketplaceStats] = await Promise.all([
       getMarketplacePublicList('get_products.php'),
       getMarketplacePublicList('get_categories.php'),
-      getMarketplaceOptionalList('get_orders.php')
+      getMarketplaceOptionalList('get_orders.php'),
+      getMarketplaceStats()
     ]);
 
     if (apiProducts && apiProducts.length > 0) {
@@ -424,6 +455,7 @@ async function loadMarketplaceData() {
       );
 
       updateMarketplaceCounts(getCatalog(), apiCategories || []);
+      updateMarketplaceHeroStats(marketplaceStats, getCatalog());
       return true;
     }
   } catch (error) {
@@ -432,6 +464,7 @@ async function loadMarketplaceData() {
 
   state.catalog = [...PRODUCTS].filter(hasValidLocalImage);
   updateMarketplaceCounts(getCatalog(), []);
+  updateMarketplaceHeroStats(null, getCatalog());
   return false;
 }
 

@@ -3,7 +3,7 @@ require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
 
-requireAuth(['customer']);
+requireAuth(['customer', 'vendor', 'admin']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -36,6 +36,8 @@ $role = strtolower((string)($current['role'] ?? ''));
 $targetRole = strtolower((string)($targetUser['role'] ?? ''));
 $allowedMap = [
     'customer' => ['vendor', 'admin'],
+    'vendor'   => ['customer', 'admin'],
+    'admin'    => ['customer', 'vendor', 'admin'],
 ];
 
 if (!in_array($targetRole, $allowedMap[$role] ?? [], true)) {

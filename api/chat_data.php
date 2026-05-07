@@ -4,7 +4,7 @@ require 'config.php';
 require_once 'api_helpers.php';
 
 // Require authentication
-requireAuth(['customer']);
+requireAuth(['customer', 'vendor', 'admin']);
 
 $userId = getCurrentUser()['user_id'];
 
@@ -40,6 +40,8 @@ if (!$currentUser) {
 
 $allowedContactRolesMap = [
     'customer' => ['vendor', 'admin'],
+    'vendor'   => ['customer', 'admin'],
+    'admin'    => ['customer', 'vendor', 'admin'],
 ];
 
 $allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];
@@ -134,7 +136,7 @@ while ($conv = $convRes->fetch_assoc()) {
     $contact = $contactRes->fetch_assoc();
     $contactStmt->close();
 
-    if (!$contact) {
+    if (!$contact || !in_array(strtolower((string)$contact['role']), $allowedContactRoles, true)) {
         continue;
     }
 
