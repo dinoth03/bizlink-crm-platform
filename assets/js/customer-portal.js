@@ -9,6 +9,30 @@
 
     const role = String(identity.user.role || '').toLowerCase().trim();
     currentUserRole = role || 'customer';
+    // Update basic vendor UI with profile info (email, premium badge)
+    try {
+      const profile = identity.profile || {};
+      if (role === 'vendor') {
+        const emailEl = document.getElementById('vendorProfileEmail');
+        if (emailEl && identity.user.email) emailEl.textContent = identity.user.email;
+
+        const badgeEl = document.getElementById('vendorPremiumBadge');
+        const rawPremium = (profile.is_premium !== undefined) ? profile.is_premium : identity.user.is_premium;
+        const isPremium = Number(rawPremium) === 1 || String(rawPremium).toLowerCase() === 'true';
+        if (badgeEl) {
+          if (isPremium) {
+            badgeEl.style.display = 'block';
+            const expiry = profile.premium_expiry_date || '';
+            if (expiry) badgeEl.textContent = `💎 Premium Active — valid until ${expiry}`;
+            else badgeEl.textContent = '💎 Premium Active';
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Unable to set vendor profile UI.', e);
+    }
     const canAccessPaymentsAsVendor = pageType === 'payments' && role === 'vendor';
     if (role !== 'customer' && !canAccessPaymentsAsVendor) {
       // If mismatch, go back to the router with the intended role

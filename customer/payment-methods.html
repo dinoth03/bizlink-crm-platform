@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../assets/css/customer-portal.css"/>
 </head>
-<body data-page="payments">
+<body data-page="payments" data-role="customer">
   <nav class="navbar">
     <div class="nav-inner">
       <a href="dashboard.html" class="logo"><span class="logo-icon">⬡</span>Biz<strong>Link</strong></a>
@@ -91,64 +91,12 @@
       </section>
 
       <section class="card" style="margin-top: 16px;">
-        <h3 style="margin-bottom: 8px;">Premium Plan Billing</h3>
-        <p class="muted" style="margin-bottom: 14px;">Use your saved card to continue premium plan upgrades. Choose a plan below to proceed.</p>
-
-        <!-- Inline compact customer plans panel -->
-        <div id="customer-mini-plans" style="display:block;margin-bottom:16px;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
-            <div style="background:var(--card-bg, #071022);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
-              <div style="font-weight:700;margin-bottom:6px;">Basic Shopper</div>
-              <div style="color:var(--muted,#9aa4b2);font-size:0.95rem;margin-bottom:8px;">FREE • Forever</div>
-              <ul style="font-size:0.9rem;margin:6px 0 10px;padding-left:18px;color:var(--muted,#9aa4b2)">
-                <li>Browse & wishlist</li>
-                <li>Chat with vendors</li>
-                <li>Order tracking</li>
-              </ul>
-              <div>
-                <button class="action-btn" data-choose-plan="basic-shopper">Choose</button>
-              </div>
-            </div>
-
-            <div style="background:var(--card-bg, #071022);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
-              <div style="font-weight:700;margin-bottom:6px;">Premium Member</div>
-              <div style="color:var(--muted,#9aa4b2);font-size:0.95rem;margin-bottom:8px;">Rs. 999 / month</div>
-              <ul style="font-size:0.9rem;margin:6px 0 10px;padding-left:18px;color:var(--muted,#9aa4b2)">
-                <li>10% discount on orders</li>
-                <li>Free shipping (min order)</li>
-                <li>Priority support & deals</li>
-              </ul>
-              <div>
-                <button class="action-btn primary" data-choose-plan="premium-member">Upgrade</button>
-              </div>
-            </div>
-
-            <div style="background:var(--card-bg, #071022);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
-              <div style="font-weight:700;margin-bottom:6px;">VIP Buyer</div>
-              <div style="color:var(--muted,#9aa4b2);font-size:0.95rem;margin-bottom:8px;">Rs. 4,999 / month</div>
-              <ul style="font-size:0.9rem;margin:6px 0 10px;padding-left:18px;color:var(--muted,#9aa4b2)">
-                <li>20% discount on all orders</li>
-                <li>Free shipping on all orders</li>
-                <li>Dedicated VIP manager</li>
-              </ul>
-              <div>
-                <button class="action-btn primary" data-choose-plan="vip-buyer">Become VIP</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <a class="action-btn" data-premium-plan-link="view" href="../pages/premiumplans.html?role=customer">View Full Plans</a>
-          <a class="action-btn primary" data-premium-plan-link="starter" href="../pages/premiumplans.html?role=customer&amp;plan=starter&amp;billing=monthly">Choose Starter Plan</a>
-          <a class="action-btn primary" data-premium-plan-link="professional" href="../pages/premiumplans.html?role=customer&amp;plan=professional&amp;billing=monthly">Choose Professional Plan</a>
-        </div>
-        <div id="premium-selection-confirm" style="display:none;margin-top:12px;padding:10px;border-radius:8px;background:#0b2b12;color:#b7ffd0;font-weight:600;"></div>
+        <h3 style="margin-bottom: 8px;">Premium Plans Removed</h3>
+        <p class="muted" style="margin-bottom: 0;">Customer premium plans are no longer available. Use this page only to manage your saved payment methods.</p>
       </section>
     </div>
   </main>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/customer-portal.js"></script>
-  <script src="../assets/js/customer-premium.js"></script>
 </body>
 </html>

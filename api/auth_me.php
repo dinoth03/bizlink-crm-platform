@@ -29,7 +29,7 @@ $profile = [];
 $role = strtolower((string)$user['role']);
 
 if ($role === 'vendor') {
-    $vendorSql = "SELECT vendor_id, business_name, business_category, business_email, business_phone, verification_status
+    $vendorSql = "SELECT vendor_id, business_name, business_category, business_email, business_phone, verification_status, is_premium, premium_expiry_date
                   FROM vendors
                   WHERE user_id = ?
                   LIMIT 1";

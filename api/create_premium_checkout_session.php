@@ -33,6 +33,7 @@ $clientIp = getClientIpAddress();
 requireRateLimit($conn, $clientIp, 'stripe_premium_by_ip', 10, 900);
 
 $payload = readJsonPayload();
+$requestRole = strtolower(trim((string)($payload['role'] ?? $userRole)));
 $plan = trim(strtolower((string)($payload['plan'] ?? '')));
 $billing = trim(strtolower((string)($payload['billing'] ?? 'monthly')));
 $paymentMethodHint = trim(strtolower((string)($payload['payment_method_hint'] ?? '')));
@@ -40,14 +41,30 @@ $paymentLast4 = trim((string)($payload['payment_last4'] ?? ''));
 $paymentBrand = trim(strtolower((string)($payload['payment_brand'] ?? '')));
 $paymentType = trim(strtolower((string)($payload['payment_type'] ?? '')));
 
-$validPlans = ['starter', 'professional'];
-if (!in_array($plan, $validPlans, true)) {
-    apiError('VALIDATION_ERROR', 'Invalid plan selected.', 422);
-}
-
 $validBilling = ['monthly', 'annual'];
 if (!in_array($billing, $validBilling, true)) {
     apiError('VALIDATION_ERROR', 'Invalid billing period.', 422);
+}
+
+$planCatalog = [
+    'customer' => [
+        'starter' => ['monthly' => 0, 'annual' => 0],
+        'premium-member' => ['monthly' => 999, 'annual' => 9990],
+        'vip-buyer' => ['monthly' => 4999, 'annual' => 49990],
+        'professional' => ['monthly' => 7999, 'annual' => 95988],
+    ],
+    'vendor' => [
+        'growth' => ['monthly' => 4999, 'annual' => 49990],
+        'enterprise' => ['monthly' => 14999, 'annual' => 149990],
+    ],
+];
+
+if (!isset($planCatalog[$requestRole])) {
+    apiError('VALIDATION_ERROR', 'Invalid account role selected.', 422);
+}
+
+if (!array_key_exists($plan, $planCatalog[$requestRole])) {
+    apiError('VALIDATION_ERROR', 'Invalid plan selected for this role.', 422);
 }
 
 if ($paymentMethodHint !== '' && !preg_match('/^[a-z0-9_\-]{3,40}$/', $paymentMethodHint)) {
@@ -66,19 +83,7 @@ if ($paymentType !== '' && !preg_match('/^[a-z0-9_\- ]{2,24}$/', $paymentType)) 
     apiError('VALIDATION_ERROR', 'Invalid payment type value.', 422);
 }
 
-// Define Prices (in LKR)
-$prices = [
-    'starter' => [
-        'monthly' => 2999,
-        'annual' => 35988
-    ],
-    'professional' => [
-        'monthly' => 7999,
-        'annual' => 95988
-    ]
-];
-
-$amount = $prices[$plan][$billing];
+$amount = $planCatalog[$requestRole][$plan][$billing];
 $unitAmount = (int)round($amount * 100);
 
 $cfg = stripeGetConfig();
@@ -86,15 +91,16 @@ if ($cfg['secret_key'] === '') {
     apiError('STRIPE_NOT_CONFIGURED', 'Stripe is not configured.', 500);
 }
 
-$planName = ucfirst($plan) . ' Plan (' . ucfirst($billing) . ')';
+$planLabel = ucwords(str_replace('-', ' ', $plan));
+$planName = $planLabel . ' Plan (' . ucfirst($billing) . ')';
 $customerEmail = trim((string)($currentUser['email'] ?? ''));
 
 // Update success/cancel URLs for premium plans based on user role.
-$successPath = $userRole === 'vendor'
+$successPath = $requestRole === 'vendor'
     ? '/vendor/vendorpanel.html?page=profile&payment=success&session_id={CHECKOUT_SESSION_ID}'
     : '/customer/dashboard.html?payment=success&session_id={CHECKOUT_SESSION_ID}';
 $successUrl = $cfg['app_base_url'] . $successPath;
-$cancelUrl = $cfg['app_base_url'] . '/pages/premiumplans.html?payment=cancelled&role=' . $userRole;
+$cancelUrl = $cfg['app_base_url'] . '/pages/premiumplans.html?payment=cancelled&role=' . $requestRole;
 
 $stripePayload = [
     'mode' => 'payment', // Using payment mode for simplicity, could be 'subscription' if we had Stripe products set up
@@ -106,15 +112,19 @@ $stripePayload = [
     'line_items[0][price_data][product_data][name]' => 'BizLink Premium: ' . $planName,
     'line_items[0][quantity]' => '1',
     'metadata[type]' => 'premium_subscription',
+    'metadata[account_role]' => $requestRole,
     'metadata[plan]' => $plan,
     'metadata[billing]' => $billing,
     'metadata[user_id]' => (string)$userId,
     'metadata[user_role]' => $userRole,
+    'metadata[requested_role]' => $requestRole,
     'payment_intent_data[metadata][type]' => 'premium_subscription',
+    'payment_intent_data[metadata][account_role]' => $requestRole,
     'payment_intent_data[metadata][plan]' => $plan,
     'payment_intent_data[metadata][billing]' => $billing,
     'payment_intent_data[metadata][user_id]' => (string)$userId,
     'payment_intent_data[metadata][user_role]' => $userRole,
+    'payment_intent_data[metadata][requested_role]' => $requestRole,
 ];
 
 if ($customerEmail !== '') {
@@ -158,6 +168,7 @@ apiSuccess([
     'session_id' => $sessionId,
     'checkout_url' => $checkoutUrl,
     'plan' => $plan,
+    'role' => $requestRole,
     'billing' => $billing,
     'selected_payment_method' => $paymentMethodHint,
     'amount' => $amount,
