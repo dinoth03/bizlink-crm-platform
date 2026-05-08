@@ -587,6 +587,29 @@ CREATE TABLE vendor_reviews (
     INDEX idx_customer_id (customer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+7. SHOPPING CART TABLE
+
+-- Shopping Cart Table
+CREATE TABLE shopping_cart (
+    cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    variant_id INT,
+    quantity INT NOT NULL DEFAULT 1,
+    price_at_addition DECIMAL(15,2) NOT NULL,
+    discount_price_at_addition DECIMAL(15,2),
+    notes VARCHAR(500),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cart_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_variant FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id) ON DELETE SET NULL,
+    UNIQUE KEY unique_customer_product_variant (customer_id, product_id, variant_id),
+    INDEX idx_customer_id (customer_id),
+    INDEX idx_product_id (product_id),
+    INDEX idx_added_at (added_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 8. WISHLIST & PREFERENCES TABLES
 
 -- Wishlist Table
