@@ -534,7 +534,62 @@ function initCheckoutGuard() {
     event.preventDefault();
     const allowed = await requireCustomerForPurchase();
     if (!allowed) return;
-    window.alert('Checkout will be available after cart API integration.');
+
+    if (!Array.isArray(state.cart) || state.cart.length === 0) {
+      window.alert('Your cart is empty. Add products before checkout.');
+      return;
+    }
+
+    if (typeof apiRequest !== 'function') {
+      window.alert('Checkout is not available right now.');
+      return;
+    }
+
+    const cartItems = state.cart.map((item) => {
+      const product = findCatalogProductById(item.id);
+      const productId = product && Number(product.api_product_id || 0) > 0
+        ? Number(product.api_product_id)
+        : Number(item.id);
+
+      return {
+        product_id: productId,
+        quantity: Number(item.qty || 1)
+      };
+    });
+
+    try {
+      const result = await apiRequest('create_order.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cart_items: cartItems })
+      });
+
+      const payload = result && result.data ? result.data : null;
+      if (!result || !result.ok || !payload || !payload.success || !payload.data) {
+        const message = payload && payload.message ? payload.message : 'Unable to place the order right now.';
+        window.alert(message);
+        return;
+      }
+
+      const createdOrders = Array.isArray(payload.data.orders_created) ? payload.data.orders_created : [];
+      const orderNumbers = createdOrders.map((order) => order.order_number).filter(Boolean);
+
+      state.cart = [];
+      updateCartBadge();
+      renderCartItems();
+      renderProducts();
+
+      window.alert(
+        orderNumbers.length > 0
+          ? `Order placed successfully. Order number(s): ${orderNumbers.join(', ')}`
+          : 'Order placed successfully.'
+      );
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      window.alert('Unable to place the order at this moment.');
+    }
   });
 }
 
