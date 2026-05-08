@@ -1,8 +1,4 @@
--- ============================================================================
--- BizLink CRM Platform - MySQL Database Schema
--- Version: 1.0
--- Created: March 2, 2026
--- ============================================================================
+BizLink CRM Platform - MySQL Database Schema
 
 -- Create Database
 CREATE DATABASE IF NOT EXISTS bizlink_crm;
@@ -11,9 +7,7 @@ USE bizlink_crm;
 -- Set default character set to UTF-8
 ALTER DATABASE bizlink_crm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- ============================================================================
--- 1. USER MANAGEMENT TABLES
--- ============================================================================
+1. USER MANAGEMENT TABLES
 
 -- Core Users Table
 CREATE TABLE users (
@@ -207,9 +201,7 @@ CREATE TABLE rate_limit_log (
     INDEX idx_rate_limit_identifier (identifier)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 2. PRODUCT/SERVICE MANAGEMENT TABLES
--- ============================================================================
+2. PRODUCT/SERVICE MANAGEMENT TABLES
 
 -- Product Categories Table
 CREATE TABLE product_categories (
@@ -287,9 +279,7 @@ CREATE TABLE product_variants (
     INDEX idx_product_id (product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 3. ORDER MANAGEMENT TABLES
--- ============================================================================
+3. ORDER MANAGEMENT TABLES
 
 -- Orders Table
 CREATE TABLE orders (
@@ -367,9 +357,7 @@ CREATE TABLE order_shipments (
     CONSTRAINT fk_shipments_order FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 4. PAYMENT & COMMISSION TABLES
--- ============================================================================
+4. PAYMENT & COMMISSION TABLES
 
 -- Payments Table
 CREATE TABLE payments (
@@ -437,9 +425,7 @@ CREATE TABLE vendor_payouts (
     INDEX idx_payout_status (payout_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 5. CUSTOMER RELATIONSHIP MANAGEMENT TABLES
--- ============================================================================
+5. CUSTOMER RELATIONSHIP MANAGEMENT TABLES
 
 -- Vendor Customers Table (Vendor's CRM)
 CREATE TABLE vendor_customers (
@@ -479,9 +465,7 @@ CREATE TABLE customer_interactions (
     CONSTRAINT fk_interactions_created_by FOREIGN KEY (created_by) REFERENCES users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 6. MESSAGING & CHAT TABLES
--- ============================================================================
+ 6. MESSAGING & CHAT TABLES
 
 -- Conversations Table
 CREATE TABLE conversations (
@@ -548,9 +532,7 @@ CREATE TABLE message_reads (
     INDEX idx_mr_read_at (read_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 7. REVIEWS & RATINGS TABLES
--- ============================================================================
+7. REVIEWS & RATINGS TABLES
 
 -- Product Reviews Table
 CREATE TABLE product_reviews (
@@ -605,9 +587,7 @@ CREATE TABLE vendor_reviews (
     INDEX idx_customer_id (customer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 8. WISHLIST & PREFERENCES TABLES
--- ============================================================================
+8. WISHLIST & PREFERENCES TABLES
 
 -- Wishlist Table
 CREATE TABLE wishlists (
@@ -634,9 +614,7 @@ CREATE TABLE followed_vendors (
     UNIQUE KEY unique_customer_vendor (customer_id, vendor_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 9. NOTIFICATIONS SYSTEM TABLES
--- ============================================================================
+9. NOTIFICATIONS SYSTEM TABLES
 
 -- Notifications Table
 CREATE TABLE notifications (
@@ -691,9 +669,7 @@ CREATE TABLE notification_preferences (
     CONSTRAINT fk_notif_prefs_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 10. ANALYTICS & REPORTING TABLES
--- ============================================================================
+10. ANALYTICS & REPORTING TABLES
 
 -- Sales Analytics Table
 CREATE TABLE sales_analytics (
@@ -747,9 +723,7 @@ CREATE TABLE traffic_analytics (
     UNIQUE KEY unique_date_page (record_date, page_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- 11. PLATFORM MANAGEMENT TABLES
--- ============================================================================
+ 11. PLATFORM MANAGEMENT TABLES
 
 -- Platform Settings Table
 CREATE TABLE platform_settings (
@@ -801,9 +775,7 @@ CREATE TABLE audit_logs (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- INSERT DEFAULT DATA
--- ============================================================================
+INSERT DEFAULT DATA
 
 -- Insert default product categories
 INSERT INTO product_categories (category_name, category_slug, category_description, sort_order) VALUES
@@ -833,9 +805,7 @@ INSERT INTO platform_settings (setting_key, setting_value, setting_type, descrip
 ('max_upload_size', '5242880', 'integer', 'Max file upload size in bytes (5MB)'),
 ('allowed_file_types', '"jpg","png","pdf","docx","xlsx"', 'json', 'Allowed file types for upload');
 
--- ============================================================================
--- INSERT DEFAULT DATA
--- ============================================================================
+INSERT DEFAULT DATA
 
 -- Insert default product categories
 INSERT INTO product_categories (category_name, category_slug, category_description, sort_order) VALUES
@@ -865,9 +835,7 @@ INSERT INTO platform_settings (setting_key, setting_value, setting_type, descrip
 ('max_upload_size', '5242880', 'integer', 'Max file upload size in bytes (5MB)'),
 ('allowed_file_types', '"jpg","png","pdf","docx","xlsx"', 'json', 'Allowed file types for upload');
 
--- ============================================================================
--- CREATE VIEWS FOR EASY REPORTING
--- ============================================================================
+CREATE VIEWS FOR EASY REPORTING
 
 -- View: Vendor Sales Summary
 CREATE VIEW vendor_sales_summary AS
@@ -917,7 +885,3 @@ FROM customers c
 LEFT JOIN users u ON c.user_id = u.user_id
 LEFT JOIN orders o ON c.customer_id = o.customer_id
 GROUP BY c.customer_id;
-
--- ============================================================================
--- END OF DATABASE SCHEMA
--- ============================================================================
