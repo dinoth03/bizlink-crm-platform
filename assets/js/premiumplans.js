@@ -288,6 +288,7 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
     e.preventDefault();
 
     const planName = (this.dataset.plan || this.closest('.pricing-card').querySelector('.plan-name').textContent).toLowerCase();
+    const selectedRole = this.closest('#vendor-plans') ? 'vendor' : 'customer';
     const billingToggle = document.getElementById('billingToggle');
     const billing = billingToggle.classList.contains('active') ? 'annual' : 'monthly';
     const selectedPayment = getSelectedPaymentContext();
@@ -296,7 +297,7 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
     const paymentBrand = selectedPayment.brand;
     const paymentType = selectedPayment.type;
 
-    const redirectParams = new URLSearchParams({ plan: planName, billing: billing });
+    const redirectParams = new URLSearchParams({ plan: planName, billing: billing, role: selectedRole });
     if (paymentMethodHint) redirectParams.set('payment_method_hint', paymentMethodHint);
     if (paymentLast4) redirectParams.set('payment_last4', paymentLast4);
     if (paymentBrand) redirectParams.set('payment_brand', paymentBrand);
@@ -305,13 +306,21 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
     const redirectTarget = `premiumplans.html?${redirectParams.toString()}`;
     const originalText = this.textContent;
     
-    // Check if logged in as vendor
+    // Check if logged in as customer or vendor
     try {
       const response = await fetch('../api/auth_me.php');
       const auth = await response.json();
+      const userRole = String(auth?.user?.role || '').toLowerCase();
+      const isAllowedRole = userRole === 'customer' || userRole === 'vendor';
       
-      if (!auth.success || auth.user.role !== 'vendor') {
+      if (!auth.success || !isAllowedRole) {
         window.location.href = `index.html?redirect=${encodeURIComponent(redirectTarget)}`;
+        return;
+      }
+
+      if (userRole !== selectedRole) {
+        alert(`Please switch to your ${selectedRole} account to buy this plan.`);
+        window.location.href = `../dashboard.php?role=${userRole}`;
         return;
       }
 
@@ -320,7 +329,7 @@ document.querySelectorAll('.btn-plan').forEach(btn => {
       this.style.opacity = '0.7';
       this.style.pointerEvents = 'none';
 
-      const checkoutPayload = { plan: planName, billing: billing };
+      const checkoutPayload = { plan: planName, billing: billing, role: selectedRole };
       if (paymentMethodHint) checkoutPayload.payment_method_hint = paymentMethodHint;
       if (paymentLast4) checkoutPayload.payment_last4 = paymentLast4;
       if (paymentBrand) checkoutPayload.payment_brand = paymentBrand;

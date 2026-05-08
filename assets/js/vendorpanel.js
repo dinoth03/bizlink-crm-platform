@@ -164,17 +164,13 @@ function initDashCharts() {
     last7Data.push(dayTotal);
   }
 
-  const statusMap = { delivered: 0, pending: 0, cancelled: 0, processing: 0 };
-  dashboardData.orders.forEach((o) => {
-    if (o.status === 'shipped') statusMap.processing += 1;
-    else if (statusMap[o.status] !== undefined) statusMap[o.status] += 1;
-  });
-  const statusTotal = Object.values(statusMap).reduce((a, b) => a + b, 0) || 1;
+  const statusPercentages = computeStatusPercentages(dashboardData.orders);
+  updateDonutLegend(statusPercentages);
   const donutData = [
-    Math.round((statusMap.delivered / statusTotal) * 100),
-    Math.round((statusMap.pending / statusTotal) * 100),
-    Math.round((statusMap.cancelled / statusTotal) * 100),
-    Math.round((statusMap.processing / statusTotal) * 100)
+    statusPercentages.delivered,
+    statusPercentages.pending,
+    statusPercentages.cancelled,
+    statusPercentages.processing
   ];
 
   // Sales line chart
@@ -552,6 +548,98 @@ function computeStats(orders) {
   return { todaySales, totalOrders, pendingOrders, totalEarnings, monthlyRevenue };
 }
 
+function computeStatusPercentages(orders) {
+  const statusMap = { delivered: 0, pending: 0, cancelled: 0, processing: 0 };
+
+  orders.forEach((order) => {
+    const status = String(order.status || '').toLowerCase();
+    if (status === 'shipped') {
+      statusMap.processing += 1;
+    } else if (statusMap[status] !== undefined) {
+      statusMap[status] += 1;
+    }
+  });
+
+  const total = Object.values(statusMap).reduce((sum, value) => sum + value, 0);
+  if (total <= 0) {
+    return { delivered: 0, pending: 0, cancelled: 0, processing: 0 };
+  }
+
+  return {
+    delivered: Math.round((statusMap.delivered / total) * 100),
+    pending: Math.round((statusMap.pending / total) * 100),
+    cancelled: Math.round((statusMap.cancelled / total) * 100),
+    processing: Math.round((statusMap.processing / total) * 100)
+  };
+}
+
+function updateDonutLegend(statusPercentages) {
+  const deliveredEl = document.getElementById('donutDeliveredPct');
+  const pendingEl = document.getElementById('donutPendingPct');
+  const cancelledEl = document.getElementById('donutCancelledPct');
+  const processingEl = document.getElementById('donutProcessingPct');
+
+  if (deliveredEl) deliveredEl.textContent = `${statusPercentages.delivered}%`;
+  if (pendingEl) pendingEl.textContent = `${statusPercentages.pending}%`;
+  if (cancelledEl) cancelledEl.textContent = `${statusPercentages.cancelled}%`;
+  if (processingEl) processingEl.textContent = `${statusPercentages.processing}%`;
+}
+
+function computeVendorRating(activeVendor, orders) {
+  const apiRating = Number(
+    activeVendor?.avg_rating ||
+    activeVendor?.vendor_rating ||
+    activeVendor?.rating ||
+    0
+  );
+
+  if (apiRating > 0) {
+    return Math.min(5, Math.max(0, apiRating));
+  }
+
+  if (!Array.isArray(orders) || orders.length === 0) {
+    return 0;
+  }
+
+  // Fallback estimate if the backend payload doesn't include rating fields.
+  const delivered = orders.filter((order) => order.status === 'delivered').length;
+  const cancelled = orders.filter((order) => order.status === 'cancelled').length;
+  const score = 3.8 + ((delivered / orders.length) * 1.2) - ((cancelled / orders.length) * 0.8);
+  return Math.min(5, Math.max(0, Number(score.toFixed(1))));
+}
+
+function updateRatingUI(activeVendor, orders) {
+  const ratingValueEl = document.getElementById('vendorRatingValue');
+  const ratingStarsEl = document.getElementById('vendorRatingStars');
+  const rating = computeVendorRating(activeVendor, orders);
+
+  if (ratingValueEl) {
+    ratingValueEl.textContent = `${rating.toFixed(1)} / 5`;
+  }
+
+  if (ratingStarsEl) {
+    const filledStars = Math.max(0, Math.min(5, Math.round(rating)));
+    ratingStarsEl.textContent = `${'★'.repeat(filledStars)}${'☆'.repeat(5 - filledStars)}`;
+  }
+}
+
+function updateMonthlyRevenueLabel() {
+  const monthLabelEl = document.getElementById('monthlyRevenueMonthLabel');
+  if (!monthLabelEl) return;
+
+  const now = new Date();
+  monthLabelEl.textContent = now.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function updateDashboardDynamicMeta() {
+  updateRatingUI(dashboardData.activeVendor, dashboardData.orders);
+  updateDonutLegend(computeStatusPercentages(dashboardData.orders));
+  updateMonthlyRevenueLabel();
+}
+
 function updateVendorIdentity(activeVendor) {
   const sessionUser = dashboardData.sessionUser || {};
   const sessionProfile = dashboardData.sessionProfile || {};
@@ -657,6 +745,7 @@ async function loadVendorDashboardData() {
 
       updateVendorIdentity(activeVendor);
       setCounterTargets(computeStats(dashboardData.orders));
+      updateDashboardDynamicMeta();
 
       const ordersBadge = document.querySelector('.nav-item[data-page="orders"] .nav-badge');
       if (ordersBadge) {
@@ -676,6 +765,7 @@ async function loadVendorDashboardData() {
   dashboardData.activeVendor = null;
   dashboardData.loadedFromApi = false;
   setCounterTargets(computeStats(dashboardData.orders));
+  updateDashboardDynamicMeta();
 }
 
 

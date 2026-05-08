@@ -11,13 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
-// Only vendors can buy premium plans
-requireAuth(['vendor']);
+// Customers and vendors can buy premium plans
+requireAuth(['customer', 'vendor']);
 
 $currentUser = getCurrentUser();
 $userId = (int)($currentUser['user_id'] ?? 0);
+$userRole = strtolower(trim((string)($currentUser['role'] ?? '')));
 if ($userId <= 0) {
     apiError('UNAUTHORIZED', 'Unauthorized user.', 401);
+}
+
+if (!in_array($userRole, ['customer', 'vendor'], true)) {
+    apiError('FORBIDDEN', 'Only customer and vendor accounts can purchase premium plans.', 403);
 }
 
 if (CSRF_ENABLED) {
@@ -84,9 +89,12 @@ if ($cfg['secret_key'] === '') {
 $planName = ucfirst($plan) . ' Plan (' . ucfirst($billing) . ')';
 $customerEmail = trim((string)($currentUser['email'] ?? ''));
 
-// Update success/cancel URLs for premium plans
-$successUrl = $cfg['app_base_url'] . '/vendor/vendorpanel.html?page=profile&payment=success&session_id={CHECKOUT_SESSION_ID}';
-$cancelUrl = $cfg['app_base_url'] . '/pages/premiumplans.html?payment=cancelled';
+// Update success/cancel URLs for premium plans based on user role.
+$successPath = $userRole === 'vendor'
+    ? '/vendor/vendorpanel.html?page=profile&payment=success&session_id={CHECKOUT_SESSION_ID}'
+    : '/customer/dashboard.html?payment=success&session_id={CHECKOUT_SESSION_ID}';
+$successUrl = $cfg['app_base_url'] . $successPath;
+$cancelUrl = $cfg['app_base_url'] . '/pages/premiumplans.html?payment=cancelled&role=' . $userRole;
 
 $stripePayload = [
     'mode' => 'payment', // Using payment mode for simplicity, could be 'subscription' if we had Stripe products set up
@@ -101,10 +109,12 @@ $stripePayload = [
     'metadata[plan]' => $plan,
     'metadata[billing]' => $billing,
     'metadata[user_id]' => (string)$userId,
+    'metadata[user_role]' => $userRole,
     'payment_intent_data[metadata][type]' => 'premium_subscription',
     'payment_intent_data[metadata][plan]' => $plan,
     'payment_intent_data[metadata][billing]' => $billing,
     'payment_intent_data[metadata][user_id]' => (string)$userId,
+    'payment_intent_data[metadata][user_role]' => $userRole,
 ];
 
 if ($customerEmail !== '') {

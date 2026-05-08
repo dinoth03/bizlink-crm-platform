@@ -161,8 +161,8 @@
             <span class="stat-change up">Excellent</span>
           </div>
           <div class="stat-label">Customer Rating</div>
-          <div class="stat-value">4.8 / 5</div>
-          <div class="stat-stars">★★★★★</div>
+          <div class="stat-value" id="vendorRatingValue">0.0 / 5</div>
+          <div class="stat-stars" id="vendorRatingStars">☆☆☆☆☆</div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
@@ -171,7 +171,7 @@
           </div>
           <div class="stat-label">Monthly Revenue</div>
           <div class="stat-value" id="s5">Rs. 0</div>
-          <div class="stat-foot">February 2026</div>
+          <div class="stat-foot" id="monthlyRevenueMonthLabel">Current month</div>
         </div>
       </div>
 
@@ -191,10 +191,10 @@
           <div class="card-header"><span class="card-title">Order Status</span></div>
           <canvas id="donutChart" height="150"></canvas>
           <div class="donut-legend">
-            <div class="dl-item"><span class="dl-dot" style="background:var(--vendor-color)"></span>Delivered 62%</div>
-            <div class="dl-item"><span class="dl-dot" style="background:#FF8C00"></span>Pending 18%</div>
-            <div class="dl-item"><span class="dl-dot" style="background:#ff6b6b"></span>Cancelled 8%</div>
-            <div class="dl-item"><span class="dl-dot" style="background:#4f8cff"></span>Processing 12%</div>
+            <div class="dl-item"><span class="dl-dot" style="background:var(--vendor-color)"></span>Delivered <span id="donutDeliveredPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#FF8C00"></span>Pending <span id="donutPendingPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#ff6b6b"></span>Cancelled <span id="donutCancelledPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#4f8cff"></span>Processing <span id="donutProcessingPct">0%</span></div>
           </div>
         </div>
       </div>

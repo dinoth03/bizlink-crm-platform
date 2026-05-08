@@ -1,11 +1,16 @@
 (async function () {
+  const pageType = document.body.getAttribute('data-page') || '';
+  let currentUserRole = 'customer';
+
   // --- AUTH GATE ---
   if (typeof authMe === 'function') {
     const identity = await authMe(true); // Redirect to login if not authenticated
     if (!identity || !identity.user) return;
 
     const role = String(identity.user.role || '').toLowerCase().trim();
-    if (role !== 'customer') {
+    currentUserRole = role || 'customer';
+    const canAccessPaymentsAsVendor = pageType === 'payments' && role === 'vendor';
+    if (role !== 'customer' && !canAccessPaymentsAsVendor) {
       // If mismatch, go back to the router with the intended role
       // This will trigger the "Session Conflict" page in dashboard.php
       window.location.href = `../dashboard.php?role=customer`;
@@ -216,12 +221,15 @@
           url.searchParams.set('payment_type', selectedCard.type);
         }
 
+        if (currentUserRole === 'vendor' || currentUserRole === 'customer') {
+          url.searchParams.set('role', currentUserRole);
+        }
+
         window.location.href = url.toString();
       });
     });
   }
 
-  const pageType = document.body.getAttribute('data-page') || '';
   if (pageType === 'orders') initOrders();
   if (pageType === 'wishlist') initWishlist();
   if (pageType === 'followed-vendors') initVendors();
