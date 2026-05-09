@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BizLink Admin – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --admin-color: #6f42c1;
+      --admin-dark: #5a2d9c;
+      --text-primary: #1a1a2e;
+      --text-secondary: #6c757d;
+      --text-muted: #999;
+      --bg-light: #f8f9fa;
+      --bg-white: #ffffff;
+      --border-color: #e9ecef;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+    
+    .navbar {
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .navbar-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--admin-color);
+    }
+    
+    .navbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .btn-admin { background: var(--admin-color); color: white; }
+    .btn-admin:hover { background: var(--admin-dark); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+    .btn-ghost:hover { background: var(--bg-light); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: #000; }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 70px;
+      width: 250px;
+      height: calc(100vh - 70px);
+      background: var(--bg-white);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 12px 0;
+    }
+    
+    .main-content {
+      margin-left: 250px;
+      min-height: calc(100vh - 70px);
+    }
+    
+    .nav-item {
+      padding: 12px 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    
+    .nav-item:hover { background: var(--bg-light); }
+    .nav-item.active {
+      color: var(--admin-color);
+      background: rgba(111, 66, 193, 0.05);
+      border-left-color: var(--admin-color);
+    }
+    
+    .page {
+      display: none;
+      padding: 24px;
+    }
+    
+    .page.active { display: block; }
+    
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: var(--bg-white);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .stat-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--admin-color);
+      margin-bottom: 4px;
+    }
+    
+    .stat-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .card {
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .filter-tab {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-white);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    
+    .filter-tab.active {
+      background: var(--admin-color);
+      color: white;
+      border-color: var(--admin-color);
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    th {
+      background: var(--bg-light);
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 2px solid var(--border-color);
+    }
+    
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    tr:hover { background: var(--bg-light); }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-success { background: rgba(40, 167, 69, 0.1); color: var(--success); }
+    .badge-warning { background: rgba(255, 193, 7, 0.1); color: #856404; }
+    .badge-danger { background: rgba(220, 53, 69, 0.1); color: var(--danger); }
+    .badge-info { background: rgba(23, 162, 184, 0.1); color: var(--info); }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .action-buttons button {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: var(--bg-white);
+      border-radius: 8px;
+      padding: 24px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .loading { text-align: center; color: var(--text-muted); padding: 20px; }
+    .error { color: var(--danger); padding: 12px; background: rgba(220,53,69,0.1); border-radius: 4px; margin-bottom: 12px; }
+    .success { color: var(--success); padding: 12px; background: rgba(40,167,69,0.1); border-radius: 4px; margin-bottom: 12px; }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; position: relative; top: 0; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+      .main-content { margin-left: 0; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { flex-direction: column; }
+      table { font-size: 0.8rem; }
+      td, th { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-title">⬡ BizLink Admin</div>
+    <div class="navbar-actions">
+      <button class="btn btn-ghost" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-item active" onclick="adminNavigate('dashboard', this)">📊 Dashboard</div>
+    <div class="nav-item" onclick="adminNavigate('vendors', this)">🏪 Vendor Management</div>
+    <div class="nav-item" onclick="adminNavigate('products', this)">📦 Product Moderation</div>
+    <div class="nav-item" onclick="adminNavigate('disputes', this)">⚖️ Dispute Resolution</div>
+    <div class="nav-item" onclick="adminNavigate('orders', this)">📋 Orders</div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page active">
+      <div class="container">
+        <h2 style="margin-bottom: 24px;">Platform Overview</h2>
+        
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-title">Total Orders</div>
+            <div class="stat-number" id="totalOrders">0</div>
+            <div class="stat-detail">All time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Total Revenue</div>
+            <div class="stat-number" id="totalRevenue" style="font-size: 1.5rem;">Rs. 0</div>
+            <div class="stat-detail">Paid orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Total Customers</div>
+            <div class="stat-number" id="totalCustomers">0</div>
+            <div class="stat-detail">Registered users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Active Vendors</div>
+            <div class="stat-number" id="activeVendors">0</div>
+            <div class="stat-detail">Approved & active</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Pending Vendors</div>
+            <div class="stat-number" id="pendingVendors" style="color: var(--warning);">0</div>
+            <div class="stat-detail">Awaiting approval</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Active Products</div>
+            <div class="stat-number" id="totalProducts">0</div>
+            <div class="stat-detail">Approved listings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Pending Moderation</div>
+            <div class="stat-number" id="pendingProducts" style="color: var(--warning);">0</div>
+            <div class="stat-detail">Products review</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Open Disputes</div>
+            <div class="stat-number" id="pendingDisputes" style="color: var(--danger);">0</div>
+            <div class="stat-detail">Needs resolution</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDOR MANAGEMENT PAGE -->
+    <div id="page-vendors" class="page">
+      <div class="container">
+        <h2 style="margin-bottom: 24px;">Vendor Management</h2>
+        
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="adminFilterVendors('all', this)">All</button>
+                <button class="filter-tab" onclick="adminFilterVendors('pending', this)">Pending</button>
+                <button class="filter-tab" onclick="adminFilterVendors('approved', this)">Approved</button>
+                <button class="filter-tab" onclick="adminFilterVendors('rejected', this)">Rejected</button>
+              </div>
+              <div class="search-box">
+                <input type="text" id="vendorSearch" placeholder="Search vendors..." onkeyup="adminSearchVendors()">
+              </div>
+            </div>
+            
+            <div id="vendorsList" class="loading">Loading vendors...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT MODERATION PAGE -->
+    <div id="page-products" class="page">
+      <div class="container">
+        <h2 style="margin-bottom: 24px;">Product Moderation</h2>
+        
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="adminFilterProducts('all', this)">All</button>
+                <button class="filter-tab" onclick="adminFilterProducts('pending', this)">Pending</button>
+                <button class="filter-tab" onclick="adminFilterProducts('approved', this)">Approved</button>
+                <button class="filter-tab" onclick="adminFilterProducts('flagged', this)">Flagged</button>
+              </div>
+              <div class="search-box">
+                <input type="text" id="productSearch" placeholder="Search products..." onkeyup="adminSearchProducts()">
+              </div>
+            </div>
+            
+            <div id="productsList" class="loading">Loading products...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPUTE RESOLUTION PAGE -->
+    <div id="page-disputes" class="page">
+      <div class="container">
+        <h2 style="margin-bottom: 24px;">Dispute Resolution</h2>
+        
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="adminFilterDisputes('all', this)">All</button>
+                <button class="filter-tab" onclick="adminFilterDisputes('open', this)">Open</button>
+                <button class="filter-tab" onclick="adminFilterDisputes('resolved', this)">Resolved</button>
+              </div>
+              <div class="search-box">
+                <input type="text" id="disputeSearch" placeholder="Search disputes..." onkeyup="adminSearchDisputes()">
+              </div>
+            </div>
+            
+            <div id="disputesList" class="loading">Loading disputes...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS PAGE -->
+    <div id="page-orders" class="page">
+      <div class="container">
+        <h2 style="margin-bottom: 24px;">Order Management</h2>
+        <div class="card">
+          <div class="card-body">
+            <div class="loading">Orders management coming soon...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <!-- Vendor Action Modal -->
+  <div id="vendorModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Vendor Action</h3>
+        <button class="close-btn" onclick="adminCloseModal('vendorModal')">×</button>
+      </div>
+      <div id="vendorModalBody">
+        <form id="vendorActionForm">
+          <div class="form-group">
+            <label class="form-label">Vendor Name</label>
+            <input type="text" id="vendorName" class="form-control" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="text" id="vendorEmail" class="form-control" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Action</label>
+            <select id="vendorAction" class="form-control">
+              <option value="approved">Approve</option>
+              <option value="rejected">Reject</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea id="vendorNotes" class="form-control" placeholder="Add notes..."></textarea>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-admin" style="flex: 1;">Submit</button>
+            <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="adminCloseModal('vendorModal')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Moderation Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Moderate Product</h3>
+        <button class="close-btn" onclick="adminCloseModal('productModal')">×</button>
+      </div>
+      <form id="productActionForm">
+        <div class="form-group">
+          <label class="form-label">Product Name</label>
+          <input type="text" id="productName" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor</label>
+          <input type="text" id="productVendor" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Action</label>
+          <select id="productAction" class="form-control">
+            <option value="approved">Approve</option>
+            <option value="flagged">Flag for Review</option>
+            <option value="rejected">Reject</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason</label>
+          <textarea id="productReason" class="form-control" placeholder="Reason for moderation..."></textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-admin" style="flex: 1;">Submit</button>
+          <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="adminCloseModal('productModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dispute Resolution Modal -->
+  <div id="disputeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Resolve Dispute</h3>
+        <button class="close-btn" onclick="adminCloseModal('disputeModal')">×</button>
+      </div>
+      <form id="disputeActionForm">
+        <div class="form-group">
+          <label class="form-label">Order</label>
+          <input type="text" id="disputeOrder" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Issue</label>
+          <textarea id="disputeIssue" class="form-control" readonly></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Resolution</label>
+          <select id="disputeResolution" class="form-control">
+            <option value="resolved">Resolved</option>
+            <option value="refunded">Refund Customer</option>
+            <option value="replaced">Replace Product</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Resolution Notes</label>
+          <textarea id="disputeNotes" class="form-control" placeholder="Add resolution details..."></textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-admin" style="flex: 1;">Submit</button>
+          <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="adminCloseModal('disputeModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>
