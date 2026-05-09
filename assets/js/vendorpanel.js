@@ -23,8 +23,84 @@ function showPage(page) {
   }
 }
 
+// Load real analytics data from API
+async function loadDashboardAnalytics() {
+  try {
+    const response = await fetch('../api/vendor_analytics.php');
+    if (!response.ok) throw new Error('Failed to fetch analytics');
+    
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message || 'Analytics failed');
+    
+    const data = result.data || {};
+    
+    // Update stat cards with real data
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    const s3 = document.getElementById('s3');
+    const s4 = document.getElementById('s4');
+    const s5 = document.getElementById('s5');
+    
+    if (s1) s1.textContent = 'Rs. ' + (data.total_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    if (s2) s2.textContent = (data.total_orders || 0).toString();
+    if (s3) s3.textContent = (data.pending_orders || 0).toString();
+    if (s4) s4.textContent = 'Rs. ' + (data.total_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    if (s5) s5.textContent = 'Rs. ' + (data.total_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    
+    // Store for chart rendering
+    window.vendorAnalytics = data;
+    
+  } catch (error) {
+    console.error('Error loading dashboard analytics:', error);
+  }
+}
+
+// Render dashboard chart with real analytics data
+function renderDashboardChartWithAnalytics() {
+  const canvas = document.getElementById('salesChart');
+  if (!canvas) return;
+  
+  const analytics = window.vendorAnalytics || {};
+  const salesByDay = analytics.sales_by_day || [];
+  
+  // Format labels and data from sales_by_day
+  const labels = salesByDay.map(d => new Date(d.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}));
+  const data = salesByDay.map(d => d.revenue || 0);
+  
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels.length > 0 ? labels : ['No data'],
+      datasets: [{
+        label: 'Sales (Rs.)',
+        data: data.length > 0 ? data : [0],
+        borderColor: VENDOR_GREEN,
+        backgroundColor: 'rgba(80, 200, 120, 0.05)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: VENDOR_GREEN,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: true, labels: { color: CHART_TICK, font: { size: 11 } } } 
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: CHART_TICK, callback: v => 'Rs. ' + v.toLocaleString() }, grid: { color: CHART_GRID } },
+        x: { ticks: { color: CHART_TICK }, grid: { display: false } }
+      }
+    }
+  });
+}
+
 function onPageActivate(page) {
-  if (page === 'dashboard')  { animateCounters(); initDashCharts(); renderRecentOrders(); }
+  if (page === 'dashboard')  { loadDashboardAnalytics().then(() => { animateCounters(); renderDashboardChartWithAnalytics(); renderDonutChart(); renderRecentOrders(); }); }
   if (page === 'products')   { renderProducts(); }
   if (page === 'orders')     { renderOrders('all'); }
   if (page === 'customers')  { renderCustomers(); }
@@ -794,81 +870,19 @@ function renderRecentOrders() {
 
 // RENDER ALL ORDERS TABLE
 function renderOrders(filter) {
-  const tbody = document.getElementById('ordersTableBody');
-  if (!tbody) return;
-  const data = filter === 'all'
-    ? dashboardData.orders
-    : dashboardData.orders.filter((o) => o.status === filter);
-
-  if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">No orders found.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = data.map(o => `
-    <tr>
-      <td style="font-family:'Playfair Display',serif;font-size:0.75rem;color:var(--vendor-color);font-weight:700">${o.id}</td>
-      <td>${o.customer}</td>
-      <td style="color:var(--text-muted)">📍 ${o.district}</td>
-      <td style="text-align:center;color:var(--text-secondary)">${o.items}</td>
-      <td style="font-family:'Playfair Display',serif;font-size:0.82rem;color:var(--vendor-color);font-weight:700">Rs. ${o.amount.toLocaleString()}</td>
-      <td><span class="badge b-${o.payment}">${o.payment}</span></td>
-      <td><span class="badge b-${o.status}">${o.status}</span></td>
-      <td style="color:var(--text-muted)">${o.date}</td>
-      <td><button class="action-btn">📄 Invoice</button></td>
-    </tr>
-  `).join('');
+  // Delegate to the new function
+  filterVendorOrders(filter === 'all' ? 'all' : filter);
 }
 
 function filterOrders(filter, btn) {
-  document.querySelectorAll('.otab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderOrders(filter);
+  filterVendorOrders(filter, btn);
 }
 
-
-// RENDER PRODUCTS (with images)
+// RENDER PRODUCTS (using API)
 let allProducts = [];
 
 function renderProducts(list = null) {
-  if (list === null) list = allProducts;
-  const grid = document.getElementById('productsGrid');
-  if (!grid) return;
-  if (list.length === 0) {
-    grid.innerHTML = '<div style="padding:20px;color:var(--text-muted)">No products available.</div>';
-    return;
-  }
-  grid.innerHTML = list.map(p => {
-    const outStock = p.stock === 0;
-    const lowStock = p.stock > 0 && p.stock <= 5;
-    const statusColor = outStock ? '#ff6b6b' : lowStock ? '#FF8C00' : 'var(--vendor-color)';
-    const statusLabel = outStock ? '❌ Out of Stock' : lowStock ? '⚠ Low Stock' : '✅ Active';
-    return `
-      <div class="product-card">
-        <div class="product-img">
-          <img src="${p.img}" alt="${p.name}" loading="lazy"
-            onerror="this.style.display='none'" />
-          <span class="product-emoji">${p.emoji}</span>
-          <div class="product-img-label">Product Image</div>
-        </div>
-        <div class="product-body">
-          <div class="product-name">${p.name}</div>
-          <div class="product-sku">SKU: ${p.sku}</div>
-          <div class="product-price-row">
-            <span class="product-price">Rs. ${p.price.toLocaleString()}</span>
-            ${p.discount ? `<span class="product-disc">-${p.discount}%</span>` : ''}
-          </div>
-          <div class="product-footer">
-            <span class="stock-txt ${outStock ? 'out-stock' : lowStock ? 'low-stock' : ''}">${outStock ? 'Out of stock' : 'Stock: ' + p.stock}</span>
-            <span style="font-size:0.68rem;color:${statusColor}">${statusLabel}</span>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-            <button class="action-btn delete-product-btn" onclick="handleDeleteProduct(event, ${Number(p.id || 0)})">🗑 Delete</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+  loadVendorProducts(1);
 }
 
 async function handleDeleteProduct(event, productId) {
@@ -1431,3 +1445,425 @@ window.addEventListener('load', async () => {
 
 console.log('%c BizLink Vendor Dashboard 🇱🇰 ', 'background: #50C878; color: white; font-size: 14px; padding: 8px 16px; border-radius: 4px;');
 console.log('%c Built for Sri Lankan Vendors ', 'color: #FF8C00; font-size: 12px;');
+
+/* ============ PRODUCT MANAGEMENT ============ */
+let currentProductPage = 1;
+let currentProductFilter = '';
+let editingProductId = null;
+
+async function loadVendorProducts(page = 1) {
+  try {
+    currentProductPage = page;
+    const searchQuery = document.getElementById('productSearchInput')?.value || '';
+    currentProductFilter = searchQuery;
+
+    const params = new URLSearchParams({
+      page: page,
+      limit: 20,
+      search: searchQuery
+    });
+
+    const response = await fetch(`../api/vendor_get_products.php?${params}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      showToast(data.message || 'Failed to load products', 'error');
+      return;
+    }
+
+    displayVendorProducts(data.data.products, data.data.pagination);
+  } catch (error) {
+    console.error('Error loading products:', error);
+    showToast('Error loading products', 'error');
+  }
+}
+
+function displayVendorProducts(products, pagination) {
+  const tbody = document.getElementById('productsTableBody');
+  const countEl = document.getElementById('productCount');
+  
+  if (!tbody) return;
+
+  if (products.length === 0) {
+    tbody.innerHTML = `<tr style="text-align:center;"><td colspan="7" style="padding:2rem;color:var(--text-muted);">No products yet. <button class="btn-vendor" onclick="showModal('addProduct')" style="background:none;border:none;color:var(--vendor-color);text-decoration:underline;cursor:pointer;">Add one now</button></td></tr>`;
+    countEl.textContent = '0 products';
+    return;
+  }
+
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td><strong>${escapeHtml(p.product_name)}</strong></td>
+      <td>${escapeHtml(p.category)}</td>
+      <td>Rs. ${(p.price).toFixed(2)}</td>
+      <td>${p.stock_quantity}</td>
+      <td><span class="badge ${p.is_active ? 'b-delivered' : 'b-pending'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td>${new Date(p.created_at).toLocaleDateString()}</td>
+      <td>
+        <button class="action-btn" onclick="editProduct(${p.product_id})">Edit</button>
+        <button class="action-btn" style="color:#ff6b6b;" onclick="deleteProduct(${p.product_id}, '${escapeHtml(p.product_name)}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+
+  countEl.textContent = `${pagination.total} product${pagination.total !== 1 ? 's' : ''}`;
+
+  // Pagination
+  const paginationEl = document.getElementById('productsPagination');
+  if (paginationEl && pagination.pages > 1) {
+    let html = '';
+    for (let i = 1; i <= pagination.pages; i++) {
+      html += `<button class="btn-sm-vendor ${i === pagination.page ? 'active' : ''}" onclick="loadVendorProducts(${i})">${i}</button> `;
+    }
+    paginationEl.innerHTML = html;
+  }
+}
+
+async function editProduct(productId) {
+  try {
+    const response = await fetch(`../api/vendor_get_products.php?search=&page=1&limit=999`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch products');
+    const data = await response.json();
+    const product = data.data.products.find(p => p.product_id === productId);
+
+    if (!product) {
+      showToast('Product not found', 'error');
+      return;
+    }
+
+    editingProductId = productId;
+    document.getElementById('vendorProductName').value = product.product_name;
+    document.getElementById('vendorProductCategory').value = product.category;
+    document.getElementById('vendorProductPrice').value = product.price;
+    document.getElementById('vendorProductStock').value = product.stock_quantity;
+    document.getElementById('vendorProductDescription').value = product.description || '';
+    document.getElementById('vendorProductImage').value = product.image_url || '';
+    document.getElementById('vendorProductStatus').value = product.is_active ? 'active' : 'draft';
+    
+    document.getElementById('vendorSaveProductBtn').textContent = 'Update Product';
+    showModal('addProduct');
+  } catch (error) {
+    console.error('Error editing product:', error);
+    showToast('Error loading product details', 'error');
+  }
+}
+
+async function submitVendorProduct(e) {
+  e.preventDefault();
+  
+  const name = document.getElementById('vendorProductName')?.value.trim();
+  const category = document.getElementById('vendorProductCategory')?.value;
+  const price = parseFloat(document.getElementById('vendorProductPrice')?.value || 0);
+  const stock = parseInt(document.getElementById('vendorProductStock')?.value || 0);
+  const description = document.getElementById('vendorProductDescription')?.value.trim();
+  const imageUrl = document.getElementById('vendorProductImage')?.value.trim();
+  const isActive = document.getElementById('vendorProductStatus')?.value === 'active' ? 1 : 0;
+
+  if (!name || !category || price <= 0 || stock < 0) {
+    showToast('Please fill in all required fields correctly', 'error');
+    return;
+  }
+
+  try {
+    const btn = document.getElementById('vendorSaveProductBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const isEdit = editingProductId !== null;
+    const endpoint = isEdit ? '../api/vendor_update_product.php' : '../api/vendor_create_product.php';
+    
+    const payload = {
+      product_name: name,
+      category: category,
+      price: price,
+      stock_quantity: stock,
+      description: description,
+      image_url: imageUrl,
+      is_active: isActive
+    };
+
+    if (isEdit) {
+      payload.product_id = editingProductId;
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      showToast(data.message || 'Failed to save product', 'error');
+      return;
+    }
+
+    showToast(isEdit ? 'Product updated successfully' : 'Product created successfully', 'success');
+    closeModal();
+    editingProductId = null;
+    document.getElementById('vendorSaveProductBtn').textContent = 'Save Product';
+    loadVendorProducts(1);
+  } catch (error) {
+    console.error('Error saving product:', error);
+    showToast('Error saving product', 'error');
+  } finally {
+    document.getElementById('vendorSaveProductBtn').disabled = false;
+  }
+}
+
+async function deleteProduct(productId, productName) {
+  if (!confirm(`Delete "${productName}"? This action cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch('../api/vendor_delete_product.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      showToast(data.message || 'Failed to delete product', 'error');
+      return;
+    }
+
+    showToast('Product deleted successfully', 'success');
+    loadVendorProducts(currentProductPage);
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    showToast('Error deleting product', 'error');
+  }
+}
+
+/* ============ ORDER MANAGEMENT ============ */
+let vendorOrdersCache = [];
+let currentOrderFilter = 'all';
+
+async function loadVendorOrders() {
+  try {
+    const response = await fetch('../api/get_vendor_orders.php', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      showToast(data.message || 'Failed to load orders', 'error');
+      return;
+    }
+
+    vendorOrdersCache = data.data || [];
+    filterVendorOrders(currentOrderFilter);
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    showToast('Error loading orders', 'error');
+  }
+}
+
+function filterVendorOrders(status, btn = null) {
+  currentOrderFilter = status;
+  
+  if (btn) {
+    document.querySelectorAll('.otab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  let filtered = vendorOrdersCache;
+  if (status !== 'all') {
+    filtered = vendorOrdersCache.filter(o => o.status === status);
+  }
+
+  displayVendorOrders(filtered);
+}
+
+function displayVendorOrders(orders) {
+  const tbody = document.getElementById('ordersTableBody');
+  if (!tbody) return;
+
+  if (orders.length === 0) {
+    tbody.innerHTML = `<tr style="text-align:center;"><td colspan="8" style="padding:2rem;color:var(--text-muted);">No orders found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => {
+    const statusColor = {
+      'pending': 'b-pending',
+      'processing': 'b-processing',
+      'shipped': 'b-shipped',
+      'delivered': 'b-delivered',
+      'cancelled': 'b-cancelled'
+    }[o.status] || 'b-pending';
+
+    const statusLabel = o.status.charAt(0).toUpperCase() + o.status.slice(1);
+    
+    return `
+      <tr>
+        <td><strong>${o.order_number || `#${o.order_id}`}</strong></td>
+        <td>${escapeHtml(o.customer_name || 'N/A')}</td>
+        <td>${o.quantity || 1} item${o.quantity !== 1 ? 's' : ''}</td>
+        <td>Rs. ${(o.total_amount || 0).toFixed(2)}</td>
+        <td>${o.payment_status ? o.payment_status.charAt(0).toUpperCase() + o.payment_status.slice(1) : 'Pending'}</td>
+        <td><span class="badge ${statusColor}">${statusLabel}</span></td>
+        <td>${new Date(o.order_date).toLocaleDateString()}</td>
+        <td>
+          <button class="action-btn" onclick="showOrderDetails(${o.order_id})">View</button>
+          ${o.status !== 'delivered' && o.status !== 'cancelled' ? `<button class="action-btn" onclick="updateOrderStatusModal(${o.order_id}, '${o.status}')">Update</button>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function updateOrderStatusModal(orderId, currentStatus) {
+  const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const nextStatuses = statuses.filter(s => s !== currentStatus && statuses.indexOf(s) > statuses.indexOf(currentStatus));
+
+  if (nextStatuses.length === 0) {
+    showToast('Order is already in final status', 'info');
+    return;
+  }
+
+  const statusSelect = `
+    <select id="newOrderStatus" class="form-input">
+      ${nextStatuses.map(s => `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
+    </select>
+  `;
+
+  const html = `
+    <div class="form-group">
+      <label>Update Order Status</label>
+      ${statusSelect}
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+      <button class="btn-outline-vendor" onclick="closeModal()">Cancel</button>
+      <button class="btn-vendor" onclick="updateVendorOrderStatus(${orderId})">Update Status</button>
+    </div>
+  `;
+
+  document.getElementById('modalTitle').textContent = '📦 Update Order Status';
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+async function updateVendorOrderStatus(orderId) {
+  const newStatus = document.getElementById('newOrderStatus')?.value;
+  
+  if (!newStatus) {
+    showToast('Please select a status', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch('../api/update_order_status.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order_id: orderId,
+        status: newStatus
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      showToast(data.message || 'Failed to update order', 'error');
+      return;
+    }
+
+    showToast('Order status updated successfully', 'success');
+    closeModal();
+    loadVendorOrders();
+  } catch (error) {
+    console.error('Error updating order:', error);
+    showToast('Error updating order status', 'error');
+  }
+}
+
+function showOrderDetails(orderId) {
+  const order = vendorOrdersCache.find(o => o.order_id === orderId);
+  if (!order) {
+    showToast('Order not found', 'error');
+    return;
+  }
+
+  const html = `
+    <div style="padding:12px;border-left:3px solid var(--vendor-color);background:rgba(80,200,120,0.05);margin-bottom:16px;border-radius:4px;">
+      <strong>${order.order_number || `Order #${order.order_id}`}</strong><br>
+      <small>${new Date(order.order_date).toLocaleString()}</small>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div><strong>Customer:</strong> ${escapeHtml(order.customer_name || 'N/A')}</div>
+      <div><strong>Status:</strong> <span class="badge">${order.status.toUpperCase()}</span></div>
+      <div><strong>Total Amount:</strong> Rs. ${(order.total_amount || 0).toFixed(2)}</div>
+      <div><strong>Payment:</strong> ${order.payment_status ? order.payment_status.toUpperCase() : 'PENDING'}</div>
+      <div><strong>Items:</strong> ${order.quantity || 1}</div>
+      <div><strong>Ordered:</strong> ${new Date(order.order_date).toLocaleDateString()}</div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+      <button class="btn-outline-vendor" onclick="closeModal()">Close</button>
+    </div>
+  `;
+
+  document.getElementById('modalTitle').textContent = '📋 Order Details';
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+/* ============ HELPERS ============ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position:fixed;bottom:20px;right:20px;
+    padding:12px 20px;border-radius:6px;
+    background:${type === 'success' ? 'var(--vendor-color)' : type === 'error' ? '#ff6b6b' : '#4f8cff'};
+    color:white;z-index:9999;
+    font-size:14px;font-weight:600;animation:slideIn 0.3s ease;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// Add toast animations to head if not present
+if (!document.querySelector('style[data-toast-anim]')) {
+  const style = document.createElement('style');
+  style.setAttribute('data-toast-anim', '1');
+  style.textContent = `
+    @keyframes slideIn { from { transform: translateX(400px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    @keyframes slideOut { to { transform: translateX(400px); opacity:0; } }
+  `;
+  document.head.appendChild(style);
+}

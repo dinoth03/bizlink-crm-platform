@@ -225,30 +225,23 @@
         <button class="btn-vendor" onclick="showModal('addProduct')">+ Add Product</button>
       </div>
       <div class="filter-row">
-        <input class="search-input" type="text" placeholder="Search products…" oninput="filterProducts(this.value)" />
-        <select class="filter-select" onchange="filterByStatus(this.value)">
-          <option value="">All Status</option>
-          <option>Active</option><option>Out of Stock</option><option>Draft</option>
-        </select>
-        <button class="btn-outline-vendor">📤 Bulk Upload (CSV)</button>
+        <input class="search-input" type="text" placeholder="Search products…" id="productSearchInput" oninput="loadVendorProducts(1)" />
       </div>
-      <div class="products-grid" id="productsGrid"></div>
 
       <div class="glass-card" style="margin-top:1.5rem">
         <div class="card-header">
-          <span class="card-title">🧩 Product Variants</span>
-          <button class="btn-ghost-sm">+ Add Variant</button>
+          <span class="card-title">📦 Your Products</span>
+          <div style="font-size:0.85rem;color:var(--text-muted);" id="productCount">0 products</div>
         </div>
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>Product</th><th>Variant</th><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th>Price</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr><td>Ceylon Tea</td><td>Classic Pack</td><td>250g</td><td>Green</td><td>TEA-001-A</td><td>58</td><td>Rs. 850</td><td><button class="action-btn">Edit</button></td></tr>
-              <tr><td>Ceylon Tea</td><td>Gift Box</td><td>500g</td><td>Gold</td><td>TEA-001-B</td><td>21</td><td>Rs. 1,450</td><td><button class="action-btn">Edit</button></td></tr>
-              <tr><td>Handloom Dress</td><td>Summer Fit</td><td>M / L</td><td>Maroon</td><td>BAT-003-A</td><td>14</td><td>Rs. 3,500</td><td><button class="action-btn">Edit</button></td></tr>
+            <thead><tr><th>Product Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+            <tbody id="productsTableBody">
+              <tr style="text-align:center;"><td colspan="7" style="padding:2rem;color:var(--text-muted);">Loading products...</td></tr>
             </tbody>
           </table>
         </div>
+        <div class="pagination" style="margin-top:1rem;text-align:center;" id="productsPagination"></div>
       </div>
     </section>
 
@@ -259,21 +252,21 @@
           <div class="section-label">FULFILMENT</div>
           <h2 class="page-h2">Order Management</h2>
         </div>
-        <button class="btn-outline-vendor">📥 Download Report</button>
       </div>
       <div class="otab-row">
-        <button class="otab active" onclick="filterOrders('all',this)">All</button>
-        <button class="otab" onclick="filterOrders('pending',this)">Pending</button>
-        <button class="otab" onclick="filterOrders('processing',this)">Processing</button>
-        <button class="otab" onclick="filterOrders('shipped',this)">Shipped</button>
-        <button class="otab" onclick="filterOrders('delivered',this)">Delivered</button>
-        <button class="otab" onclick="filterOrders('cancelled',this)">Cancelled</button>
+        <button class="otab active" onclick="filterVendorOrders('all',this)">All</button>
+        <button class="otab" onclick="filterVendorOrders('pending',this)">Pending</button>
+        <button class="otab" onclick="filterVendorOrders('processing',this)">Processing</button>
+        <button class="otab" onclick="filterVendorOrders('shipped',this)">Shipped</button>
+        <button class="otab" onclick="filterVendorOrders('delivered',this)">Delivered</button>
       </div>
       <div class="glass-card" style="padding:0">
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>Order ID</th><th>Customer</th><th>District</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-            <tbody id="ordersTableBody"></tbody>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody id="ordersTableBody">
+              <tr style="text-align:center;"><td colspan="8" style="padding:2rem;color:var(--text-muted);">Loading orders...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>

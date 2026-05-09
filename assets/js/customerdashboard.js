@@ -630,8 +630,82 @@ async function customerLogout() {
   window.location.href = '../pages/index.html';
 }
 
+// Load real customer analytics data from API
+async function loadCustomerAnalytics() {
+  try {
+    const response = await fetch('../api/customer_analytics.php');
+    if (!response.ok) throw new Error('Failed to fetch analytics');
+    
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message || 'Analytics failed');
+    
+    const data = result.data || {};
+    
+    // Update stat cards with real data
+    const statNumbers = document.querySelectorAll('.stat-number');
+    if (statNumbers[0]) {
+      statNumbers[0].dataset.target = String(data.total_orders || 0);
+      statNumbers[0].textContent = '0';
+    }
+    if (statNumbers[1]) {
+      statNumbers[1].dataset.target = String(data.in_progress_orders || 0);
+      statNumbers[1].textContent = '0';
+    }
+    if (statNumbers[2]) {
+      statNumbers[2].dataset.target = String(data.wishlist_count || 0);
+      statNumbers[2].textContent = '0';
+    }
+    if (statNumbers[3]) {
+      statNumbers[3].dataset.target = String(data.vendors_count || 0);
+      statNumbers[3].textContent = '0';
+    }
+    
+    // Update stat details
+    const statDetails = document.querySelectorAll('.stat-detail');
+    const last30Days = data.spending_by_day ? data.spending_by_day.length : 0;
+    if (statDetails[0]) {
+      const last30Total = data.spending_by_day ? data.spending_by_day.reduce((sum, d) => sum + (d.amount || 0), 0) : 0;
+      statDetails[0].textContent = `Last 30 days: Rs. ${Math.round(last30Total).toLocaleString()}`;
+    }
+    if (statDetails[1]) statDetails[1].textContent = 'Awaiting delivery';
+    if (statDetails[2]) statDetails[2].textContent = 'items saved';
+    if (statDetails[3]) statDetails[3].textContent = `${data.vendors_count || 0} active vendors`;
+    
+    // Update loyalty widget
+    const loyaltyHead = document.querySelector('.loyalty-head p');
+    const tierBadge = document.querySelector('.tier-badge');
+    const pointsCaption = document.querySelector('.points-caption');
+    
+    if (loyaltyHead) {
+      loyaltyHead.innerHTML = `Current tier: <strong>${data.loyalty_tier || 'Silver'}</strong> · ${data.loyalty_points || 0} points earned`;
+    }
+    if (tierBadge) {
+      tierBadge.textContent = `${data.loyalty_tier || 'Silver'} Member`;
+    }
+    if (pointsCaption) {
+      const pointsToNext = Math.max(0, 5000 - (data.loyalty_points || 0));
+      pointsCaption.textContent = `${pointsToNext} more points to reach next tier rewards.`;
+    }
+    
+    // Update points progress bar
+    const pointsFill = document.querySelector('.points-fill');
+    if (pointsFill) {
+      const percentage = Math.min(100, ((data.loyalty_points || 0) / 5000) * 100);
+      pointsFill.style.width = `${percentage}%`;
+    }
+    
+    // Store for later use
+    window.customerAnalytics = data;
+    
+  } catch (error) {
+    console.error('Error loading customer analytics:', error);
+    // Silently fail - keep default values
+  }
+}
+
 window.addEventListener('load', async () => {
   showStripePaymentNoticeFromUrl();
+  await loadCustomerAnalytics();
   await loadCustomerDashboardData();
   startCounterAnimation();
   console.log('BizLink Customer Portal - Live data mode');
