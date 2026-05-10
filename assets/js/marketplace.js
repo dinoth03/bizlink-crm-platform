@@ -331,10 +331,12 @@ function mapApiProduct(product, index) {
   const reviews = 12 + (index * 7);
   const isNew = index < 6;
   const image = resolveApiProductImage(product, category);
+  const vendorId = Number(product.vendor_id || 0);
 
   return {
     id: uiProductId,
     api_product_id: apiProductId,
+    vendor_id: vendorId,
     vendor_user_id: Number(product.vendor_user_id || 0),
     source: 'api',
     name: product.product_name,
@@ -870,6 +872,11 @@ function renderCard(p, i) {
   const addBtnText = p.isService ? '📞 Enquire' : (inCart ? '✓ Added' : '+ Cart');
 
   const oldPriceHtml = p.oldPrice ? `<div class="card-price-old">Rs. ${p.oldPrice.toLocaleString()}</div>` : '';
+  
+  // Add vendor shop link if vendor_id is available (API products)
+  const vendorShopLink = (p.vendor_id && p.vendor_id > 0) 
+    ? `<a href="vendor.html?id=${p.vendor_id}" class="card-shop-link" title="Visit Vendor Shop" onclick="event.stopPropagation()">🏪</a>`
+    : '';
 
   return `
     <div class="prod-card" style="animation-delay:${delay}s" onclick="openModal(${p.id})">
@@ -882,6 +889,7 @@ function renderCard(p, i) {
             ${isWished ? '❤️' : '🤍'}
           </button>
           <button class="card-action-btn" onclick="openModal(${p.id})" title="Quick View">👁️</button>
+          ${vendorShopLink}
         </div>
         <div class="card-badge-wrap">
           ${badgeHtml}${newBadge}${serviceBadge}

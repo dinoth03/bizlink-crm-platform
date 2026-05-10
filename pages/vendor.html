@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Vendor Shop - BizLink</title>
+    <link rel="stylesheet" href="../assets/css/vendor-shop.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Sora:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- AMBIENT BACKGROUND -->
+<div class="ambient">
+    <div class="amb-grid"></div>
+    <div class="amb-orb orb-navy"></div>
+    <div class="amb-orb orb-green"></div>
+    <div class="amb-orb orb-orange"></div>
+    <div class="scanlines"></div>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="home.html" class="nav-brand">
+            <span class="logo-hex">⬡</span>
+            <span class="logo-text">Biz<strong>Link</strong></span>
+        </a>
+        <div class="nav-links">
+            <a href="marketplace.html">Marketplace</a>
+            <a href="chat.html">Chat</a>
+            <a href="home.html">Home</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="vendor-shop-container">
+
+    <!-- VENDOR HEADER -->
+    <div class="vendor-header" id="vendorHeader">
+        <div class="vendor-banner" id="vendorBanner"></div>
+        <div class="vendor-info-section">
+            <div class="vendor-logo-wrap">
+                <img id="vendorLogo" class="vendor-logo" src="" alt="Vendor Logo"/>
+            </div>
+            <div class="vendor-details">
+                <h1 id="vendorName" class="vendor-name">Loading...</h1>
+                <div class="vendor-meta">
+                    <span id="vendorCategory" class="vendor-badge">Category</span>
+                    <span id="vendorRating" class="vendor-rating">
+                        <span class="stars">★★★★★</span>
+                        <span class="rating-text">4.8 (120 reviews)</span>
+                    </span>
+                    <span id="vendorStatus" class="vendor-status-badge verified">✓ Verified</span>
+                </div>
+                <p id="vendorDescription" class="vendor-description">Loading vendor information...</p>
+                <div class="vendor-contact">
+                    <a id="vendorEmail" href="#" class="contact-link">📧 Email</a>
+                    <a id="vendorPhone" href="#" class="contact-link">📞 Phone</a>
+                    <a id="vendorWebsite" href="#" target="_blank" class="contact-link">🌐 Website</a>
+                    <button class="contact-link" onclick="startVendorChat()">💬 Message Vendor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="vendor-tabs">
+        <button class="tab-btn active" onclick="switchTab('products')">
+            <span class="tab-icon">🛍️</span> Products
+        </button>
+        <button class="tab-btn" onclick="switchTab('reviews')">
+            <span class="tab-icon">⭐</span> Reviews
+        </button>
+        <button class="tab-btn" onclick="switchTab('info')">
+            <span class="tab-icon">ℹ️</span> About
+        </button>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div class="tab-content" id="productsTab">
+        <div class="products-section">
+            <div class="section-header">
+                <h2>Featured Products</h2>
+                <div class="filter-bar">
+                    <input type="text" id="productSearch" placeholder="Search products..." class="search-input"/>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+            </div>
+            <div class="products-grid" id="productsGrid">
+                <div class="loading-spinner">Loading products...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEWS TAB -->
+    <div class="tab-content hidden" id="reviewsTab">
+        <div class="reviews-section">
+            <div class="section-header">
+                <h2>Customer Reviews</h2>
+            </div>
+            <div class="reviews-stats" id="reviewsStats">
+                <div class="stat-card">
+                    <div class="stat-label">Overall Rating</div>
+                    <div class="stat-value" id="overallRating">4.8</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Quality</div>
+                    <div class="stat-value" id="qualityRating">4.7</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Delivery Speed</div>
+                    <div class="stat-value" id="deliveryRating">4.9</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Communication</div>
+                    <div class="stat-value" id="communicationRating">4.8</div>
+                </div>
+            </div>
+            <div class="reviews-list" id="reviewsList">
+                <div class="loading-spinner">Loading reviews...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div class="tab-content hidden" id="infoTab">
+        <div class="about-section">
+            <h2>About This Vendor</h2>
+            <div class="about-content" id="aboutContent">
+                <p>Loading vendor information...</p>
+            </div>
+            <div class="vendor-stats">
+                <div class="stat">
+                    <div class="stat-num" id="totalProducts">0</div>
+                    <div class="stat-label">Products</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="totalReviews">0</div>
+                    <div class="stat-label">Reviews</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="joinDate">2023</div>
+                    <div class="stat-label">Member Since</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- EMPTY STATE -->
+<div class="error-state hidden" id="errorState">
+    <div class="error-icon">❌</div>
+    <h2 id="errorTitle">Vendor Not Found</h2>
+    <p id="errorMessage">This vendor could not be found or is not verified yet.</p>
+    <a href="marketplace.html" class="btn-primary">Back to Marketplace</a>
+</div>
+
+<!-- TOAST NOTIFICATIONS -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/vendor-shop.js"></script>
+</body>
+</html>

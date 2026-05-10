@@ -534,6 +534,16 @@ ul { list-style: none; }
 .card-action-btn:hover { background: var(--vendor-g); border-color: transparent; transform: scale(1.1); }
 .card-action-btn.wishlisted { color: #ff4d6d; }
 
+/* Vendor Shop Link */
+.card-shop-link {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(80, 200, 120, 0.2); border: 1.5px solid var(--vendor-g);
+  color: var(--vendor-g); display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; transition: all 0.2s;
+  text-decoration: none; cursor: pointer;
+}
+.card-shop-link:hover { background: var(--vendor-g); color: #fff; transform: scale(1.15); }
+
 /* Badges */
 .card-badge-wrap { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
 .card-badge {
