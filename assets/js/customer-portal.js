@@ -565,9 +565,20 @@
     }
   };
 
-  window.addToCartFromWishlist = function(productId) {
-    // In a real app, this would call an API. For now, we'll redirect to product or show demo.
-    alert('Product ' + productId + ' added to cart!');
+  window.addToCartFromWishlist = async function(productId) {
+    try {
+      const resp = await apiRequest('add_to_cart.php', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
+      });
+      if (resp && resp.ok) {
+        alert('Product added to cart successfully!');
+      } else {
+        alert('Failed to add to cart: ' + (resp.data?.message || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Failed to add item to cart.');
+    }
   };
 
   window.shareWishlist = async function() {

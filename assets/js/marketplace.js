@@ -571,6 +571,7 @@ async function loadMarketplaceData() {
 
       updateMarketplaceCounts(getCatalog(), apiCategories || []);
       updateMarketplaceHeroStats(marketplaceStats, getCatalog());
+      renderRecommendations();
       return true;
     }
   } catch (error) {
@@ -1114,6 +1115,78 @@ function getFilteredProducts() {
   return list;
 }
 
+/* RECOMMENDATIONS ENGINE */
+function getRelatedProducts(productId, category) {
+  const catalog = getCatalog();
+  return catalog
+    .filter(p => p.cat === category && p.id !== productId)
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 4);
+}
+
+function getPersonalizedRecommendations() {
+  if (!hasPersonalization()) return [];
+  
+  const prefs = state.preferenceCounts;
+  // Get top 2 categories
+  const topCats = Object.entries(prefs)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(entry => entry[0]);
+    
+  const catalog = getCatalog();
+  return catalog
+    .filter(p => topCats.includes(p.cat))
+    .sort((a, b) => (prefs[b.cat] || 0) - (prefs[a.cat] || 0) || b.rating - a.rating)
+    .slice(0, 4);
+}
+
+function renderRecommendations() {
+  const section = document.getElementById('recommendationsSection');
+  const grid = document.getElementById('recommendationsGrid');
+  if (!section || !grid) return;
+  
+  // Only show if not searching or filtering by category (homepage state)
+  if (state.search || state.cat !== 'all') {
+    section.classList.add('hidden');
+    return;
+  }
+  
+  const recs = getPersonalizedRecommendations();
+  if (recs.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  
+  section.classList.remove('hidden');
+  grid.innerHTML = recs.map((p, i) => renderCard(p, i)).join('');
+}
+
+function updateModalRelatedProducts(currentProduct) {
+  const related = getRelatedProducts(currentProduct.id, currentProduct.cat);
+  if (related.length === 0) return '';
+  
+  const relatedHtml = related.map(p => `
+    <div class="rel-card" onclick="openModal(${p.id})">
+      <div class="rel-img-wrap">
+        <img class="rel-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" />
+      </div>
+      <div class="rel-name">${p.name}</div>
+      <div class="rel-stars">${renderStars(p.rating)}</div>
+      <div class="rel-price">Rs. ${p.price.toLocaleString()}</div>
+    </div>
+  `).join('');
+  
+  return `
+    <div class="modal-related-section">
+      <h3 class="mrs-title">✨ You might also like</h3>
+      <div class="mrs-grid">
+        ${relatedHtml}
+      </div>
+    </div>
+  `;
+}
+
 /*RENDER PRODUCTS*/
 function renderProducts() {
   const filtered = getFilteredProducts();
@@ -1137,6 +1210,7 @@ function renderProducts() {
   }
 
   renderPagination(totalPages);
+  renderRecommendations();
 }
 
 /*RENDER CARD*/
@@ -1448,8 +1522,14 @@ function openModal(id) {
         </div>
         ` : `<div class="note">Reviews available for marketplace products only.</div>`}
       </div>
+      <div id="modalRelatedProducts"></div>
     </div>
   `;
+
+  // Inject related products
+  const relatedHtml = updateModalRelatedProducts(p);
+  const relatedContainer = document.getElementById('modalRelatedProducts');
+  if (relatedContainer) relatedContainer.innerHTML = relatedHtml;
 
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1541,11 +1621,15 @@ async function addToCartById(id, qty = 1) {
   const p = findCatalogProductById(id);
   if (!p) return false;
 
+  const apiId = Number(p.api_product_id || 0);
+  const isLocalOnly = apiId <= 0;
+
   if (!p.isService) {
     const allowed = await requireCustomerForPurchase();
     if (!allowed) return false;
   }
 
+  // Update local state first for immediate UI response
   const existing = state.cart.find(c => c.id === id);
   if (existing) {
     existing.qty = Math.min(existing.qty + qty, 99);
@@ -1556,8 +1640,20 @@ async function addToCartById(id, qty = 1) {
   updateCartBadge();
   renderCartItems();
   showToast(`🛒 "${p.name}" added to cart!`, 'cart');
-  // Re-render to update button state
   renderProducts();
+
+  // Sync with server if it's a real product
+  if (!isLocalOnly && typeof apiRequest === 'function') {
+    try {
+      await apiRequest('add_to_cart.php', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: apiId, quantity: qty })
+      });
+    } catch (err) {
+      console.warn('Failed to sync cart with server:', err);
+    }
+  }
+
   return true;
 }
 
@@ -1760,4 +1856,76 @@ function toggleWishlist() {
 const originalOnDOMContentLoaded = document.addEventListener;
 document.addEventListener('DOMContentLoaded', () => {
   loadUserWishlist();
+  loadUserCart();
+  loadMpNotifications();
 });
+
+function findCatalogProductByApiId(apiId) {
+  return getCatalog().find(p => Number(p.api_product_id) === Number(apiId));
+}
+
+async function loadUserCart() {
+  if (typeof apiRequest !== 'function') return;
+  try {
+    const resp = await apiRequest('get_cart.php', {}, false);
+    if (resp && resp.ok && resp.data && Array.isArray(resp.data.cart_items)) {
+      state.cart = resp.data.cart_items.map(item => {
+        const localProd = findCatalogProductByApiId(item.product_id);
+        return {
+          id: localProd ? localProd.id : (900000 + item.product_id),
+          name: item.product_name,
+          price: item.price,
+          emoji: localProd ? localProd.emoji : '📦',
+          qty: item.quantity
+        };
+      });
+      updateCartBadge();
+      renderCartItems();
+      renderProducts();
+    }
+  } catch (err) {
+    console.debug('Failed to load cart:', err);
+  }
+}
+
+async function loadMpNotifications() {
+  if (typeof apiRequest !== 'function') return;
+  try {
+    const resp = await apiRequest('get_notifications.php?limit=5', {}, false);
+    if (resp && resp.ok && resp.data && Array.isArray(resp.data.data)) {
+      const notifs = resp.data.data;
+      const unreadCount = notifs.filter(n => !n.is_read).length;
+      const badge = document.getElementById('mpNotifBadge');
+      if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+      }
+      const list = document.getElementById('mpNotifList');
+      if (list && notifs.length > 0) {
+        list.innerHTML = notifs.map(n => `
+          <div class="mp-notif-item ${n.is_read ? '' : 'unread'}">
+            <div class="mp-notif-msg">${n.message}</div>
+            <div class="mp-notif-time">${new Date(n.created_at).toLocaleDateString()}</div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.debug('Failed to load notifications:', err);
+  }
+}
+
+function toggleMpNotif() {
+  const panel = document.getElementById('mpNotifPanel');
+  panel.classList.toggle('hidden');
+}
+
+async function markAllMpNotifRead() {
+  if (typeof apiRequest !== 'function') return;
+  try {
+    await apiRequest('mark_notifications_read.php', { method: 'POST', body: JSON.stringify({ all: true }) });
+    loadMpNotifications();
+  } catch (err) {
+    console.debug('Failed to mark read:', err);
+  }
+}

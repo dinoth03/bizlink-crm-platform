@@ -34,6 +34,21 @@
     </div>
 
     <div class="nav-actions">
+      <div class="mp-notif-wrap">
+        <button class="nav-icon-btn" onclick="toggleMpNotif()" title="Notifications">
+          <span>🔔</span>
+          <span class="nav-badge" id="mpNotifBadge" style="display:none;">0</span>
+        </button>
+        <div class="mp-notif-panel hidden" id="mpNotifPanel">
+          <div class="mp-notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllMpNotifRead()">Mark all read</button>
+          </div>
+          <div class="mp-notif-list" id="mpNotifList">
+            <div class="mp-notif-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
       <button class="nav-icon-btn" onclick="toggleWishlist()" title="Wishlist">
         <span>🤍</span>
         <span class="nav-badge" id="wishlistBadge">0</span>
@@ -399,6 +414,20 @@
         <button class="cat-chip" data-cat="accounting" onclick="selectCategory('accounting', this)">📊 Accounting</button>
         <button class="cat-chip" data-cat="logistics" onclick="selectCategory('logistics', this)">🚚 Logistics</button>
       </div>
+
+      <!-- Personalized Recommendations -->
+      <section id="recommendationsSection" class="recommendations-section hidden">
+        <div class="rec-header">
+          <div class="rec-title-wrap">
+            <span class="rec-icon">✨</span>
+            <h2 class="rec-title">Recommended for You</h2>
+            <span class="rec-badge">Personalized</span>
+          </div>
+        </div>
+        <div class="rec-grid" id="recommendationsGrid">
+          <!-- Injected by JS -->
+        </div>
+      </section>
 
       <!-- Product Grid -->
       <div class="product-grid" id="productGrid">
