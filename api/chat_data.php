@@ -39,8 +39,8 @@ if (!$currentUser) {
 }
 
 $allowedContactRolesMap = [
-    'customer' => ['vendor', 'admin'],
-    'vendor'   => ['customer', 'admin'],
+    'customer' => ['vendor', 'admin', 'customer'],
+    'vendor'   => ['customer', 'admin', 'vendor'],
     'admin'    => ['customer', 'vendor', 'admin'],
 ];
 

@@ -23,78 +23,95 @@
     </div>
   </nav>
 
-  <main class="page">
+  <main class="page orders-page">
     <div class="container">
-      <header class="page-header">
-        <h1>Order History</h1>
-        <p>Track orders, cancel pending purchases, request returns, and leave reviews.</p>
+      <header class="page-header orders-hero card">
+        <div>
+          <span class="eyebrow">Customer order history</span>
+          <h1>Track every purchase in one place</h1>
+          <p>See order progress, shipment tracking, payment status, and complete order details without leaving the page.</p>
+        </div>
+        <div class="hero-badges">
+          <span class="hero-badge">Live status updates</span>
+          <span class="hero-badge">Shipment timeline</span>
+          <span class="hero-badge">Vendor details</span>
+        </div>
       </header>
 
-      <div class="toolbar">
-        <button class="filter-btn active" data-filter-status="all">All</button>
-        <button class="filter-btn" data-filter-status="processing">Processing</button>
-        <button class="filter-btn" data-filter-status="shipped">Shipped</button>
-        <button class="filter-btn" data-filter-status="delivered">Delivered</button>
-        <button class="filter-btn" data-filter-status="cancelled">Cancelled</button>
-      </div>
+      <section class="orders-summary-grid">
+        <article class="summary-card card">
+          <span class="summary-label">Total orders</span>
+          <strong id="ordersTotalCount">0</strong>
+          <span class="summary-note">All purchases in your account</span>
+        </article>
+        <article class="summary-card card">
+          <span class="summary-label">In transit</span>
+          <strong id="ordersTransitCount">0</strong>
+          <span class="summary-note">Processing and shipped orders</span>
+        </article>
+        <article class="summary-card card">
+          <span class="summary-label">Delivered</span>
+          <strong id="ordersDeliveredCount">0</strong>
+          <span class="summary-note">Orders already completed</span>
+        </article>
+        <article class="summary-card card">
+          <span class="summary-label">Total spent</span>
+          <strong id="ordersSpentCount">LKR 0</strong>
+          <span class="summary-note">Lifetime customer spend</span>
+        </article>
+      </section>
 
-      <section class="card table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Vendor</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr data-order-status="processing">
-              <td>BL-10245</td>
-              <td>TeaLanka</td>
-              <td>LKR 5,200</td>
-              <td><span class="status-pill">Processing</span></td>
-              <td>2026-04-07</td>
-              <td class="actions">
-                <button class="small-btn" data-action-track="BL-10245">Track</button>
-                <button class="small-btn" data-action-cancel="BL-10245">Cancel</button>
-              </td>
-            </tr>
-            <tr data-order-status="shipped">
-              <td>BL-10210</td>
-              <td>Tharu Fashion</td>
-              <td>LKR 9,750</td>
-              <td><span class="status-pill">Shipped</span></td>
-              <td>2026-04-05</td>
-              <td class="actions">
-                <button class="small-btn" data-action-track="BL-10210">Track</button>
-              </td>
-            </tr>
-            <tr data-order-status="delivered">
-              <td>BL-10188</td>
-              <td>Coco Goods</td>
-              <td>LKR 3,640</td>
-              <td><span class="status-pill">Delivered</span></td>
-              <td>2026-03-31</td>
-              <td class="actions">
-                <button class="small-btn" data-action-return="BL-10188">Return</button>
-                <button class="small-btn" data-action-review="BL-10188">Review</button>
-              </td>
-            </tr>
-            <tr data-order-status="cancelled">
-              <td>BL-10150</td>
-              <td>Spice Island</td>
-              <td>LKR 2,180</td>
-              <td><span class="status-pill">Cancelled</span></td>
-              <td>2026-03-25</td>
-              <td class="actions">
-                <button class="small-btn" data-action-track="BL-10150">Details</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <section class="card orders-controls">
+        <div class="orders-search">
+          <label for="ordersSearch">Search orders</label>
+          <input id="ordersSearch" class="input" type="search" placeholder="Order number or vendor name" autocomplete="off" />
+        </div>
+        <div class="orders-filters" aria-label="Order status filters">
+          <button type="button" class="filter-btn active" data-order-filter="all">All</button>
+          <button type="button" class="filter-btn" data-order-filter="pending">Pending</button>
+          <button type="button" class="filter-btn" data-order-filter="processing">Processing</button>
+          <button type="button" class="filter-btn" data-order-filter="shipped">Shipped</button>
+          <button type="button" class="filter-btn" data-order-filter="out_for_delivery">Out for delivery</button>
+          <button type="button" class="filter-btn" data-order-filter="delivered">Delivered</button>
+          <button type="button" class="filter-btn" data-order-filter="cancelled">Cancelled</button>
+        </div>
+      </section>
+
+      <section class="card table-wrap orders-table-card">
+        <div class="orders-table-head">
+          <div>
+            <h2>Your orders</h2>
+            <p id="ordersTableSubtitle">Loading your purchase history...</p>
+          </div>
+          <span class="orders-badge" id="ordersResultCount">0 orders</span>
+        </div>
+        <div class="orders-table-scroll">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Vendor</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Tracking</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customerOrdersTableBody">
+              <tr>
+                <td colspan="8">
+                  <div class="orders-loading-state">Loading order history...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="orders-empty-state" id="ordersEmptyState" hidden>
+          <h3>No orders found</h3>
+          <p>Try a different search or status filter, or place a new order from the marketplace.</p>
+        </div>
       </section>
 
       <div class="footer-links">
@@ -104,6 +121,20 @@
       </div>
     </div>
   </main>
+
+  <div class="order-modal-backdrop" id="customerOrderModalBackdrop" hidden>
+    <div class="order-modal" role="dialog" aria-modal="true" aria-labelledby="customerOrderModalTitle">
+      <div class="order-modal-header">
+        <div>
+          <span class="eyebrow" id="customerOrderModalSubtitle">Order details</span>
+          <h3 id="customerOrderModalTitle">Order details</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="customerOrderModalClose" aria-label="Close order details">×</button>
+      </div>
+      <div class="order-modal-body" id="customerOrderModalBody"></div>
+    </div>
+  </div>
+
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/customer-portal.js"></script>
 </body>

@@ -99,8 +99,78 @@ let pendingTargetUserId = null;
 let ME_USER_ID = null;
 let isGuestMode = false;
 let accessDeniedMode = false;
+let contactSearchDebounce = null;
+let vendorDirectoryLoaded = false;
 
-let CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
+let CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin', 'customer'];
+const CHAT_ALL_ROLES = ['customer', 'vendor', 'admin', 'bot'];
+
+function mergeVendorContacts(vendors = []) {
+  if (!Array.isArray(vendors) || vendors.length === 0) return;
+
+  const byUserId = new Map();
+  CONTACTS.forEach((contact, index) => {
+    const uid = Number(contact?.userId || 0);
+    if (uid > 0) {
+      byUserId.set(uid, index);
+    }
+  });
+
+  vendors.forEach((vendor) => {
+    const uid = Number(vendor?.userId || 0);
+    if (uid <= 0) return;
+
+    if (byUserId.has(uid)) {
+      const idx = byUserId.get(uid);
+      const existing = CONTACTS[idx];
+      CONTACTS[idx] = {
+        ...existing,
+        ...vendor,
+        conversationId: existing.conversationId || vendor.conversationId || null,
+        hasConversation: Boolean(existing.hasConversation || vendor.hasConversation),
+      };
+      return;
+    }
+
+    CONTACTS.push(vendor);
+    byUserId.set(uid, CONTACTS.length - 1);
+  });
+}
+
+async function fetchVendorDirectory(search = '') {
+  const params = new URLSearchParams();
+  if (search && String(search).trim() !== '') {
+    params.set('search', String(search).trim());
+  }
+
+  try {
+    const endpoint = `../api/chat_vendor_directory.php${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    if (!payload || !payload.success || !Array.isArray(payload.data)) {
+      return [];
+    }
+
+    return payload.data;
+  } catch (error) {
+    console.error('Vendor directory load failed:', error);
+    return [];
+  }
+}
+
+async function ensureVendorDirectoryLoaded(search = '') {
+  const vendors = await fetchVendorDirectory(search);
+  if (vendors.length > 0) {
+    mergeVendorContacts(vendors);
+    vendorDirectoryLoaded = true;
+  }
+  return vendors;
+}
 
 function renderCurrentUserBadge() {
   const ruName = document.querySelector('.ru-name');
@@ -148,12 +218,10 @@ function showChatAccessDenied(reason = '') {
   isGuestMode = false;
   ME_USER_ID = null;
 
-  const shell = document.querySelector('.shell');
   const denied = document.getElementById('accessDeniedState');
   const emptyState = document.getElementById('emptyState');
   const chatWindow = document.getElementById('chatWindow');
 
-  if (shell) shell.classList.add('chat-locked');
   if (denied) denied.classList.remove('hidden');
   if (emptyState) emptyState.classList.add('hidden');
   if (chatWindow) chatWindow.classList.add('hidden');
@@ -187,12 +255,12 @@ async function loadChatDataFromApi() {
     const payload = await response.json();
 
     if (response.status === 401 || response.status === 403) {
-      showChatAccessDenied('chat_api_forbidden');
+      enableGuestMode('chat_api_forbidden');
       return false;
     }
 
     if (response.status === 429) {
-      showChatAccessDenied('chat_api_rate_limited');
+      enableGuestMode('chat_api_rate_limited');
       return false;
     }
 
@@ -201,21 +269,12 @@ async function loadChatDataFromApi() {
     }
 
     if (!['customer', 'vendor', 'admin'].includes(String(payload.current_user?.role || '').toLowerCase())) {
-      showChatAccessDenied('unauthorized_role');
+      enableGuestMode('unauthorized_role');
       return false;
     }
 
-    // Set allowed contact roles based on current user's role
-    const currentRole = String(payload.current_user.role).toLowerCase();
-    if (currentRole === 'customer') {
-      CHAT_ALLOWED_CONTACT_ROLES = ['vendor', 'admin'];
-    } else if (currentRole === 'vendor') {
-      CHAT_ALLOWED_CONTACT_ROLES = ['customer', 'admin'];
-    } else if (currentRole === 'admin') {
-      CHAT_ALLOWED_CONTACT_ROLES = ['customer', 'vendor', 'admin'];
-    }
-
-    renderRoleFilterChips(currentRole);
+    CHAT_ALLOWED_CONTACT_ROLES = CHAT_ALL_ROLES.slice();
+    renderRoleFilterChips(String(payload.current_user.role).toLowerCase());
 
     isGuestMode = false;
     ME_USER_ID = Number(payload.current_user.id);
@@ -236,7 +295,7 @@ async function loadChatDataFromApi() {
 
 async function bootstrapChatIdentity() {
   if (typeof authMe !== 'function') {
-    showChatAccessDenied('auth_context_missing');
+    enableGuestMode('auth_context_missing');
     return false;
   }
 
@@ -246,7 +305,7 @@ async function bootstrapChatIdentity() {
       ME_USER_ID = Number(identity.user.user_id || 0) || ME_USER_ID;
       applyChatIdentity(identity.user);
       if (!['customer', 'vendor', 'admin'].includes(String(identity.user.role || '').toLowerCase())) {
-        showChatAccessDenied('role_unauthorized');
+        enableGuestMode('role_unauthorized');
         return false;
       }
       return true;
@@ -255,7 +314,7 @@ async function bootstrapChatIdentity() {
     console.error('Failed to load authenticated chat identity:', error);
   }
 
-  showChatAccessDenied('auth_identity_missing');
+  enableGuestMode('auth_identity_missing');
   return false;
 }
 
@@ -431,7 +490,7 @@ function renderNewContactItem(contact, i) {
           <span class="ci-role-badge">${contact.role}</span>
         </div>
         <div class="ci-row2">
-          <span class="ci-preview">Start a new conversation</span>
+          <span class="ci-preview">${contact.company !== '—' ? contact.company : contact.email}${contact.province !== '—' ? ` · ${contact.province}` : ''}</span>
         </div>
       </div>
     </div>`;
@@ -526,7 +585,7 @@ function renderChatHeader(contact) {
 
   document.getElementById('chName').textContent = contact.name;
   const metaMap = { online:'Online', away:'Away · Last seen recently', offline:'Offline' };
-  const roleLabel = contact.role === 'vendor' ? 'Verified Vendor' : contact.role === 'customer' ? 'Customer' : 'Admin Team';
+  const roleLabel = contact.role === 'vendor' ? 'Vendor' : contact.role === 'customer' ? 'Customer' : 'Admin Team';
   document.getElementById('chMeta').innerHTML =
     `${roleLabel} &nbsp;·&nbsp; <span class="${contact.status === 'online' ? 'online-txt' : ''}">${metaMap[contact.status]}</span>`;
 }
@@ -1076,7 +1135,7 @@ function renderInfoPanel(contact) {
     <div class="ip-profile">
       <div class="ip-avatar" style="background:${contact.color}">${contact.initials}</div>
       <div class="ip-name">${contact.name}</div>
-      <div class="ip-tag">${contact.role === 'vendor' ? '🏪 Verified Vendor' : contact.role === 'customer' ? '👤 Customer' : '⚙️ Admin'}</div>
+      <div class="ip-tag">${contact.role === 'vendor' ? '🏪 Vendor' : contact.role === 'customer' ? '👤 Customer' : '⚙️ Admin'}</div>
       <div class="ip-status-row">${statusMap[contact.status]}</div>
     </div>
 
@@ -1209,16 +1268,39 @@ function clearSearch() {
 }
 
 function filterContacts(val) {
-  const filtered = getVisibleContacts().filter(c =>
-    c.name.toLowerCase().includes(val.toLowerCase()) ||
-    (c.company || '').toLowerCase().includes(val.toLowerCase())
-  );
-  renderContactGrid(filtered);
+  const query = String(val || '').toLowerCase().trim();
+
+  if (contactSearchDebounce) {
+    clearTimeout(contactSearchDebounce);
+  }
+
+  contactSearchDebounce = setTimeout(async () => {
+    if (query) {
+      await ensureVendorDirectoryLoaded(query);
+    } else if (!vendorDirectoryLoaded) {
+      await ensureVendorDirectoryLoaded('');
+    }
+
+    const filtered = getVisibleContacts().filter((contact) => {
+      if (!query) return true;
+      const searchText = [
+        contact.name,
+        contact.company,
+        contact.owner_name,
+        contact.email,
+        contact.phone,
+        contact.province,
+        contact.role,
+        contact.joined
+      ].join(' ').toLowerCase();
+      return searchText.includes(query);
+    });
+    renderContactGrid(filtered);
+  }, 180);
 }
 
 function getAllowedChatRoles() {
-  if (accessDeniedMode) return [];
-  return CHAT_ALLOWED_CONTACT_ROLES.slice();
+  return CHAT_ALL_ROLES.slice();
 }
 
 function getVisibleContacts() {
@@ -1238,14 +1320,8 @@ function renderRoleFilterChips(userRole) {
     <button class="fchip ${currentFilter === 'unread' ? 'active' : ''}" data-filter="unread" onclick="setFilter('unread',this)">Unread <span class="fchip-count" id="unreadCount">${unreadCount}</span></button>
   `;
 
-  if (userRole === 'customer' || userRole === 'admin') {
-    html += `<button class="fchip ${currentFilter === 'vendors' ? 'active' : ''}" data-filter="vendors" onclick="setFilter('vendors',this)">Vendors</button>`;
-  }
-  
-  if (userRole === 'vendor' || userRole === 'admin') {
-    html += `<button class="fchip ${currentFilter === 'customers' ? 'active' : ''}" data-filter="customers" onclick="setFilter('customers',this)">Customers</button>`;
-  }
-
+  html += `<button class="fchip ${currentFilter === 'vendors' ? 'active' : ''}" data-filter="vendors" onclick="setFilter('vendors',this)">Vendors</button>`;
+  html += `<button class="fchip ${currentFilter === 'customers' ? 'active' : ''}" data-filter="customers" onclick="setFilter('customers',this)">Customers</button>`;
   html += `<button class="fchip ${currentFilter === 'admin' ? 'active' : ''}" data-filter="admin" onclick="setFilter('admin',this)">Admin</button>`;
   html += `<button class="fchip ai-chip" onclick="startAIChat()" title="Chat with AI Assistant">🤖 AI</button>`;
 
@@ -1253,31 +1329,14 @@ function renderRoleFilterChips(userRole) {
 }
 
 function filterStaticContactsByRole() {
-  const allowed = new Set(CHAT_ALLOWED_CONTACT_ROLES.map(r => String(r).toLowerCase()));
-  // Remove contacts not matching allowed roles
-  for (let i = CONTACTS.length - 1; i >= 0; i--) {
-    const role = String(CONTACTS[i].role || '').toLowerCase();
-    // Keep bot and allowed roles
-    if (role !== 'bot' && !allowed.has(role)) {
-      CONTACTS.splice(i, 1);
-    }
-  }
-
-  // Remove conversations involving removed contacts
-  for (let i = CONVERSATIONS.length - 1; i >= 0; i--) {
-    const contact = getContact(CONVERSATIONS[i].contactId);
-    const role = String(contact.role || '').toLowerCase();
-    if (role !== 'bot' && !allowed.has(role)) {
-      CONVERSATIONS.splice(i, 1);
-    }
-  }
+  CHAT_ALLOWED_CONTACT_ROLES = CHAT_ALL_ROLES.slice();
 }
 
 function renderContactGrid(contacts) {
   const grid = document.getElementById('contactGrid');
   if (!grid) return;
   if (contacts.length === 0) {
-    grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--t3);font-size:.82rem;">No contacts found</div>`;
+    grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--t3);font-size:.82rem;">No vendor or admin contacts found</div>`;
     return;
   }
   grid.innerHTML = contacts.map(c => `
@@ -1286,20 +1345,20 @@ function renderContactGrid(contacts) {
       <div class="citem-info">
         <strong>${c.name}</strong>
         <span>${c.company !== '—' ? c.company : c.email}</span>
+        <small style="display:block;color:var(--t3);margin-top:3px;line-height:1.35;">${c.province !== '—' ? c.province : 'Province unavailable'} · ${c.phone !== '—' ? c.phone : c.email}</small>
       </div>
       <span class="citem-role role-${c.role}">${capitalize(c.role)}</span>
     </div>`).join('');
 }
 
 /* NEW CHAT MODAL */
-function openNewChat(roleFilter = null) {
-  if (accessDeniedMode) {
-    showChatAccessDenied('blocked_open_new_chat');
-    return;
-  }
+async function openNewChat(roleFilter = null) {
   document.getElementById('modalBackdrop').classList.remove('hidden');
   document.getElementById('contactSearch').value = '';
-  if (roleFilter && CHAT_ALLOWED_CONTACT_ROLES.includes(String(roleFilter).toLowerCase())) {
+
+  await ensureVendorDirectoryLoaded('');
+
+  if (roleFilter && CHAT_ALL_ROLES.includes(String(roleFilter).toLowerCase())) {
     renderContactGrid(getVisibleContacts().filter((contact) => contact.role === String(roleFilter).toLowerCase()));
     return;
   }
@@ -1310,15 +1369,7 @@ function closeNewChat(e) {
     document.getElementById('modalBackdrop').classList.add('hidden');
 }
 function startNewChat(contactId) {
-  if (accessDeniedMode) {
-    showChatAccessDenied('blocked_start_new_chat');
-    return;
-  }
   const contact = getContact(contactId);
-  if (!CHAT_ALLOWED_CONTACT_ROLES.includes(String(contact?.role || '').toLowerCase())) {
-    showToast('You are not authorized to message this user role.', 'warn');
-    return;
-  }
   const existing = CONVERSATIONS.find(c => c.contactId === contactId);
 
   if (existing) {
