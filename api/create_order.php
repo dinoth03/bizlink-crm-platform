@@ -4,6 +4,8 @@ require 'config.php';
 require_once 'api_helpers.php';
 require_once 'csrf_protection.php';
 require_once 'rate_limiting.php';
+require_once 'shipping_helpers.php';
+require_once 'promotional_helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -66,6 +68,7 @@ $shippingAddressInput = sanitizeString((string)($payload['shipping_address'] ?? 
 $billingAddressInput = sanitizeString((string)($payload['billing_address'] ?? ''), 500);
 $orderNotes = sanitizeString((string)($payload['order_notes'] ?? $payload['notes'] ?? ''), 1000);
 $customerNotes = sanitizeString((string)($payload['customer_notes'] ?? ''), 1000);
+$couponCode = isset($payload['coupon_code']) ? sanitizeString($payload['coupon_code'], 50) : null;
 $currency = 'LKR';
 $taxRate = 0.08;
 $allowedPaymentMethods = ['credit_card', 'debit_card', 'bank_transfer', 'digital_wallet', 'cash_on_delivery'];
@@ -99,6 +102,8 @@ if ($customerId <= 0) {
 $userAddress = buildAddressString($customer);
 $shippingAddress = $shippingAddressInput !== '' ? $shippingAddressInput : $userAddress;
 $billingAddress = $billingAddressInput !== '' ? $billingAddressInput : $shippingAddress;
+$shippingProvince = trim((string)($customer['province'] ?? ''));
+$shippingCity = trim((string)($customer['city'] ?? ''));
 
 $cartItems = [];
 $payloadItems = isset($payload['cart_items']) && is_array($payload['cart_items']) ? $payload['cart_items'] : [];
@@ -367,6 +372,8 @@ try {
         $vendorDiscount = 0.0;
         $vendorTax = 0.0;
         $vendorCommission = 0.0;
+        $vendorItemCount = 0;
+        $vendorHasPhysicalItems = false;
 
         foreach ($vendorItems as $vendorItem) {
             if ($vendorItem['product_type'] !== 'service') {
@@ -381,11 +388,68 @@ try {
             $vendorSubtotal += (float)$vendorItem['line_subtotal'];
             $vendorDiscount += (float)$vendorItem['line_discount'];
             $vendorTax += (float)$vendorItem['line_tax'];
+            $vendorItemCount += (int)($vendorItem['quantity'] ?? 1);
+            $vendorHasPhysicalItems = true;
         }
 
         $vendorCommission = round($vendorSubtotal * ((float)$vendorGroup['commission_rate'] / 100), 2);
-        $shippingCost = 0.0;
-        $grandTotal = round($vendorSubtotal + $vendorTax + $shippingCost, 2);
+        $shippingEstimate = bizlinkEstimateShipping([
+            'province' => $shippingProvince,
+            'city' => $shippingCity,
+            'subtotal' => $vendorSubtotal,
+            'weight_kg' => max(0.5, (float)$vendorItemCount * 0.4),
+            'item_count' => max(1, $vendorItemCount),
+            'shipping_method' => $shippingMethod,
+            'is_service' => !$vendorHasPhysicalItems
+        ]);
+        $shippingCost = (float)$shippingEstimate['shipping_cost'];
+        $expectedDeliveryDate = (string)$shippingEstimate['estimated_delivery_end'];
+        
+        // Calculate promotional discounts for this vendor
+        ensurePromotionalTables($conn);
+        $promotionalDiscount = 0.0;
+        $appliedCoupon = null;
+        
+        // Apply coupon if provided
+        if (!empty($couponCode)) {
+            $couponValidation = validateCoupon($conn, $couponCode, $vendorSubtotal);
+            if ($couponValidation['valid']) {
+                $promotionalDiscount += $couponValidation['discount_amount'];
+                $appliedCoupon = $couponValidation;
+            }
+        }
+        
+        // Apply bulk discounts
+        $bulkDiscounts = calculateBulkDiscounts($conn, $vendorId, $vendorItems);
+        foreach ($bulkDiscounts as $bulkDiscount) {
+            $promotionalDiscount += (float)$bulkDiscount['discount_amount'];
+        }
+        
+        // Apply seasonal sales
+        $activeSales = getActiveSeasonalSales($conn, $vendorId);
+        foreach ($activeSales as $sale) {
+            foreach ($vendorItems as $item) {
+                if (canApplySeasonalSale($conn, (int)$sale['seasonal_sale_id'], (int)$item['product_id'])) {
+                    $discountAmount = 0;
+                    if ($sale['discount_type'] === 'percentage') {
+                        $discountAmount = (((float)$item['unit_price'] * (int)$item['quantity']) * (float)$sale['discount_value']) / 100;
+                    } else {
+                        $discountAmount = (float)$sale['discount_value'] * (int)$item['quantity'];
+                    }
+                    
+                    if ($sale['max_discount_per_item'] !== null) {
+                        $discountAmount = min($discountAmount, (float)$sale['max_discount_per_item'] * (int)$item['quantity']);
+                    }
+                    
+                    $promotionalDiscount += $discountAmount;
+                }
+            }
+        }
+        
+        $promotionalDiscount = round(max(0, min($promotionalDiscount, $vendorSubtotal)), 2);
+        $vendorDiscount = round($vendorDiscount + $promotionalDiscount, 2);
+        
+        $grandTotal = round($vendorSubtotal - $vendorDiscount + $vendorTax + $shippingCost, 2);
         $orderNumber = generateUniqueOrderNumber($conn, 5);
         if ($orderNumber === '') {
             throw new Exception('Unable to generate a unique order number.');
@@ -417,6 +481,13 @@ try {
             throw new Exception('Failed to create order for vendor ' . $vendorGroup['vendor_name']);
         }
         $orderId = (int)$insertOrderStmt->insert_id;
+
+        $updateExpectedDeliveryStmt = $conn->prepare('UPDATE orders SET expected_delivery_date = ? WHERE order_id = ?');
+        if ($updateExpectedDeliveryStmt) {
+            $updateExpectedDeliveryStmt->bind_param('si', $expectedDeliveryDate, $orderId);
+            $updateExpectedDeliveryStmt->execute();
+            $updateExpectedDeliveryStmt->close();
+        }
 
         foreach ($vendorItems as $vendorItem) {
             $productId = (int)$vendorItem['product_id'];
@@ -496,6 +567,8 @@ try {
             'tax_amount' => round($vendorTax, 2),
             'commission_amount' => round($vendorCommission, 2),
             'total_amount' => round($grandTotal, 2),
+            'shipping_cost' => round($shippingCost, 2),
+            'expected_delivery_date' => $expectedDeliveryDate,
             'items_count' => count($vendorItems)
         ];
 

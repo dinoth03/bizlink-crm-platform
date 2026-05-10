@@ -4,6 +4,7 @@ require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
 require_once 'csrf_protection.php';
+require_once 'shipping_helpers.php';
 require_once 'rate_limiting.php';
 require_once 'stripe_helpers.php';
 
@@ -96,7 +97,7 @@ if ($price <= 0) {
 }
 
 $orderSubtotal = round($price * $quantity, 2);
-$orderTotal = $orderSubtotal;
+$shippingMethod = 'Standard Delivery';
 $currency = 'LKR';
 $shippingAddress = 'To be confirmed at checkout';
 $orderNotes = 'Created from marketplace Buy Now with Stripe checkout';
@@ -114,6 +115,19 @@ if ($userInfoStmt) {
         $shippingAddress = $city . ', ' . ($country !== '' ? $country : 'Sri Lanka');
     }
 }
+
+$shippingEstimate = bizlinkEstimateShipping([
+    'province' => '',
+    'city' => $city ?? '',
+    'subtotal' => $orderSubtotal,
+    'weight_kg' => max(0.5, (float)$quantity * 0.4),
+    'item_count' => max(1, $quantity),
+    'shipping_method' => $shippingMethod,
+    'is_service' => ((string)($product['product_type'] ?? '') === 'service')
+]);
+$shippingCost = (float)$shippingEstimate['shipping_cost'];
+$estimatedDeliveryDate = (string)$shippingEstimate['estimated_delivery_end'];
+$orderTotal = round($orderSubtotal + $shippingCost, 2);
 
 function generateOrderNumber(): string {
     return 'BL-' . date('YmdHis') . '-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
@@ -366,7 +380,7 @@ try {
             notes,
             created_at,
             updated_at
-        ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, 0, 0, 0, 0, ?, ?, ?, NOW(), NOW())'
+        ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, 0, 0, ?, 0, ?, ?, ?, NOW(), NOW())'
     );
 
     if (!$insertOrderStmt) {
@@ -374,7 +388,7 @@ try {
     }
 
     $insertOrderStmt->bind_param(
-        'siisssddss',
+        'siisssdddss',
         $orderNumber,
         $customerId,
         $vendorId,
@@ -382,6 +396,7 @@ try {
         $paymentStatus,
         $shippingAddress,
         $orderSubtotal,
+        $shippingCost,
         $orderTotal,
         $currency,
         $orderNotes
@@ -394,6 +409,13 @@ try {
     }
 
     $orderId = (int)$insertOrderStmt->insert_id;
+
+    $updateOrderStmt = $conn->prepare('UPDATE orders SET shipping_method = ?, expected_delivery_date = ? WHERE order_id = ?');
+    if ($updateOrderStmt) {
+        $updateOrderStmt->bind_param('ssi', $shippingMethod, $estimatedDeliveryDate, $orderId);
+        $updateOrderStmt->execute();
+        $updateOrderStmt->close();
+    }
     $insertOrderStmt->close();
 
     $insertItemStmt = $conn->prepare(
@@ -579,6 +601,64 @@ try {
     );
 
     $conn->commit();
+
+    // Send email / SMS notifications (best-effort, non-blocking behavior)
+    require_once __DIR__ . '/mail_service.php';
+    require_once __DIR__ . '/sms_service.php';
+
+    try {
+        // Customer contact
+        $custStmt = $conn->prepare('SELECT u.email, u.phone, np.email_notifications, np.sms_notifications FROM customers c JOIN users u ON c.user_id = u.user_id LEFT JOIN notification_preferences np ON np.user_id = u.user_id WHERE c.customer_id = ? LIMIT 1');
+        if ($custStmt) {
+            $custStmt->bind_param('i', $customerId);
+            $custStmt->execute();
+            $custRow = $custStmt->get_result()->fetch_assoc();
+            $custStmt->close();
+        } else {
+            $custRow = null;
+        }
+
+        // Vendor contact
+        $vendStmt = $conn->prepare('SELECT u.email, u.phone, np.email_notifications, np.sms_notifications FROM vendors v JOIN users u ON v.user_id = u.user_id LEFT JOIN notification_preferences np ON np.user_id = u.user_id WHERE v.vendor_id = ? LIMIT 1');
+        if ($vendStmt) {
+            $vendStmt->bind_param('i', $vendorId);
+            $vendStmt->execute();
+            $vendRow = $vendStmt->get_result()->fetch_assoc();
+            $vendStmt->close();
+        } else {
+            $vendRow = null;
+        }
+
+        // Prepare messages
+        $orderUrl = '/customer/order.html?order_id=' . $orderId;
+        $custSubject = 'Order confirmation: ' . $orderNumber;
+        $custHtml = "<p>Thank you for your order <strong>{$orderNumber}</strong>.</p><p>Product: {$productName}<br>Quantity: {$quantity}<br>Total: Rs. {$orderTotal}</p><p>Track your order: <a href=\"{$orderUrl}\">View order</a></p>";
+        $custText = strip_tags(str_replace(['<br>', '<br/>', '<p>', '</p>'], "\n", $custHtml));
+
+        $vendorSubject = 'New order received: ' . $orderNumber;
+        $vendorHtml = "<p>You received a new order <strong>{$orderNumber}</strong>.</p><p>Product: {$productName}<br>Quantity: {$quantity}<br>Total: Rs. {$orderTotal}</p><p>Open vendor orders panel to process.</p>";
+        $vendorText = strip_tags(str_replace(['<br>', '<br/>', '<p>', '</p>'], "\n", $vendorHtml));
+
+        // Customer email
+        if (!empty($custRow['email']) && ($custRow['email_notifications'] ?? 1)) {
+            try { sendMail($custRow['email'], $custSubject, $custHtml, $custText); } catch (Throwable $e) { error_log('[Notify] Customer email failed: ' . $e->getMessage()); }
+        }
+        // Vendor email
+        if (!empty($vendRow['email']) && ($vendRow['email_notifications'] ?? 1)) {
+            try { sendMail($vendRow['email'], $vendorSubject, $vendorHtml, $vendorText); } catch (Throwable $e) { error_log('[Notify] Vendor email failed: ' . $e->getMessage()); }
+        }
+
+        // Customer SMS
+        if (!empty($custRow['phone']) && ($custRow['sms_notifications'] ?? 0)) {
+            try { sendSms($custRow['phone'], "Order {$orderNumber} confirmed. Total Rs. {$orderTotal}"); } catch (Throwable $e) { error_log('[Notify] Customer SMS failed: ' . $e->getMessage()); }
+        }
+        // Vendor SMS
+        if (!empty($vendRow['phone']) && ($vendRow['sms_notifications'] ?? 0)) {
+            try { sendSms($vendRow['phone'], "New order {$orderNumber}: {$quantity} x {$productName}"); } catch (Throwable $e) { error_log('[Notify] Vendor SMS failed: ' . $e->getMessage()); }
+        }
+    } catch (Throwable $notifyEx) {
+        error_log('[Notify] Exception during notification dispatch: ' . $notifyEx->getMessage());
+    }
 
     apiSuccess([
         'order_id' => $orderId,

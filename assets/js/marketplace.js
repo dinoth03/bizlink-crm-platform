@@ -94,16 +94,129 @@ let state = {
   priceMin: null,
   priceMax: null,
   minRating: 0,
+  brand: '',
+  delivery: '',
   cart: [],
   wishlist: [],
   page: 1,
   itemsPerPage: 12,
   preferenceCounts: {},
+  searchSuggestions: [],
+  savedSearches: [],
+  searchTimer: null,
+  suggestionTimer: null,
   catalog: [...PRODUCTS],
 };
 
 function getCatalog() {
   return Array.isArray(state.catalog) && state.catalog.length > 0 ? state.catalog : PRODUCTS;
+}
+
+/* ===== Product Reviews (Modal) ===== */
+async function loadProductReviewsForModal(product) {
+  const container = document.getElementById('modalReviews');
+  if (!container) return;
+
+  const apiId = Number(product.api_product_id || 0);
+  if (!apiId) {
+    container.innerHTML = '<div style="color:var(--t3);">Reviews available for marketplace products only.</div>';
+    return;
+  }
+
+  container.innerHTML = 'Loading reviews...';
+  try {
+    const resp = await apiRequest(`get_product_reviews.php?product_id=${apiId}`);
+    if (!resp || !resp.ok || !resp.data) {
+      container.innerHTML = '<div style="color:var(--t3);">Unable to load reviews.</div>';
+      return;
+    }
+    const envelope = resp.data;
+    const data = envelope.data || envelope;
+    const reviews = (data.reviews || []);
+    renderModalReviews(reviews, data.meta || {});
+  } catch (err) {
+    console.error('Load reviews failed', err);
+    container.innerHTML = '<div style="color:var(--t3);">Unable to load reviews.</div>';
+  }
+}
+
+function renderModalReviews(reviews, meta) {
+  const container = document.getElementById('modalReviews');
+  if (!container) return;
+  if (!reviews || reviews.length === 0) {
+    container.innerHTML = '<div style="padding:1rem;color:var(--t3);">No reviews yet — be the first to review this product.</div>';
+    return;
+  }
+
+  container.innerHTML = reviews.map(r => {
+    const stars = '★'.repeat(Math.round(r.rating)) + '☆'.repeat(5 - Math.round(r.rating));
+    const name = r.reviewer_name || 'Anonymous';
+    const date = new Date(r.created_at).toLocaleDateString();
+    const content = r.review_content || '';
+    return `
+      <div class="modal-review-item">
+        <div class="review-head"><strong>${name}</strong> <span class="review-date">${date}</span></div>
+        <div class="review-stars">${stars} <span class="review-score">${r.rating}</span></div>
+        <div class="review-body">${content}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function submitModalReview(prodCardId) {
+  const product = findCatalogProductById(prodCardId);
+  if (!product) return showToast('Product not found', 'warn');
+
+  const apiId = Number(product.api_product_id || 0);
+  if (!apiId) return showToast('Reviews supported for marketplace products only', 'warn');
+
+  // Ensure customer logged in
+  if (typeof authMe === 'function') {
+    const me = await authMe(false);
+    if (!me || !me.user) {
+      showToast('Please sign in to submit a review', 'info');
+      window.location.href = getLoginPageUrl('login_required');
+      return;
+    }
+  }
+
+  const rating = parseInt(document.getElementById('reviewRating')?.value || '5', 10);
+  const title = document.getElementById('reviewTitle')?.value || '';
+  const content = document.getElementById('reviewContent')?.value || '';
+  if (!content.trim()) return showToast('Please write a review before submitting', 'warn');
+
+  const payload = {
+    product_id: apiId,
+    rating,
+    review_title: title,
+    review_content: content
+  };
+
+  try {
+    const result = await apiRequest('create_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, false);
+
+    if (!result) return; // auth redirect handled by apiRequest
+    const envelope = result.data || {};
+    if (!result.ok || !envelope.success) {
+      showToast(envelope.message || 'Unable to submit review', 'warn');
+      return;
+    }
+
+    showToast('Thank you — your review has been submitted', 'success');
+    // Clear form
+    document.getElementById('reviewTitle').value = '';
+    document.getElementById('reviewContent').value = '';
+
+    // Reload reviews
+    loadProductReviewsForModal(product);
+  } catch (err) {
+    console.error('Submit review failed', err);
+    showToast('Unable to submit review', 'warn');
+  }
 }
 
 function findCatalogProductById(id) {
@@ -640,6 +753,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initBackToTop();
   initCheckoutGuard();
   initMarketplaceAuthUI();
+  loadSavedSearches();
+
+  document.addEventListener('click', (event) => {
+    const wrap = document.querySelector('.nav-search-wrap');
+    const suggestions = document.getElementById('searchSuggestions');
+    if (!wrap || !suggestions) return;
+    if (!wrap.contains(event.target)) {
+      hideSearchSuggestions();
+    }
+  });
 
   // Hydrate from API when available, but never block first paint.
   loadMarketplaceData().then(() => {
@@ -710,17 +833,154 @@ function selectCategory(cat, el) {
 
 /*SEARCH*/
 function handleSearch(val) {
-  state.search = val.trim().toLowerCase();
+  const raw = String(val || '');
+  state.search = raw.trim().toLowerCase();
   state.page = 1;
-  document.getElementById('searchClear').classList.toggle('visible', val.length > 0);
+  const clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.classList.toggle('visible', raw.trim().length > 0);
+  renderProducts();
+  updateActiveFilters();
+
+  if (state.suggestionTimer) clearTimeout(state.suggestionTimer);
+  state.suggestionTimer = setTimeout(() => {
+    loadSearchSuggestions(raw.trim());
+  }, 180);
+}
+
+function clearSearch() {
+  const input = document.getElementById('globalSearch');
+  if (input) input.value = '';
+  state.search = '';
+  hideSearchSuggestions();
+  const clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.classList.remove('visible');
   renderProducts();
   updateActiveFilters();
 }
 
-function clearSearch() {
-  document.getElementById('globalSearch').value = '';
-  state.search = '';
-  document.getElementById('searchClear').classList.remove('visible');
+function applySearchSuggestion(value) {
+  const input = document.getElementById('globalSearch');
+  if (input) input.value = value;
+  handleSearch(value);
+  hideSearchSuggestions();
+}
+
+function hideSearchSuggestions() {
+  const box = document.getElementById('searchSuggestions');
+  if (!box) return;
+  box.hidden = true;
+  box.innerHTML = '';
+}
+
+function renderSearchSuggestions(items) {
+  const box = document.getElementById('searchSuggestions');
+  if (!box) return;
+
+  const list = Array.isArray(items) ? items.slice(0, 8) : [];
+  if (list.length === 0) {
+    box.innerHTML = '<div class="search-suggestion-empty">No suggestions yet. Keep typing or clear the search.</div>';
+    box.hidden = false;
+    return;
+  }
+
+  box.innerHTML = list.map((item) => {
+    const label = String(item.suggestion_label || '').trim();
+    const type = String(item.suggestion_type || 'product').trim();
+    const icon = type === 'vendor' ? '🏪' : (type === 'category' ? '🗂️' : '🔎');
+    return `<button type="button" class="search-suggestion-item" onclick="applySearchSuggestion(${JSON.stringify(label)})"><span>${icon} ${label}</span><span class="search-suggestion-kind">${type}</span></button>`;
+  }).join('');
+  box.hidden = false;
+}
+
+async function loadSearchSuggestions(term) {
+  const query = String(term || '').trim();
+  if (query.length < 2) {
+    hideSearchSuggestions();
+    return;
+  }
+
+  if (typeof apiRequest !== 'function') {
+    const localMatches = getCatalog()
+      .filter((product) => {
+        const hay = [product.name, product.company, product.cat, ...(product.tags || [])].join(' ').toLowerCase();
+        return hay.includes(query.toLowerCase());
+      })
+      .slice(0, 8)
+      .map((product) => ({ suggestion_label: product.name, suggestion_type: 'product' }));
+    renderSearchSuggestions(localMatches);
+    return;
+  }
+
+  try {
+    const response = await apiRequest(`get_search_suggestions.php?term=${encodeURIComponent(query)}`, { method: 'GET' }, false);
+    const envelope = response && response.data ? response.data : null;
+    const suggestions = envelope && envelope.success && envelope.data && Array.isArray(envelope.data.suggestions)
+      ? envelope.data.suggestions
+      : [];
+    state.searchSuggestions = suggestions;
+    renderSearchSuggestions(suggestions);
+  } catch (error) {
+    console.debug('Search suggestions failed:', error?.message || error);
+    hideSearchSuggestions();
+  }
+}
+
+function buildCurrentSearchQuery() {
+  return {
+    cat: state.cat,
+    search: state.search,
+    sort: state.sort,
+    view: state.view,
+    priceMin: state.priceMin,
+    priceMax: state.priceMax,
+    minRating: state.minRating,
+    brand: state.brand,
+    delivery: state.delivery
+  };
+}
+
+function applySearchQuery(query = {}) {
+  state.cat = String(query.cat || 'all');
+  state.search = String(query.search || '').trim().toLowerCase();
+  state.sort = String(query.sort || 'featured');
+  state.view = String(query.view || 'grid');
+  state.priceMin = query.priceMin !== null && query.priceMin !== undefined && query.priceMin !== '' ? Number(query.priceMin) : null;
+  state.priceMax = query.priceMax !== null && query.priceMax !== undefined && query.priceMax !== '' ? Number(query.priceMax) : null;
+  state.minRating = query.minRating !== null && query.minRating !== undefined && query.minRating !== '' ? Number(query.minRating) : 0;
+  state.brand = String(query.brand || '').trim().toLowerCase();
+  state.delivery = String(query.delivery || '').trim().toLowerCase();
+
+  const searchInput = document.getElementById('globalSearch');
+  const brandInput = document.getElementById('brandFilter');
+  const deliverySelect = document.getElementById('deliveryFilter');
+  const priceMinInput = document.getElementById('priceMin');
+  const priceMaxInput = document.getElementById('priceMax');
+  if (searchInput) searchInput.value = state.search;
+  if (brandInput) brandInput.value = state.brand;
+  if (deliverySelect) deliverySelect.value = state.delivery;
+  if (priceMinInput) priceMinInput.value = state.priceMin ?? '';
+  if (priceMaxInput) priceMaxInput.value = state.priceMax ?? '';
+
+  const sortSelect = document.querySelector('.sort-select');
+  if (sortSelect) sortSelect.value = state.sort;
+
+  setView(state.view);
+
+  document.getElementById('searchClear')?.classList.toggle('visible', state.search.length > 0);
+  renderProducts();
+  updateActiveFilters();
+}
+
+function applyBrandFilter() {
+  state.brand = (document.getElementById('brandFilter')?.value || '').trim().toLowerCase();
+  state.page = 1;
+  renderProducts();
+  updateActiveFilters();
+}
+
+function applyDeliveryFilter() {
+  state.delivery = (document.getElementById('deliveryFilter')?.value || '').trim().toLowerCase();
+  state.page = 1;
   renderProducts();
   updateActiveFilters();
 }
@@ -784,6 +1044,8 @@ function updateActiveFilters() {
   if (state.priceMin) addFilterTag(container, `Min: Rs.${state.priceMin.toLocaleString()}`, () => { document.getElementById('priceMin').value=''; state.priceMin=null; renderProducts(); updateActiveFilters(); });
   if (state.priceMax) addFilterTag(container, `Max: Rs.${state.priceMax.toLocaleString()}`, () => { document.getElementById('priceMax').value=''; state.priceMax=null; renderProducts(); updateActiveFilters(); });
   if (state.minRating > 0) addFilterTag(container, `Rating: ${state.minRating}★+`, () => setRatingFilter(0, document.querySelector('.sf-btn')));
+  if (state.brand) addFilterTag(container, `Brand: ${state.brand}`, () => { state.brand=''; const input = document.getElementById('brandFilter'); if (input) input.value=''; renderProducts(); updateActiveFilters(); });
+  if (state.delivery) addFilterTag(container, `Delivery: ${state.delivery}`, () => { state.delivery=''; const input = document.getElementById('deliveryFilter'); if (input) input.value=''; renderProducts(); updateActiveFilters(); });
 }
 
 function addFilterTag(container, label, removeFn) {
@@ -801,11 +1063,30 @@ function getFilteredProducts() {
   if (state.search) list = list.filter(p =>
     p.name.toLowerCase().includes(state.search) ||
     p.company.toLowerCase().includes(state.search) ||
-    p.tags.some(t => t.toLowerCase().includes(state.search))
+    (Array.isArray(p.tags) && p.tags.some(t => String(t).toLowerCase().includes(state.search))) ||
+    String(p.desc || '').toLowerCase().includes(state.search)
   );
   if (state.priceMin !== null) list = list.filter(p => p.price >= state.priceMin);
   if (state.priceMax !== null) list = list.filter(p => p.price <= state.priceMax);
   if (state.minRating > 0) list = list.filter(p => p.rating >= state.minRating);
+  if (state.brand) {
+    list = list.filter((p) => {
+      const hay = [p.company, p.brand, p.vendor_name, p.vendor, ...(Array.isArray(p.tags) ? p.tags : [])].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(state.brand);
+    });
+  }
+  if (state.delivery) {
+    list = list.filter((p) => {
+      const deliveryText = String(p.delivery || '').toLowerCase();
+      if (!deliveryText) return false;
+      if (state.delivery === 'same-day') return deliveryText.includes('same day') || deliveryText.includes('same-day');
+      if (state.delivery === '2-3 days') return deliveryText.includes('2–3') || deliveryText.includes('2-3') || deliveryText.includes('2 to 3');
+      if (state.delivery === '4-7 days') return deliveryText.includes('4–7') || deliveryText.includes('4-7') || deliveryText.includes('4 to 7');
+      if (state.delivery === '1-2 weeks') return deliveryText.includes('1–2 weeks') || deliveryText.includes('1-2 weeks') || deliveryText.includes('week');
+      if (state.delivery === 'service') return !!p.isService || deliveryText.includes('service');
+      return deliveryText.includes(state.delivery);
+    });
+  }
 
   switch (state.sort) {
     case 'price-asc':  list.sort((a,b) => a.price - b.price); break;
@@ -956,6 +1237,114 @@ function goPage(p) {
   document.getElementById('marketplace').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+async function loadSavedSearches() {
+  const container = document.getElementById('savedSearchList');
+  if (!container) return;
+
+  if (typeof apiRequest !== 'function') {
+    container.innerHTML = '<div class="saved-search-empty">Sign in to save searches.</div>';
+    return;
+  }
+
+  try {
+    const response = await apiRequest('get_saved_searches.php', { method: 'GET' }, false);
+    const envelope = response && response.data ? response.data : null;
+    const searches = envelope && envelope.success && envelope.data ? (Array.isArray(envelope.data) ? envelope.data : []) : [];
+    state.savedSearches = searches;
+
+    if (!searches.length) {
+      container.innerHTML = '<div class="saved-search-empty">No saved searches yet. Use the button above after setting filters.</div>';
+      return;
+    }
+
+    container.innerHTML = searches.map((entry) => {
+      const query = entry.query || {};
+      const summaryParts = [];
+      if (query.search) summaryParts.push(`Search: ${query.search}`);
+      if (query.cat && query.cat !== 'all') summaryParts.push(`Category: ${query.cat}`);
+      if (query.brand) summaryParts.push(`Brand: ${query.brand}`);
+      if (query.delivery) summaryParts.push(`Delivery: ${query.delivery}`);
+      if (query.minRating) summaryParts.push(`Rating: ${query.minRating}★+`);
+      if (query.priceMin || query.priceMax) summaryParts.push(`Price: ${query.priceMin || 0} - ${query.priceMax || 'any'}`);
+
+      return `
+        <div class="saved-search-item">
+          <div>
+            <strong>${entry.name}</strong>
+            <span>${summaryParts.join(' · ') || 'Saved search filters'}</span>
+          </div>
+          <div class="saved-search-item-actions">
+            <button type="button" class="saved-search-mini-btn" onclick="applySavedSearch(${entry.saved_search_id})">Use</button>
+            <button type="button" class="saved-search-mini-btn danger" onclick="deleteSavedSearch(${entry.saved_search_id})">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Failed to load saved searches:', error);
+    container.innerHTML = '<div class="saved-search-empty">Unable to load saved searches right now.</div>';
+  }
+}
+
+async function saveCurrentSearch() {
+  const name = window.prompt('Name this search');
+  if (!name || !name.trim()) return;
+
+  if (typeof apiRequest !== 'function') {
+    showToast('Sign in to save searches', 'info');
+    return;
+  }
+
+  try {
+    const response = await apiRequest('save_search.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.trim(), query: buildCurrentSearchQuery() })
+    }, false);
+
+    const envelope = response && response.data ? response.data : null;
+    if (!response || !response.ok || !envelope || !envelope.success) {
+      showToast((envelope && envelope.message) || 'Unable to save search', 'warn');
+      return;
+    }
+
+    showToast('Search saved', 'success');
+    loadSavedSearches();
+  } catch (error) {
+    console.error('Save search failed:', error);
+    showToast('Unable to save search', 'warn');
+  }
+}
+
+function applySavedSearch(savedSearchId) {
+  const entry = state.savedSearches.find((item) => Number(item.saved_search_id) === Number(savedSearchId));
+  if (!entry) return;
+  applySearchQuery(entry.query || {});
+}
+
+async function deleteSavedSearch(savedSearchId) {
+  if (!window.confirm('Delete this saved search?')) return;
+  if (typeof apiRequest !== 'function') return;
+
+  try {
+    const response = await apiRequest('delete_saved_search.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: Number(savedSearchId) })
+    }, false);
+    const envelope = response && response.data ? response.data : null;
+    if (!response || !response.ok || !envelope || !envelope.success) {
+      showToast((envelope && envelope.message) || 'Unable to delete saved search', 'warn');
+      return;
+    }
+    showToast('Saved search deleted', 'success');
+    loadSavedSearches();
+  } catch (error) {
+    console.error('Delete saved search failed:', error);
+    showToast('Unable to delete saved search', 'warn');
+  }
+}
+
 /* MODAL*/
 function openModal(id) {
   const p = findCatalogProductById(id);
@@ -1035,11 +1424,35 @@ function openModal(id) {
       <div class="modal-delivery">
         🚚 <strong>Delivery:</strong> ${p.delivery}
       </div>
+
+      <div class="modal-reviews" id="modalReviewsWrap">
+        <h3>Customer Reviews</h3>
+        <div id="modalReviews">Loading reviews...</div>
+        ${p.api_product_id && Number(p.api_product_id) > 0 ? `
+        <div class="modal-review-form">
+          <h4>Write a review</h4>
+          <label>Rating: <select id="reviewRating">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Very good</option>
+            <option value="3">3 - Good</option>
+            <option value="2">2 - Fair</option>
+            <option value="1">1 - Poor</option>
+          </select></label>
+          <label>Title: <input id="reviewTitle" type="text" maxlength="255" placeholder="Short title"/></label>
+          <label>Review: <textarea id="reviewContent" rows="4" placeholder="Share your experience"></textarea></label>
+          <div class="modal-review-actions">
+            <button class="btn" id="submitReviewBtn" onclick="submitModalReview(${p.id})">Submit Review</button>
+          </div>
+        </div>
+        ` : `<div class="note">Reviews available for marketplace products only.</div>`}
+      </div>
     </div>
   `;
 
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Load reviews for API-backed products
+  try { loadProductReviewsForModal(p); } catch (e) { /* ignore */ }
 }
 
 function closeModal(e) {

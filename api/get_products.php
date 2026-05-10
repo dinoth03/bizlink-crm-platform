@@ -35,7 +35,9 @@ $filters = [
     'min_price' => isset($_GET['min_price']) ? (float)$_GET['min_price'] : null,
     'max_price' => isset($_GET['max_price']) ? (float)$_GET['max_price'] : null,
     'status' => isset($_GET['status']) ? strtolower(trim((string)$_GET['status'])) : '',
-    'vendor_id' => isset($_GET['vendor_id']) ? (int)$_GET['vendor_id'] : 0
+    'vendor_id' => isset($_GET['vendor_id']) ? (int)$_GET['vendor_id'] : 0,
+    'min_rating' => isset($_GET['min_rating']) ? (float)$_GET['min_rating'] : null,
+    'brand' => isset($_GET['brand']) ? sanitizeString((string)$_GET['brand'], 100) : ''
 ];
 
 $validationErrors = [];
@@ -90,12 +92,21 @@ if ($filters['category'] !== '') {
     appendSqlCondition($whereClause, $params, $types, 'LOWER(p.category) = ?', strtolower($filters['category']), 's');
 }
 if ($filters['search'] !== '') {
-    $searchTerm = '%' . $filters['search'] . '%';
-    $whereClause .= ' AND (p.product_name LIKE ? OR v.business_name LIKE ?)';
-    $params[] = $searchTerm;
-    $params[] = $searchTerm;
-    $types[] = 's';
-    $types[] = 's';
+    $search = trim($filters['search']);
+    // Prefer FULLTEXT when available and search term is at least 3 chars
+    if (strlen($search) >= 3) {
+        // Use natural language MATCH ... AGAINST
+        $whereClause .= ' AND MATCH(p.product_name, p.product_description) AGAINST (? IN NATURAL LANGUAGE MODE)';
+        $params[] = $search;
+        $types[] = 's';
+    } else {
+        $searchTerm = '%' . $search . '%';
+        $whereClause .= ' AND (p.product_name LIKE ? OR v.business_name LIKE ?)';
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $types[] = 's';
+        $types[] = 's';
+    }
 }
 if ($filters['min_price'] !== null) {
     appendSqlCondition($whereClause, $params, $types, 'p.price >= ?', $filters['min_price'], 'd');
@@ -108,6 +119,19 @@ if ($filters['status'] !== '') {
 }
 if ($filters['vendor_id'] > 0) {
     appendSqlCondition($whereClause, $params, $types, 'p.vendor_id = ?', $filters['vendor_id'], 'i');
+}
+// Rating filter (uses stored avg_rating on product)
+if ($filters['min_rating'] !== null && $filters['min_rating'] > 0) {
+    appendSqlCondition($whereClause, $params, $types, 'p.avg_rating >= ?', $filters['min_rating'], 'd');
+}
+// Brand filter: check attributes JSON brand or product_name
+if ($filters['brand'] !== '') {
+    $brandLower = strtolower($filters['brand']);
+    $whereClause .= ' AND (LOWER(JSON_UNQUOTE(JSON_EXTRACT(p.attributes, "$.brand"))) = ? OR LOWER(p.product_name) LIKE ?)';
+    $params[] = $brandLower;
+    $params[] = '%' . $brandLower . '%';
+    $types[] = 's';
+    $types[] = 's';
 }
 
 $countSql = 'SELECT COUNT(*) AS total FROM products p LEFT JOIN vendors v ON p.vendor_id = v.vendor_id' . $whereClause;

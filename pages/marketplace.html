@@ -30,6 +30,7 @@
       <span class="ns-icon">🔍</span>
       <input type="text" class="nav-search" id="globalSearch" placeholder="භාණ්ඩ සොයන්න · Search products, vendors..." oninput="handleSearch(this.value)" />
       <button class="ns-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      <div class="search-suggestions" id="searchSuggestions" hidden></div>
     </div>
 
     <div class="nav-actions">
@@ -313,6 +314,35 @@
           <button class="sf-btn" data-rating="3" onclick="setRatingFilter(3, this)">3★+</button>
           <button class="sf-btn" data-rating="4" onclick="setRatingFilter(4, this)">4★+</button>
           <button class="sf-btn" data-rating="4.5" onclick="setRatingFilter(4.5, this)">4.5★+</button>
+        </div>
+      </div>
+
+      <!-- Advanced Filters -->
+      <div class="advanced-filter">
+        <div class="pf-label">Brand</div>
+        <input type="text" id="brandFilter" class="pf-input brand-input" placeholder="Brand or vendor name" oninput="applyBrandFilter()" />
+      </div>
+      <div class="advanced-filter">
+        <div class="pf-label">Delivery Time</div>
+        <select id="deliveryFilter" class="sort-select delivery-select" onchange="applyDeliveryFilter()">
+          <option value="">Any delivery time</option>
+          <option value="same-day">Same day</option>
+          <option value="2-3 days">2-3 days</option>
+          <option value="4-7 days">4-7 days</option>
+          <option value="1-2 weeks">1-2 weeks</option>
+          <option value="service">Service timeline</option>
+        </select>
+      </div>
+
+      <!-- Saved Searches -->
+      <div class="saved-searches">
+        <div class="pf-label">Saved Searches</div>
+        <div class="saved-search-actions">
+          <button type="button" class="saved-search-save-btn" onclick="saveCurrentSearch()">Save current</button>
+          <button type="button" class="saved-search-save-btn secondary" onclick="loadSavedSearches()">Refresh</button>
+        </div>
+        <div class="saved-search-list" id="savedSearchList">
+          <div class="saved-search-empty">Sign in to save searches.</div>
         </div>
       </div>
     </aside>
