@@ -1005,8 +1005,9 @@ function showApprovalModal(type) {
               </div>
             `}
           </div>
-          <div style="margin-left:16px;display:flex;flex-direction:column;gap:8px;min-width:100px;">
+          <div style="margin-left:16px;display:flex;flex-direction:column;gap:8px;min-width:120px;">
             <button onclick="approveEntry('${type}', ${item[type === 'vendor' ? 'vendor_id' : 'customer_id']})" style="background:#16a34a;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Approve</button>
+            ${type === 'vendor' ? `<button onclick="reviewDocuments(${item.vendor_id})" style="background:#4f8cff;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Review Docs</button>` : ''}
             <button onclick="rejectEntry('${type}', ${item[type === 'vendor' ? 'vendor_id' : 'customer_id']})" style="background:#ef4444;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Reject</button>
           </div>
         </div>
@@ -1102,6 +1103,141 @@ async function rejectEntry(type, id) {
     alert('Error: ' + error.message);
   }
 }
+
+async function reviewDocuments(vendorId) {
+  try {
+    const res = await fetch(`../api/admin_get_vendor_docs.php?vendor_id=${vendorId}`);
+    const result = await res.json();
+    if (!result.success) throw new Error(result.message);
+
+    const data = result.data;
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const backdrop = document.getElementById('modalBackdrop');
+
+    if (!modalTitle || !modalBody || !backdrop) {
+      alert('Modal elements not found');
+      return;
+    }
+
+    modalTitle.textContent = `Review Documents: ${data.business_name}`;
+    
+    let html = `
+      <div style="padding:10px;">
+        <div style="margin-bottom:20px;padding:15px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>Overall KYC Status:</strong>
+            <span class="status-badge badge-${data.kyc_status}">${data.kyc_status.toUpperCase()}</span>
+          </div>
+        </div>
+        <div style="display:grid;gap:15px;">
+    `;
+
+    if (data.documents.length === 0) {
+      html += `<p style="text-align:center;padding:20px;color:#999;">No documents uploaded yet.</p>`;
+    } else {
+      data.documents.forEach(doc => {
+        const typeLabel = doc.document_type.replace('_', ' ').toUpperCase();
+        html += `
+          <div style="padding:15px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="font-weight:600;color:#1e293b;">${typeLabel}</div>
+              <span class="status-badge badge-${doc.status}" id="doc-status-${doc.document_id}">${doc.status.toUpperCase()}</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+              <a href="${doc.document_url}" target="_blank" style="color:#2563eb;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View Document
+              </a>
+              <span style="font-size:12px;color:#94a3b8;">Uploaded: ${new Date(doc.uploaded_at).toLocaleDateString()}</span>
+            </div>
+            ${doc.status === 'pending' ? `
+              <div style="display:flex;gap:8px;">
+                <button onclick="verifyDoc(${doc.document_id}, 'verified')" style="flex:1;background:#16a34a;color:white;border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Approve</button>
+                <button onclick="verifyDoc(${doc.document_id}, 'rejected')" style="flex:1;background:#ef4444;color:white;border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Reject</button>
+              </div>
+            ` : doc.status === 'rejected' ? `
+              <div style="font-size:12px;color:#ef4444;background:#fef2f2;padding:8px;border-radius:4px;">
+                <strong>Reason:</strong> ${doc.rejection_reason || 'N/A'}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+    }
+
+    html += `
+        </div>
+        <div style="margin-top:20px;text-align:right;">
+          <button class="btn-outline" onclick="closeModalDirect()">Close</button>
+        </div>
+      </div>
+    `;
+
+    modalBody.innerHTML = html;
+    backdrop.style.display = 'flex';
+    backdrop.classList.add('open');
+
+  } catch (error) {
+    console.error('Error reviewing documents:', error);
+    alert('Error loading documents: ' + error.message);
+  }
+}
+
+async function verifyDoc(docId, status) {
+  let reason = '';
+  if (status === 'rejected') {
+    reason = prompt('Enter rejection reason:');
+    if (reason === null) return;
+    if (reason.trim() === '') {
+      alert('Rejection reason is required.');
+      return;
+    }
+  }
+
+  try {
+    const res = await fetch('../api/admin_verify_document.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        document_id: docId,
+        status: status,
+        rejection_reason: reason
+      })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      alert(`Document ${status} successfully!`);
+      const statusEl = document.getElementById(`doc-status-${docId}`);
+      if (statusEl) {
+        statusEl.textContent = status.toUpperCase();
+        statusEl.className = `status-badge badge-${status}`;
+      }
+      loadPendingCounts();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (error) {
+    console.error('Error verifying document:', error);
+    alert('An error occurred.');
+  }
+}
+
+function closeModalDirect() {
+  const backdrop = document.getElementById('modalBackdrop');
+  if (backdrop) {
+    backdrop.style.display = 'none';
+    backdrop.classList.remove('open');
+  }
+}
+
+function closeModal(event) {
+  if (event && event.target.id === 'modalBackdrop') {
+    closeModalDirect();
+  }
+}
+
 
 function escapeHtml(text) {
   const div = document.createElement('div');

@@ -52,6 +52,9 @@
     <a href="#" class="nav-item" data-page="settings" onclick="navigate(event,this,'settings')">
       <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
     </a>
+    <a href="#" class="nav-item" data-page="verification" onclick="navigate(event,this,'verification')">
+      <span class="nav-icon">🛡️</span><span class="nav-label">Verification</span>
+    </a>
     <a href="#" class="nav-item" data-page="support" onclick="navigate(event,this,'support')">
       <span class="nav-icon">🛡</span><span class="nav-label">Support</span>
     </a>
@@ -569,6 +572,77 @@
             <div class="contact-row">🕘 Mon–Sat · 9am–6pm</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== VERIFICATION ===== -->
+    <section class="page" id="page-verification">
+      <div class="page-header">
+        <div>
+          <div class="section-label">TRUST & SAFETY</div>
+          <h2 class="page-h2">Business Verification (KYC)</h2>
+        </div>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 1.5rem;">
+          <div class="verification-status-banner" id="kycStatusBanner">
+              <div class="vs-info">
+                  <h3 id="kycStatusTitle">Verification Required</h3>
+                  <p id="kycStatusDesc">Please upload the mandatory documents to verify your business and unlock all features.</p>
+              </div>
+              <div class="vs-badge" id="kycStatusBadge">Pending</div>
+          </div>
+      </div>
+
+      <div class="verification-grid">
+          <!-- Business License -->
+          <div class="glass-card doc-card">
+              <div class="doc-icon">📋</div>
+              <h3>Business License</h3>
+              <p>Upload a clear copy of your business registration certificate.</p>
+              <div class="doc-status" id="status-business_license">Not Uploaded</div>
+              <div class="doc-action">
+                  <input type="file" id="file-business_license" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('business_license')">
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-business_license').click()">Upload Document</button>
+              </div>
+              <div class="rejection-msg hidden" id="reject-business_license"></div>
+          </div>
+
+          <!-- Tax Certificate -->
+          <div class="glass-card doc-card">
+              <div class="doc-icon">🧾</div>
+              <h3>Tax Certificate</h3>
+              <p>Upload your TIN (Tax Identification Number) registration document.</p>
+              <div class="doc-status" id="status-tax_certificate">Not Uploaded</div>
+              <div class="doc-action">
+                  <input type="file" id="file-tax_certificate" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('tax_certificate')">
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-tax_certificate').click()">Upload Document</button>
+              </div>
+              <div class="rejection-msg hidden" id="reject-tax_certificate"></div>
+          </div>
+
+          <!-- Identity Proof -->
+          <div class="glass-card doc-card">
+              <div class="doc-icon">🆔</div>
+              <h3>Identity Proof</h3>
+              <p>Upload a copy of the business owner's NIC or Passport.</p>
+              <div class="doc-status" id="status-identity_proof">Not Uploaded</div>
+              <div class="doc-action">
+                  <input type="file" id="file-identity_proof" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('identity_proof')">
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-identity_proof').click()">Upload Document</button>
+              </div>
+              <div class="rejection-msg hidden" id="reject-identity_proof"></div>
+          </div>
+      </div>
+
+      <div class="glass-card" style="margin-top: 1.5rem;">
+          <div class="card-header"><span class="card-title">Verification Guidelines</span></div>
+          <ul class="guidelines-list">
+              <li>Documents must be clearly legible and not expired.</li>
+              <li>Files must be in PDF, JPG, or PNG format.</li>
+              <li>Maximum file size is 10MB per document.</li>
+              <li>Verification usually takes 1-3 business days.</li>
+          </ul>
       </div>
     </section>
 

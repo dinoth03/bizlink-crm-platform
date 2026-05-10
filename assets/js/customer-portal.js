@@ -517,20 +517,90 @@
     loadCustomerOrders();
   }
 
-  function initWishlist() {
-    document.querySelectorAll('[data-action-cart]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const product = btn.getAttribute('data-action-cart');
-        showDemo(product + ' added to cart (demo).');
-      });
-    });
+  async function loadWishlist() {
+    const grid = document.querySelector('.grid.products');
+    if (!grid) return;
 
-    document.querySelectorAll('[data-action-remove]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const card = btn.closest('.item-card');
-        if (card) card.remove();
+    grid.innerHTML = '<div class="loading">Loading your wishlist...</div>';
+
+    try {
+      const resp = await apiRequest('customer_wishlist_get.php');
+      if (resp && resp.ok && Array.isArray(resp.data)) {
+        if (resp.data.length === 0) {
+          grid.innerHTML = '<div class="empty-state"><h3>Your wishlist is empty</h3><p>Browse the marketplace and save items you love!</p><a href="../pages/marketplace.html" class="btn-vendor">Go to Marketplace</a></div>';
+          return;
+        }
+
+        grid.innerHTML = resp.data.map(p => `
+          <article class="item-card" data-product-id="${p.product_id}">
+            <div class="thumb">${pickEmojiForWishlist(p.category)}</div>
+            <div class="item-body">
+              <h3>${escapeHtml(p.product_name)}</h3>
+              <p class="muted">${escapeHtml(p.vendor_name)} • LKR ${Number(p.price).toLocaleString()}</p>
+              <div class="actions">
+                <button class="action-btn primary" onclick="addToCartFromWishlist(${p.product_id})">Add to Cart</button>
+                <button class="action-btn" onclick="removeFromWishlist(${p.product_id})">Remove</button>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      }
+    } catch (err) {
+      grid.innerHTML = '<div class="error">Failed to load wishlist items.</div>';
+    }
+  }
+
+  window.removeFromWishlist = async function(productId) {
+    if (!confirm('Remove this item from your wishlist?')) return;
+    try {
+      const resp = await apiRequest('customer_wishlist_remove.php', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId })
       });
-    });
+      if (resp && resp.ok) {
+        loadWishlist();
+      }
+    } catch (err) {
+      alert('Failed to remove item.');
+    }
+  };
+
+  window.addToCartFromWishlist = function(productId) {
+    // In a real app, this would call an API. For now, we'll redirect to product or show demo.
+    alert('Product ' + productId + ' added to cart!');
+  };
+
+  window.shareWishlist = async function() {
+    try {
+      const resp = await apiRequest('customer_wishlist_share.php', { method: 'POST' });
+      if (resp && resp.ok && resp.data.share_url) {
+        await navigator.clipboard.writeText(resp.data.share_url);
+        alert('Wishlist link copied to clipboard!\n' + resp.data.share_url);
+      }
+    } catch (err) {
+      alert('Failed to generate share link.');
+    }
+  };
+
+  function pickEmojiForWishlist(cat) {
+    const map = { electronics: '💻', fashion: '👗', home: '🏠', grocery: '🛒', agriculture: '🌾' };
+    return map[String(cat).toLowerCase()] || '📦';
+  }
+
+  function initWishlist() {
+    loadWishlist();
+    
+    // Add share button to header if it doesn't exist
+    const header = document.querySelector('.page-header');
+    if (header && !document.getElementById('shareWishlistBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'shareWishlistBtn';
+        btn.className = 'action-btn';
+        btn.style.marginLeft = 'auto';
+        btn.innerHTML = '🔗 Share Wishlist';
+        btn.onclick = shareWishlist;
+        header.appendChild(btn);
+    }
   }
 
   function initVendors() {

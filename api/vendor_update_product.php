@@ -56,6 +56,17 @@ if (!$ownerRow) {
     apiError('FORBIDDEN', 'You do not own this product.', 403);
 }
 
+require_once 'wishlist_helpers.php';
+
+// Get current product state for price drop check
+$currentProductStmt = $conn->prepare('SELECT price FROM products WHERE product_id = ? LIMIT 1');
+$currentProductStmt->bind_param('i', $productId);
+$currentProductStmt->execute();
+$currentProductRow = $currentProductStmt->get_result()->fetch_assoc();
+$currentProductStmt->close();
+
+$oldPrice = (float)($currentProductRow['price'] ?? 0);
+
 // Parse update fields
 $updates = [];
 $bindings = '';
@@ -147,6 +158,12 @@ $updateStmt->close();
 
 if (!$ok) {
     apiError('DB_UPDATE_ERROR', 'Failed to update product.', 500);
+}
+
+// Check for price drop alerts
+if (isset($payload['price'])) {
+    $newPrice = (float)$payload['price'];
+    checkPriceDropAlerts($conn, $productId, $oldPrice, $newPrice);
 }
 
 apiSuccess(['product_id' => $productId], 'Product updated successfully.', 'PRODUCT_UPDATED');

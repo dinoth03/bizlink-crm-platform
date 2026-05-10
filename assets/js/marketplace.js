@@ -1159,6 +1159,8 @@ function renderCard(p, i) {
     ? `<a href="vendor.html?id=${p.vendor_id}" class="card-shop-link" title="Visit Vendor Shop" onclick="event.stopPropagation()">🏪</a>`
     : '';
 
+  const wishlistIcon = isWished ? '❤️' : '🤍';
+
   return `
     <div class="prod-card" style="animation-delay:${delay}s" onclick="openModal(${p.id})">
       <div class="card-img-wrap">
@@ -1167,7 +1169,7 @@ function renderCard(p, i) {
           <button class="card-action-btn ${isWished ? 'wishlisted' : ''}"
             onclick="toggleWishlistItem(event, ${p.id})"
             title="Wishlist">
-            ${isWished ? '❤️' : '🤍'}
+            ${wishlistIcon}
           </button>
           <button class="card-action-btn" onclick="openModal(${p.id})" title="Quick View">👁️</button>
           ${vendorShopLink}
@@ -1674,3 +1676,88 @@ document.addEventListener('keydown', e => {
 });
 
 console.log('%c BizLink Marketplace 🇱🇰 ', 'background:#50C878;color:#fff;font-size:14px;padding:6px 14px;border-radius:4px;');
+async function toggleWishlistItem(event, productId) {
+  if (event) event.stopPropagation();
+
+  if (typeof apiRequest !== 'function') {
+    showToast('Sign in to manage wishlist', 'info');
+    return;
+  }
+
+  const product = findCatalogProductById(productId);
+  if (!product) return;
+
+  const apiId = product.api_product_id || 0;
+  if (!apiId) {
+    showToast('Wishlist supported for marketplace products only', 'info');
+    return;
+  }
+
+  const isWished = state.wishlist.includes(productId);
+  const endpoint = isWished ? 'customer_wishlist_remove.php' : 'customer_wishlist_add.php';
+
+  try {
+    const resp = await apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ product_id: apiId })
+    });
+
+    if (resp && resp.ok) {
+      if (isWished) {
+        state.wishlist = state.wishlist.filter(id => id !== productId);
+        showToast('Removed from wishlist', 'success');
+      } else {
+        state.wishlist.push(productId);
+        showToast('Added to wishlist', 'success');
+      }
+      
+      const badge = document.getElementById('wishlistBadge');
+      if (badge) {
+        badge.textContent = state.wishlist.length;
+        badge.style.display = state.wishlist.length > 0 ? 'flex' : 'none';
+      }
+      
+      renderProducts();
+    }
+  } catch (err) {
+    console.error('Wishlist toggle failed', err);
+    showToast('Operation failed', 'warn');
+  }
+}
+
+async function loadUserWishlist() {
+  if (typeof apiRequest !== 'function') return;
+
+  try {
+    const resp = await apiRequest('customer_wishlist_get.php');
+    if (resp && resp.ok && Array.isArray(resp.data)) {
+      // Map API product IDs back to UI IDs (900000 + api_id)
+      state.wishlist = resp.data.map(item => 900000 + Number(item.product_id));
+      
+      const badge = document.getElementById('wishlistBadge');
+      if (badge) {
+        badge.textContent = state.wishlist.length;
+        badge.style.display = state.wishlist.length > 0 ? 'flex' : 'none';
+      }
+      
+      renderProducts();
+    }
+  } catch (err) {
+    console.debug('Failed to load wishlist:', err);
+  }
+}
+
+function toggleWishlist() {
+  // Check if logged in
+  if (typeof authMe === 'function') {
+    window.location.href = '../customer/wishlist.html';
+  } else {
+    showToast('Sign in to view your wishlist', 'info');
+  }
+}
+
+// Ensure loadUserWishlist is called in DOMContentLoaded
+const originalOnDOMContentLoaded = document.addEventListener;
+document.addEventListener('DOMContentLoaded', () => {
+  loadUserWishlist();
+});

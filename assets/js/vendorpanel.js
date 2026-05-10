@@ -108,6 +108,7 @@ function onPageActivate(page) {
   if (page === 'payments')   { renderTransactions(); }
   if (page === 'reviews')    { renderReviews(); }
   if (page === 'promotions') { startCountdown(); }
+  if (page === 'verification') { loadVerificationStatus(); }
 }
 
 async function vendorLogout() {
@@ -1867,3 +1868,126 @@ if (!document.querySelector('style[data-toast-anim]')) {
   `;
   document.head.appendChild(style);
 }
+
+/* ============ VERIFICATION (KYC) ============ */
+
+async function loadVerificationStatus() {
+  try {
+    const response = await fetch('../api/vendor_get_verification_status.php');
+    const result = await response.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Failed to load verification status', 'error');
+      return;
+    }
+
+    const data = result.data;
+    updateKycUI(data);
+  } catch (error) {
+    console.error('Error loading verification status:', error);
+  }
+}
+
+function updateKycUI(data) {
+  const statusBanner = document.getElementById('kycStatusBanner');
+  const statusBadge = document.getElementById('kycStatusBadge');
+  const statusTitle = document.getElementById('kycStatusTitle');
+  const statusDesc = document.getElementById('kycStatusDesc');
+
+  if (!statusBanner || !statusBadge) return;
+
+  const status = data.kyc_status || 'not_started';
+  
+  // Reset
+  statusBanner.className = 'verification-status-banner ' + status;
+  statusBadge.textContent = status.replace('_', ' ').toUpperCase();
+
+  if (status === 'verified') {
+    statusTitle.textContent = 'Business Verified ✅';
+    statusDesc.textContent = 'Congratulations! Your business is fully verified. You have full access to all BizLink features.';
+    statusBanner.style.background = 'rgba(80, 200, 120, 0.15)';
+    statusBanner.style.borderColor = 'var(--vendor-color)';
+  } else if (status === 'pending') {
+    statusTitle.textContent = 'Verification Under Review ⏳';
+    statusDesc.textContent = 'Your documents have been submitted and are currently being reviewed by our team. This usually takes 1-3 business days.';
+    statusBanner.style.background = 'rgba(255, 140, 0, 0.15)';
+    statusBanner.style.borderColor = 'var(--accent-orange)';
+  } else if (status === 'rejected') {
+    statusTitle.textContent = 'Verification Rejected ❌';
+    statusDesc.textContent = 'Some of your documents were rejected. Please review the reasons below and re-upload the correct documents.';
+    statusBanner.style.background = 'rgba(255, 107, 107, 0.15)';
+    statusBanner.style.borderColor = 'var(--accent-red)';
+  }
+
+  // Update individual documents
+  const docs = data.documents || [];
+  const types = ['business_license', 'tax_certificate', 'identity_proof'];
+  
+  types.forEach(type => {
+    const doc = docs.find(d => d.document_type === type);
+    const statusEl = document.getElementById(`status-${type}`);
+    const rejectEl = document.getElementById(`reject-${type}`);
+    const btnEl = document.querySelector(`[onclick="document.getElementById('file-${type}').click()"]`);
+
+    if (doc) {
+      if (statusEl) {
+          statusEl.textContent = doc.status.toUpperCase();
+          statusEl.className = 'doc-status ' + doc.status;
+      }
+      
+      if (btnEl) {
+          if (doc.status === 'verified') {
+            btnEl.disabled = true;
+            btnEl.textContent = 'Verified';
+            if (rejectEl) rejectEl.classList.add('hidden');
+          } else if (doc.status === 'rejected') {
+            btnEl.textContent = 'Re-upload';
+            if (rejectEl) {
+                rejectEl.textContent = 'Reason: ' + (doc.rejection_reason || 'Invalid document');
+                rejectEl.classList.remove('hidden');
+            }
+          } else {
+            btnEl.textContent = 'Replace';
+            if (rejectEl) rejectEl.classList.add('hidden');
+          }
+      }
+    }
+  });
+}
+
+async function uploadDoc(type) {
+  const fileInput = document.getElementById(`file-${type}`);
+  if (!fileInput.files.length) return;
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append('document', file);
+  formData.append('document_type', type);
+
+  // Get CSRF token if needed
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+  
+  try {
+    showToast(`Uploading ${type.replace('_', ' ')}...`, 'info');
+    
+    const response = await fetch('../api/vendor_upload_document.php', {
+      method: 'POST',
+      body: formData,
+      headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showToast('Document uploaded successfully!', 'success');
+      loadVerificationStatus();
+    } else {
+      showToast(result.message || 'Upload failed', 'error');
+    }
+  } catch (error) {
+    console.error('Error uploading document:', error);
+    showToast('An error occurred during upload', 'error');
+  } finally {
+    fileInput.value = ''; // Reset input
+  }
+}
