@@ -358,6 +358,111 @@ const BLOCKED_IMAGE_FILES = new Set([
   'Food-Cold-Chain-Logistics-Market.webp'
 ]);
 
+function normalizeImageToken(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\u2018\u2019']/g, '')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function extractImageFilename(pathLike) {
+  const raw = String(pathLike || '').trim();
+  if (!raw) return '';
+
+  const withoutQuery = raw.split('?')[0].split('#')[0];
+  const decoded = decodeURI(withoutQuery);
+  const normalizedSlashes = decoded.replace(/\\/g, '/');
+  return normalizedSlashes.split('/').pop() || '';
+}
+
+const LOCAL_IMAGE_LOOKUP = (() => {
+  const map = new Map();
+  LOCAL_IMAGE_FILES.forEach((filename) => {
+    map.set(normalizeImageToken(filename), filename);
+  });
+  return map;
+})();
+
+const PRODUCT_IMAGE_BY_NAME = (() => {
+  const map = new Map();
+  PRODUCTS.forEach((product) => {
+    const key = normalizeImageToken(product.name);
+    if (key && hasValidLocalImage(product)) {
+      map.set(key, product.image);
+    }
+  });
+  return map;
+})();
+
+function resolveLocalFilename(candidate) {
+  const filename = extractImageFilename(candidate);
+  if (!filename) return '';
+
+  if (LOCAL_IMAGE_FILES.has(filename)) {
+    return filename;
+  }
+
+  return LOCAL_IMAGE_LOOKUP.get(normalizeImageToken(filename)) || '';
+}
+
+function inferImageFromProductName(productName) {
+  const normalizedName = normalizeImageToken(productName);
+  if (!normalizedName) return '';
+
+  const staticMatch = PRODUCT_IMAGE_BY_NAME.get(normalizedName);
+  if (staticMatch) {
+    return staticMatch;
+  }
+
+  const tokens = normalizedName.split(' ').filter((token) => token.length >= 3);
+  if (tokens.length === 0) return '';
+
+  let bestFilename = '';
+  let bestScore = 0;
+
+  LOCAL_IMAGE_FILES.forEach((filename) => {
+    const normalizedFile = normalizeImageToken(filename);
+    let score = 0;
+    tokens.forEach((token) => {
+      if (normalizedFile.includes(token)) {
+        score += 1;
+      }
+    });
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestFilename = filename;
+    }
+  });
+
+  if (bestScore >= 2 && bestFilename) {
+    return `../assets/images/${bestFilename}`;
+  }
+
+  return '';
+}
+
+function getCategoryFallbackImage(category) {
+  return CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other;
+}
+
+function getResolvedImageForDisplay(product) {
+  const src = String(product?.image || '').trim();
+  if (src) return src;
+  return getCategoryFallbackImage(product?.cat);
+}
+
+function handleMarketplaceImageError(img, category) {
+  if (!img) return;
+  img.onerror = null;
+  img.src = getCategoryFallbackImage(category);
+}
+
+window.handleMarketplaceImageError = handleMarketplaceImageError;
+
 function normalizeProductKey(product) {
   const name = String(product?.name || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
   return name;
@@ -381,17 +486,30 @@ function hasValidLocalImage(product) {
 
 function resolveApiProductImage(product, category) {
   const candidate = String(product.image || product.image_url || product.product_image || product.thumbnail || '').trim();
+
   if (candidate) {
     if (/^https?:\/\//i.test(candidate)) {
       return candidate;
     }
+
+    const localFilename = resolveLocalFilename(candidate);
+    if (localFilename) {
+      return `../assets/images/${localFilename}`;
+    }
+
     if (candidate.startsWith('../') || candidate.startsWith('./') || candidate.startsWith('/')) {
       return candidate;
     }
+
     return `../assets/images/${candidate}`;
   }
 
-  return CATEGORY_IMAGE_FALLBACKS[category] || CATEGORY_IMAGE_FALLBACKS.other;
+  const inferred = inferImageFromProductName(product.product_name || product.name || '');
+  if (inferred) {
+    return inferred;
+  }
+
+  return getCategoryFallbackImage(category);
 }
 
 function toCategorySlug(value) {
@@ -1169,7 +1287,7 @@ function updateModalRelatedProducts(currentProduct) {
   const relatedHtml = related.map(p => `
     <div class="rel-card" onclick="openModal(${p.id})">
       <div class="rel-img-wrap">
-        <img class="rel-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" />
+        <img class="rel-img" src="${encodeURI(getResolvedImageForDisplay(p))}" alt="${p.name}" loading="lazy" onerror="handleMarketplaceImageError(this, '${p.cat}')" />
       </div>
       <div class="rel-name">${p.name}</div>
       <div class="rel-stars">${renderStars(p.rating)}</div>
@@ -1238,7 +1356,7 @@ function renderCard(p, i) {
   return `
     <div class="prod-card" style="animation-delay:${delay}s" onclick="openModal(${p.id})">
       <div class="card-img-wrap">
-        <img class="card-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80'" />
+        <img class="card-img" src="${encodeURI(getResolvedImageForDisplay(p))}" alt="${p.name}" loading="lazy" onerror="handleMarketplaceImageError(this, '${p.cat}')" />
         <div class="card-img-actions">
           <button class="card-action-btn ${isWished ? 'wishlisted' : ''}"
             onclick="toggleWishlistItem(event, ${p.id})"
@@ -1440,7 +1558,7 @@ function openModal(id) {
   document.getElementById('modalInner').innerHTML = `
     <div class="modal-img-col">
       <div class="modal-img-badge-wrap">${badgeHtml}${newBadge}${serviceBadge}</div>
-      <img class="modal-img" src="${encodeURI(p.image)}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=900&q=80'" />
+      <img class="modal-img" src="${encodeURI(getResolvedImageForDisplay(p))}" alt="${p.name}" loading="lazy" onerror="handleMarketplaceImageError(this, '${p.cat}')" />
       <div class="modal-img-actions">
         <button class="modal-act-btn" onclick="toggleWishlistItem(event, ${p.id})" title="Wishlist">
           ${isWished ? '❤️' : '🤍'}

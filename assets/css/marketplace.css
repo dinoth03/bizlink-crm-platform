@@ -1102,6 +1102,7 @@ ul { list-style: none; }
   font-weight: 600;
   color: var(--t1);
   display: -webkit-box;
+  line-clamp: 1;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
