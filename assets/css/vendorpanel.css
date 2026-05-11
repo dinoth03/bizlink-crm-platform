@@ -38,7 +38,7 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 20px; scroll-behavior: smooth; }
+html { font-size: 20px; scroll-behavior: smooth; overflow: hidden; }
 body {
   font-family: var(--font-body);
   background: var(--bg-dark);
@@ -695,6 +695,18 @@ ul { list-style: none; }
   margin-bottom: 28px;
 }
 .chart-wide { /* occupies left 2/3 */ }
+
+#page-dashboard #salesChart {
+  width: 100% !important;
+  height: 240px !important;
+  max-height: 240px;
+}
+
+#page-dashboard #donutChart {
+  width: 100% !important;
+  height: 220px !important;
+  max-height: 220px;
+}
 
 /*TABLE (home's .mock-table-mini elevated)*/
 .table-wrap { overflow-x: auto; }

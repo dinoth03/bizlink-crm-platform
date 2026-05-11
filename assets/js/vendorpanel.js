@@ -17,7 +17,12 @@ function goToPage(page) {
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + page);
+  const pagesWrap = document.querySelector('.pages-wrap');
   if (target) {
+    if (pagesWrap) {
+      pagesWrap.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
     target.classList.add('active');
     onPageActivate(page);
   }
@@ -59,6 +64,12 @@ async function loadDashboardAnalytics() {
 function renderDashboardChartWithAnalytics() {
   const canvas = document.getElementById('salesChart');
   if (!canvas) return;
+
+  if (window.vendorSalesChart && typeof window.vendorSalesChart.destroy === 'function') {
+    window.vendorSalesChart.destroy();
+  }
+
+  canvas.style.height = '240px';
   
   const analytics = window.vendorAnalytics || {};
   const salesByDay = analytics.sales_by_day || [];
@@ -67,7 +78,7 @@ function renderDashboardChartWithAnalytics() {
   const labels = salesByDay.map(d => new Date(d.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}));
   const data = salesByDay.map(d => d.revenue || 0);
   
-  new Chart(canvas, {
+  window.vendorSalesChart = new Chart(canvas, {
     type: 'line',
     data: {
       labels: labels.length > 0 ? labels : ['No data'],
@@ -87,7 +98,8 @@ function renderDashboardChartWithAnalytics() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
+      aspectRatio: 2.8,
       plugins: { 
         legend: { display: true, labels: { color: CHART_TICK, font: { size: 11 } } } 
       },
@@ -99,8 +111,52 @@ function renderDashboardChartWithAnalytics() {
   });
 }
 
+function renderDashboardDonutWithAnalytics() {
+  const canvas = document.getElementById('donutChart');
+  if (!canvas) return;
+
+  if (window.vendorDonutChart && typeof window.vendorDonutChart.destroy === 'function') {
+    window.vendorDonutChart.destroy();
+  }
+
+  const statusPercentages = computeStatusPercentages(dashboardData.orders);
+  updateDonutLegend(statusPercentages);
+
+  window.vendorDonutChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Delivered', 'Pending', 'Cancelled', 'Processing'],
+      datasets: [{
+        data: [
+          statusPercentages.delivered,
+          statusPercentages.pending,
+          statusPercentages.cancelled,
+          statusPercentages.processing
+        ],
+        backgroundColor: [VENDOR_GREEN, ACCENT_ORANGE, ACCENT_RED, ACCENT_BLUE],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipDefaults(),
+          callbacks: { label: (ctx) => `  ${ctx.label}: ${ctx.raw}%` }
+        }
+      },
+      animation: { animateRotate: true, duration: 900 }
+    }
+  });
+}
+
 function onPageActivate(page) {
-  if (page === 'dashboard')  { loadDashboardAnalytics().then(() => { animateCounters(); renderDashboardChartWithAnalytics(); renderDonutChart(); renderRecentOrders(); }); }
+  if (page === 'dashboard')  { loadDashboardAnalytics().then(() => { animateCounters(); renderDashboardChartWithAnalytics(); renderDashboardDonutWithAnalytics(); renderRecentOrders(); }); }
   if (page === 'products')   { renderProducts(); }
   if (page === 'orders')     { renderOrders('all'); }
   if (page === 'customers')  { renderCustomers(); }
@@ -590,7 +646,7 @@ function pickActiveVendor(vendors, orders) {
   return chosen;
 }
 
-function filterVendorOrders(orders, activeVendor) {
+function filterOrdersForActiveVendor(orders, activeVendor) {
   if (!orders || orders.length === 0) return [];
 
   const vendorName = activeVendor ? activeVendor.vendor_name : '';
@@ -809,7 +865,7 @@ async function loadVendorDashboardData() {
       dashboardData.vendors = vendors;
       const mappedOrders = orders.map(mapApiOrder);
       const activeVendor = pickActiveVendor(vendors, mappedOrders);
-      dashboardData.orders = filterVendorOrders(mappedOrders, activeVendor);
+      dashboardData.orders = filterOrdersForActiveVendor(mappedOrders, activeVendor);
       dashboardData.rawOrders = [...dashboardData.orders];
       
       // No longer filtering by shop_name on frontend as API handles it via own_only=1
@@ -1355,6 +1411,9 @@ function toggleFaq(el) {
 
 // LIVE CHAT
 function sendChat() {
+  const activeSupportPage = document.getElementById('page-support');
+  if (!activeSupportPage || !activeSupportPage.classList.contains('active')) return;
+
   const input = document.getElementById('chatInput');
   const msgs = document.getElementById('chatMessages');
   if (!input || !msgs || !input.value.trim()) return;
@@ -1375,13 +1434,28 @@ function sendChat() {
 
 
 // COUNTDOWN (Avurudu flash sale)
+let countdownIntervalId = null;
+
 function startCountdown() {
   const target = new Date('2026-04-13T00:00:00');
   const el = document.getElementById('countdown');
   if (!el) return;
+
+  if (countdownIntervalId) {
+    clearInterval(countdownIntervalId);
+    countdownIntervalId = null;
+  }
+
   const update = () => {
     const diff = target - new Date();
-    if (diff <= 0) { el.textContent = '🎉 Sale is LIVE!'; return; }
+    if (diff <= 0) {
+      el.textContent = '🎉 Sale is LIVE!';
+      if (countdownIntervalId) {
+        clearInterval(countdownIntervalId);
+        countdownIntervalId = null;
+      }
+      return;
+    }
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -1389,7 +1463,7 @@ function startCountdown() {
     el.textContent = `${d}d  ${String(h).padStart(2,'0')}h  ${String(m).padStart(2,'0')}m  ${String(s).padStart(2,'0')}s`;
   };
   update();
-  setInterval(update, 1000);
+  countdownIntervalId = setInterval(update, 1000);
 }
 
 
@@ -1990,4 +2064,4 @@ async function uploadDoc(type) {
   } finally {
     fileInput.value = ''; // Reset input
   }
-}
+}
