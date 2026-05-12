@@ -183,10 +183,13 @@
       <div class="charts-row">
         <div class="glass-card chart-wide">
           <div class="card-header">
-            <span class="card-title">Sales Overview — Last 7 Days</span>
-            <div class="chart-tabs">
-              <button class="ctab active">Week</button>
-              <button class="ctab">Month</button>
+            <div class="sales-head">
+              <span class="card-title">Sales Overview — Last 7 Days</span>
+              <span class="sales-range-hint" id="salesRangeHint">Showing weekly trend</span>
+            </div>
+            <div class="chart-tabs" aria-label="Sales chart range">
+              <button class="ctab active" type="button" aria-pressed="true">Week</button>
+              <button class="ctab" type="button" aria-pressed="false">Month</button>
             </div>
           </div>
           <canvas id="salesChart" height="110"></canvas>

@@ -61,6 +61,47 @@ async function loadDashboardAnalytics() {
 }
 
 // Render dashboard chart with real analytics data
+let vendorSalesRange = 'week';
+
+function normalizeSalesPoints(analytics) {
+  const rawSeries = Array.isArray(analytics.sales_last_30_days)
+    ? analytics.sales_last_30_days
+    : (Array.isArray(analytics.sales_by_day) ? analytics.sales_by_day : []);
+
+  return rawSeries
+    .map((row) => ({
+      date: String(row.day || row.date || '').slice(0, 10),
+      revenue: Number(row.revenue || 0)
+    }))
+    .filter((row) => row.date && !Number.isNaN(new Date(row.date).getTime()))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function buildSalesSeries(points, days) {
+  const totalsByDate = new Map();
+  points.forEach((point) => {
+    totalsByDate.set(point.date, (totalsByDate.get(point.date) || 0) + Number(point.revenue || 0));
+  });
+
+  const labels = [];
+  const data = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const day = new Date();
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - i);
+    const key = day.toISOString().slice(0, 10);
+    const value = Number(totalsByDate.get(key) || 0);
+
+    labels.push(days === 7
+      ? day.toLocaleDateString('en-US', { weekday: 'short' })
+      : day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    data.push(value);
+  }
+
+  return { labels, data };
+}
+
 function renderDashboardChartWithAnalytics() {
   const canvas = document.getElementById('salesChart');
   if (!canvas) return;
@@ -72,19 +113,30 @@ function renderDashboardChartWithAnalytics() {
   canvas.style.height = '240px';
   
   const analytics = window.vendorAnalytics || {};
-  const salesByDay = analytics.sales_by_day || [];
-  
-  // Format labels and data from sales_by_day
-  const labels = salesByDay.map(d => new Date(d.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}));
-  const data = salesByDay.map(d => d.revenue || 0);
+  const allPoints = normalizeSalesPoints(analytics);
+  const rangeDays = vendorSalesRange === 'month' ? 30 : 7;
+  const chartTitle = document.querySelector('.chart-wide .card-title');
+  const rangeHint = document.getElementById('salesRangeHint');
+  if (chartTitle) {
+    chartTitle.textContent = vendorSalesRange === 'month'
+      ? 'Sales Overview — Last 30 Days'
+      : 'Sales Overview — Last 7 Days';
+  }
+  if (rangeHint) {
+    rangeHint.textContent = vendorSalesRange === 'month'
+      ? 'Showing monthly trend (last 30 days)'
+      : 'Showing weekly trend';
+  }
+
+  const series = buildSalesSeries(allPoints, rangeDays);
   
   window.vendorSalesChart = new Chart(canvas, {
     type: 'line',
     data: {
-      labels: labels.length > 0 ? labels : ['No data'],
+      labels: series.labels.length > 0 ? series.labels : ['No data'],
       datasets: [{
         label: 'Sales (Rs.)',
-        data: data.length > 0 ? data : [0],
+        data: series.data.length > 0 ? series.data : [0],
         borderColor: VENDOR_GREEN,
         backgroundColor: 'rgba(80, 200, 120, 0.05)',
         borderWidth: 2,
@@ -432,8 +484,18 @@ function initAnalyticsCharts() {
 // Chart tab toggle
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('ctab')) {
-    e.target.closest('.chart-tabs').querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+    const tabsWrap = e.target.closest('.chart-tabs');
+    if (!tabsWrap) return;
+    tabsWrap.querySelectorAll('.ctab').forEach((t) => {
+      t.classList.remove('active');
+      t.setAttribute('aria-pressed', 'false');
+    });
     e.target.classList.add('active');
+    e.target.setAttribute('aria-pressed', 'true');
+
+    const tabText = (e.target.textContent || '').trim().toLowerCase();
+    vendorSalesRange = tabText === 'month' ? 'month' : 'week';
+    renderDashboardChartWithAnalytics();
   }
 });
 
