@@ -1914,7 +1914,12 @@ async function toggleWishlistItem(event, productId) {
     const resp = await apiRequest(endpoint, {
       method: 'POST',
       body: JSON.stringify({ product_id: apiId })
-    });
+    }, false);
+
+    if (!resp || resp.status === 401) {
+      showToast('Please sign in to manage wishlist', 'info');
+      return;
+    }
 
     if (resp && resp.ok) {
       if (isWished) {
@@ -1943,7 +1948,11 @@ async function loadUserWishlist() {
   if (typeof apiRequest !== 'function') return;
 
   try {
-    const resp = await apiRequest('customer_wishlist_get.php');
+    const resp = await apiRequest('customer_wishlist_get.php', {}, false);
+    if (!resp || resp.status === 401) {
+      return;
+    }
+
     if (resp && resp.ok && Array.isArray(resp.data)) {
       // Map API product IDs back to UI IDs (900000 + api_id)
       state.wishlist = resp.data.map(item => 900000 + Number(item.product_id));

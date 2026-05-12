@@ -259,7 +259,13 @@
 <!--FAQ SECTION-->
 <section class="section faq-section">
   <div class="container">
-    <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+      <div class="faq-controls" style="display:flex;gap:8px;align-items:center;">
+        <button id="expandAllFaq" class="btn-ghost" style="padding:8px 12px;border-radius:8px;font-size:0.9rem;">Expand All</button>
+        <button id="collapseAllFaq" class="btn-ghost" style="padding:8px 12px;border-radius:8px;font-size:0.9rem;">Collapse All</button>
+      </div>
+    </div>
 
     <!-- VENDOR FAQ -->
     <div id="faq-vendor" style="display: block;">
@@ -407,7 +413,7 @@
       </div>
       <div>
         <h4 style="margin-bottom:12px;">Product</h4>
-        <a href="index.html">Home</a>
+        <a href="home.html">Home</a>
         <a href="premiumplans.html">Pricing</a>
         <a href="../customer/payment-methods.html">Payment Methods</a>
         <a href="home.html#crm">Learn CRM</a>

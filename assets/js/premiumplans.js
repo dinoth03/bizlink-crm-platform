@@ -209,7 +209,14 @@ function toggleFAQ(faqItem) {
 
 function initFAQ() {
   const faqItems = document.querySelectorAll('.faq-item');
+  // Ensure empty answers have a useful fallback and wire item toggles
   faqItems.forEach(item => {
+    const answerEl = item.querySelector('.faq-answer');
+    if (!answerEl) return;
+    if (!answerEl.textContent || answerEl.textContent.trim() === '') {
+      answerEl.innerHTML = '<em>Answer coming soon. For immediate help, visit our <a href="contact.html">Contact page</a> or email info@bizlink.lk.</em>';
+    }
+
     item.addEventListener('click', function(e) {
       // Prevent triggering on nested links
       if (e.target.tagName !== 'A') {
@@ -217,6 +224,32 @@ function initFAQ() {
       }
     });
   });
+
+  // Expand / Collapse all controls
+  const expandAll = document.getElementById('expandAllFaq');
+  const collapseAll = document.getElementById('collapseAllFaq');
+  if (expandAll) {
+    expandAll.addEventListener('click', function() {
+      faqItems.forEach(it => {
+        if (!it.classList.contains('active')) {
+          it.classList.add('active');
+          const ans = it.querySelector('.faq-answer');
+          if (ans) ans.style.maxHeight = ans.scrollHeight + 'px';
+        }
+      });
+    });
+  }
+  if (collapseAll) {
+    collapseAll.addEventListener('click', function() {
+      faqItems.forEach(it => {
+        if (it.classList.contains('active')) {
+          it.classList.remove('active');
+          const ans = it.querySelector('.faq-answer');
+          if (ans) ans.style.maxHeight = '0';
+        }
+      });
+    });
+  }
 }
 
 /**
