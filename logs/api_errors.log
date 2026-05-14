@@ -131,3 +131,27 @@ Stack trace:
 [13-May-2026 20:06:41 Europe/Berlin] Attempting connection to localhost:3306
 [13-May-2026 20:06:41 Europe/Berlin] Database connection successful!
 [13-May-2026 20:06:41 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[14-May-2026 14:07:54 Europe/Berlin] === API REQUEST STARTED at 2026-05-14 14:07:54 from unknown ===
+[14-May-2026 14:07:54 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[14-May-2026 14:07:54 Europe/Berlin] Attempting connection to localhost:3306
+[14-May-2026 14:07:54 Europe/Berlin] Database connection successful!
+[14-May-2026 14:07:54 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[14-May-2026 14:08:48 Europe/Berlin] === API REQUEST STARTED at 2026-05-14 14:08:48 from unknown ===
+[14-May-2026 14:08:48 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[14-May-2026 14:08:48 Europe/Berlin] Attempting connection to localhost:3306
+[14-May-2026 14:08:48 Europe/Berlin] Database connection successful!
+[14-May-2026 14:08:48 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[14-May-2026 14:14:22 Europe/Berlin] === API REQUEST STARTED at 2026-05-14 14:14:22 from unknown ===
+[14-May-2026 14:14:22 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[14-May-2026 14:14:22 Europe/Berlin] Attempting connection to localhost:3306
+[14-May-2026 14:14:22 Europe/Berlin] Database connection successful!
+[14-May-2026 20:20:40 Europe/Berlin] === API REQUEST STARTED at 2026-05-14 20:20:40 from unknown ===
+[14-May-2026 20:20:40 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[14-May-2026 20:20:40 Europe/Berlin] Attempting connection to localhost:3306
+[14-May-2026 20:20:40 Europe/Berlin] Database connection successful!
+[14-May-2026 20:20:40 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[14-May-2026 20:21:40 Europe/Berlin] === API REQUEST STARTED at 2026-05-14 20:21:40 from unknown ===
+[14-May-2026 20:21:40 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[14-May-2026 20:21:40 Europe/Berlin] Attempting connection to localhost:3306
+[14-May-2026 20:21:40 Europe/Berlin] Database connection successful!
+[14-May-2026 20:21:40 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151

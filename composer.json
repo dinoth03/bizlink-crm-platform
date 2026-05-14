@@ -2,15 +2,11 @@
   "name": "bizlink/crm-platform",
   "description": "BizLink CRM backend test setup",
   "type": "project",
-  "require": {},
+  "require": {
+    "phpmailer/phpmailer": "^7.0"
+  },
   "require-dev": {
     "phpunit/phpunit": "^10.5"
-  },
-  "autoload": {
-    "files": [
-      "api/auth_token_utils.php",
-      "api/api_helpers.php"
-    ]
   },
   "scripts": {
     "test": "@php vendor/bin/phpunit --configuration phpunit.xml",

@@ -652,7 +652,7 @@ function renderMessages(conv) {
     const statusIcon = isMe ? getStatusIcon(msg.status) : '';
 
     html += `
-      <div class="msg-row ${isMe ? 'outgoing' : 'incoming'}" style="animation-delay:${delay}s">
+      <div class="msg-row ${isMe ? 'outgoing' : 'incoming'}${msg.type === 'ai' ? ' ai-msg' : ''}" style="animation-delay:${delay}s">
         ${aviHtml}
         <div class="msg-bubble-wrap">
           ${senderHtml}
@@ -899,7 +899,7 @@ function appendMessage(msg, conv) {
   }
 
   const el = document.createElement('div');
-  el.className = `msg-row ${isMe ? 'outgoing' : 'incoming'}`;
+  el.className = `msg-row ${isMe ? 'outgoing' : 'incoming'}${msg.type === 'ai' ? ' ai-msg' : ''}`;
   el.id = `row-${msg.id}`;
   el.innerHTML = `
     ${!isMe ? `<div class="msg-avatar" style="background:${contact.color}">${contact.initials}</div>` : ''}
@@ -1459,10 +1459,11 @@ async function startAIChat() {
     return;
   }
 
-  showToast('AI chat is disabled for customer-only messaging.', 'info');
-  return;
+  // Find the AI Bot in our contacts
+  const botContact = CONTACTS.find(c => c.role === 'bot');
+  const botUserId = botContact ? botContact.userId : 999;
 
-  const existing = CONVERSATIONS.find(c => c.contactId === 'ai-bot');
+  const existing = CONVERSATIONS.find(c => c.contactId === (botContact ? botContact.id : 'ai-bot'));
 
   if (existing) {
     closeNewChat();
@@ -1486,7 +1487,7 @@ async function startAIChat() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getAuthToken()}`
       },
-      body: JSON.stringify({ target_user_id: 999 }) // AI Bot user ID
+      body: JSON.stringify({ target_user_id: botUserId })
     });
 
     const data = await response.json();

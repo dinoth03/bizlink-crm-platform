@@ -39,9 +39,9 @@ if (!$currentUser) {
 }
 
 $allowedContactRolesMap = [
-    'customer' => ['vendor', 'admin', 'customer'],
-    'vendor'   => ['customer', 'admin', 'vendor'],
-    'admin'    => ['customer', 'vendor', 'admin'],
+    'customer' => ['vendor', 'admin', 'customer', 'bot'],
+    'vendor'   => ['customer', 'admin', 'vendor', 'bot'],
+    'admin'    => ['customer', 'vendor', 'admin', 'bot'],
 ];
 
 $allowedContactRoles = $allowedContactRolesMap[strtolower((string)$currentUser['role'])] ?? [];
@@ -86,7 +86,7 @@ if (count($allowedContactRoles) >= 2) {
             'userId' => $contactId,
             'name' => $displayName,
             'owner_name' => $contact['full_name'],
-            'initials' => substr($initials, 0, 2),
+            'initials' => $contact['role'] === 'bot' ? '🤖' : substr($initials, 0, 2),
             'role' => $contact['role'],
             'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : ($contact['role'] === 'bot' ? '#2196F3' : '#FF8C00')),
             'status' => mapStatus($contact['account_status']),
@@ -157,7 +157,7 @@ while ($conv = $convRes->fetch_assoc()) {
             'userId' => $contactId,
             'name' => $displayName,
             'owner_name' => $contact['full_name'],
-            'initials' => substr($initials, 0, 2),
+            'initials' => $contact['role'] === 'bot' ? '🤖' : substr($initials, 0, 2),
             'role' => $contact['role'],
             'color' => $contact['role'] === 'vendor' ? '#50C878' : ($contact['role'] === 'admin' ? '#000080' : ($contact['role'] === 'bot' ? '#2196F3' : '#FF8C00')),
             'status' => mapStatus($contact['account_status']),

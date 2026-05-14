@@ -3,6 +3,7 @@ require 'config.php';
 require_once 'api_helpers.php';
 require_once 'auth_middleware.php';
 require_once 'mail_service.php';
+require_once 'csrf_protection.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -22,8 +23,15 @@ if (!empty($errors)) {
     apiError('VALIDATION_ERROR', 'Missing required fields.', 422, $errors);
 }
 
+// CSRF Protection
+$csrfToken = $payload['csrf_token'] ?? '';
+if (!validateCsrfToken($conn, $csrfToken, $_SESSION['user_id'] ?? null, session_id())) {
+    apiError('CSRF_VALIDATION_FAILED', 'Security validation failed. Please refresh and try again.', 403);
+}
+
 $inquiryId = (int)$payload['inquiry_id'];
 $replyMessage = trim($payload['reply_message']);
+$recipientEmail = isset($payload['recipient_email']) ? trim((string)$payload['recipient_email']) : '';
 
 // Fetch inquiry details
 $stmt = $conn->prepare("SELECT full_name, email, message, admin_notes FROM contact_inquiries WHERE inquiry_id = ?");
@@ -35,6 +43,11 @@ $stmt->close();
 
 if (!$inquiry) {
     apiError('NOT_FOUND', 'Inquiry not found.', 404);
+}
+
+$targetEmail = $recipientEmail !== '' ? strtolower($recipientEmail) : strtolower(trim((string)$inquiry['email']));
+if (!filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
+    apiError('VALIDATION_ERROR', 'Invalid recipient email address.', 422);
 }
 
 // Update inquiry status to resolved and append to admin notes
@@ -68,13 +81,22 @@ $htmlBody = "
     </div>
 ";
 
-$mailResult = sendMail($inquiry['email'], $subject, $htmlBody);
+$mailResult = sendMail($targetEmail, $subject, $htmlBody);
 
 if ($mailResult['success']) {
-    apiSuccess(null, 'Reply sent successfully.', 'REPLY_SENT');
+    apiSuccess([
+        'target_email' => $targetEmail,
+        'email_sent' => true,
+        'mail_message' => $mailResult['message']
+    ], 'Reply sent successfully.', 'REPLY_SENT');
 } else {
-    // In dev mode, this might fail if SMTP isn't set up, but we want the user to know it was recorded.
-    apiError('MAIL_ERROR', 'Reply recorded in system, but email delivery failed: ' . $mailResult['message'], 500);
+    error_log('[Contact Reply] Reply saved for inquiry ' . $inquiryId . ' but email delivery failed to ' . $targetEmail . ': ' . $mailResult['message']);
+    apiSuccess([
+        'target_email' => $targetEmail,
+        'email_sent' => false,
+        'mail_message' => $mailResult['message'],
+        'log_id' => $mailResult['logId'] ?? null
+    ], 'Reply recorded in system, but email delivery failed. Error: ' . ($mailResult['message'] ?? 'Unknown error'), 'REPLY_SAVED_EMAIL_FAILED');
 }
 
 $conn->close();

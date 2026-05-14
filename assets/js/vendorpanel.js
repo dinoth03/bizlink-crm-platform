@@ -883,7 +883,7 @@ function updateVendorIdentity(activeVendor) {
     searchInput.readOnly = true;
   }
   if (supportGreeting) {
-    supportGreeting.textContent = `👋 Hello ${firstName}! How can we help you today? / ආයුබෝවන් ${firstName}! අපි අද ඔබට උදව් කරන්නේ කෙසේද?`;
+    supportGreeting.innerHTML = `👋 Hello ${firstName}! How can we help you today? / <span class="si-label">ආයුබෝවන් ${firstName}! අපි අද ඔබට උදව් කරන්නේ කෙසේද?</span>`;
   }
 }
 
@@ -891,9 +891,9 @@ async function loadVendorDashboardData() {
   const recentOrdersBody = document.getElementById('recentOrdersBody');
   const ordersTableBody = document.getElementById('ordersTableBody');
   const productsGrid = document.getElementById('productsGrid');
-  renderWidgetState(recentOrdersBody, 'Loading recent orders... / මෑත ඇණවුම් පූරණය වෙමින්...', 'loading');
-  renderWidgetState(ordersTableBody, 'Loading order list... / ඇණවුම් ලැයිස්තුව පූරණය වෙමින්...', 'loading');
-  renderWidgetState(productsGrid, 'Loading products... / නිෂ්පාදන පූරණය වෙමින්...', 'loading');
+  renderWidgetState(recentOrdersBody, 'Loading recent orders... / <span class="si-label">මෑත ඇණවුම් පූරණය වෙමින්...</span>', 'loading');
+  renderWidgetState(ordersTableBody, 'Loading order list... / <span class="si-label">ඇණවුම් ලැයිස්තුව පූරණය වෙමින්...</span>', 'loading');
+  renderWidgetState(productsGrid, 'Loading products... / <span class="si-label">නිෂ්පාදන පූරණය වෙමින්...</span>', 'loading');
 
   try {
     if (typeof authMe !== 'function') {
@@ -970,7 +970,7 @@ function renderRecentOrders() {
   if (!tbody || tbody.children.length) return;
 
   if (!dashboardData.orders.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No recent orders available. / මෑත ඇණවුම් නොමැත.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No recent orders available. / <span class="si-label">මෑත ඇණවුම් නොමැත.</span></td></tr>';
     return;
   }
 
@@ -1298,7 +1298,7 @@ function renderReviews() {
           </div>
         </div>
         <div class="review-text">"${r.text}"</div>
-        <button class="review-reply">💬 Reply to Review / විමර්ශනයට පිළිතුරු දෙන්න</button>
+        <button class="review-reply">💬 Reply to Review / <span class="si-label">විමර්ශනයට පිළිතුරු දෙන්න</span></button>
       </div>
     </div>
   `).join('');
@@ -1310,7 +1310,7 @@ function renderReviews() {
   const ratingBig = document.querySelector('#page-reviews .rating-big');
   const ratingCount = document.querySelector('#page-reviews .rating-count');
   if (ratingBig) ratingBig.textContent = averageRating;
-  if (ratingCount) ratingCount.textContent = `Based on ${totalReviews.toLocaleString()} reviews / විමර්ශන ${totalReviews.toLocaleString()}ක් මත පදනම්ව`;
+  if (ratingCount) ratingCount.innerHTML = `Based on ${totalReviews.toLocaleString()} reviews / <span class="si-label">විමර්ශන ${totalReviews.toLocaleString()}ක් මත පදනම්ව</span>`;
 }
 
 
@@ -1318,61 +1318,56 @@ function renderReviews() {
 
 const MODALS = {
   addProduct: {
-    title: '📦 Add New Product / නව නිෂ්පාදනය එක් කරන්න',
+    title: '📦 Add New Product / <span class="si-label">නව නිෂ්පාදනය එක් කරන්න</span>',
     html: `
-      <div class="form-group"><label>Product Name / නිෂ්පාදන නාමය</label><input id="vendorProductName" type="text" placeholder="e.g. Ceylon Green Tea 250g / උදා. සීලෝන් හරිත තේ 250g" class="form-input" /></div>
-      <div class="form-group"><label>Category / කාණ්ඩය</label>
+      <div class="form-group"><label>Product Name / <span class="si-label">නිෂ්පාදන නාමය</span></label><input id="vendorProductName" type="text" placeholder="e.g. Ceylon Green Tea 250g / උදා. සීලෝන් හරිත තේ 250g" class="form-input" /></div>
+      <div class="form-group"><label>Category / <span class="si-label">කාණ්ඩය</span></label>
         <select id="vendorProductCategory" class="form-input">
-          <option value="grocery">Grocery</option>
-          <option value="fashion">Fashion</option>
-          <option value="home">Home</option>
-          <option value="electronics">Electronics</option>
-          <option value="health">Health</option>
-          <option value="agriculture">Agriculture</option>
-          <option value="construction">Construction</option>
-          <option value="office">Office</option>
-          <option value="packaging">Packaging</option>
-          <option value="industrial">Industrial</option>
+          <option value="Tea">Ceylon Tea / තේ</option>
+          <option value="Spices">Spices / කුළුබඩු</option>
+          <option value="Handicrafts">Handicrafts / අත්කම්</option>
+          <option value="Fashion">Fashion / ඇඟලුම්</option>
+          <option value="Health">Health & Beauty / සෞඛ්‍ය සහ රූපලාවන්‍ය</option>
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Price (Rs.) / මිල</label><input id="vendorProductPrice" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" /></div>
-        <div class="form-group"><label>Discount (%) / වට්ටම (%)</label><input id="vendorProductDiscount" type="number" min="0" max="100" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>Price (Rs.) / <span class="si-label">මිල</span></label><input id="vendorProductPrice" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" /></div>
+        <div class="form-group"><label>Discount (%) / <span class="si-label">වට්ටම (%)</span></label><input id="vendorProductDiscount" type="number" min="0" max="100" placeholder="0" class="form-input" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Stock Quantity / තොග ප්‍රමාණය</label><input id="vendorProductStock" type="number" min="0" placeholder="0" class="form-input" /></div>
-        <div class="form-group"><label>SKU Code / SKU කේතය</label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009 / උදා. TEA-009" class="form-input" /></div>
+        <div class="form-group"><label>Stock Quantity / <span class="si-label">තොග ප්‍රමාණය</span></label><input id="vendorProductStock" type="number" min="0" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>SKU Code / <span class="si-label">SKU කේතය</span></label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009 / උදා. TEA-009" class="form-input" /></div>
       </div>
-      <div class="form-group"><label>Product Description / නිෂ්පාදන විස්තරය</label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description… / නිෂ්පාදන විස්තරය…"></textarea></div>
+      <div class="form-group"><label>Product Description / <span class="si-label">නිෂ්පාදන විස්තරය</span></label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description… / නිෂ්පාදන විස්තරය…"></textarea></div>
       <div class="form-group">
-        <label>Product Image from Computer / පරිගණකයෙන් රූපයක්</label>
-        <input id="vendorProductImageFile" type="file" accept="image/*" class="form-input" />
-        <small style="display:block;color:var(--text-muted);margin-top:6px;">Choose an image from your computer. You can also paste an image URL below as a fallback. / ඔබගේ පරිගණකයෙන් රූපයක් තෝරන්න. අවශ්‍ය නම් පහත URL එකද භාවිත කළ හැක.</small>
+        <label>Product Image from Computer / <span class="si-label">පරිගණකයෙන් රූපයක්</span></label>
+        <input type="file" id="vendorProductFile" accept="image/*" class="form-input" style="padding: 6px;" />
+        <small style="display:block;color:var(--text-muted);margin-top:6px;">Choose an image from your computer. You can also paste an image URL below as a fallback. / <span class="si-label">ඔබගේ පරිගණකයෙන් රූපයක් තෝරන්න. අවශ්‍ය නම් පහත URL එකද භාවිත කළ හැක.</span></small>
       </div>
-      <div class="form-group"><label>Product Image URL / රූප URL</label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
-      <div class="form-group"><label>Status / තත්ත්වය</label><select id="vendorProductStatus" class="form-input"><option value="active">Active / සක්‍රීය</option><option value="draft">Draft / කෙටුම්පත</option></select></div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-        <button class="btn-outline-vendor" onclick="closeModal()">Cancel / අවලංගු</button>
-        <button class="btn-vendor" id="vendorSaveProductBtn" onclick="submitVendorProduct(event)">Save Product / නිෂ්පාදනය සුරකින්න</button>
+      <div class="form-group"><label>Product Image URL / <span class="si-label">රූප URL</span></label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
+      <div class="form-group"><label>Status / <span class="si-label">තත්ත්වය</span></label><select id="vendorProductStatus" class="form-input"><option value="active">Active / <span class="si-label">සක්‍රීය</span></option><option value="draft">Draft / <span class="si-label">කෙටුම්පත</span></option></select></div>
+      <div class="modal-footer">
+        <button class="btn-outline-vendor" onclick="closeModal()">Cancel / <span class="si-label">අවලංගු</span></button>
+        <button class="btn-vendor" id="vendorSaveProductBtn" onclick="submitVendorProduct(event)">Save Product / <span class="si-label">නිෂ්පාදනය සුරකින්න</span></button>
       </div>
     `
   },
   addCoupon: {
-    title: '🎟 Create Coupon Code / කූපනයක් සාදන්න',
+    title: '🎟 Create Coupon Code / <span class="si-label">කූපනයක් සාදන්න</span>',
     html: `
-      <div class="form-group"><label>Coupon Code / කූපන කේතය</label><input type="text" id="vendorCouponCode" placeholder="e.g. POSON20 / උදා. POSON20" class="form-input" style="text-transform:uppercase;letter-spacing:3px;font-family:'Playfair Display',serif" /></div>
+      <div class="form-group"><label>Coupon Code / <span class="si-label">කූපන කේතය</span></label><input type="text" id="vendorCouponCode" placeholder="e.g. POSON20 / උදා. POSON20" class="form-input" style="text-transform:uppercase;letter-spacing:3px;font-family:'Playfair Display',serif" /></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Discount Type / වට්ටම් වර්ගය</label><select id="vendorCouponType" class="form-input"><option value="percentage">Percentage (%) / ප්‍රතිශතය</option><option value="fixed">Flat Amount (Rs.) / ස්ථිර මුදල</option></select></div>
-        <div class="form-group"><label>Discount Value / වට්ටම් අගය</label><input type="number" id="vendorCouponValue" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>Discount Type / <span class="si-label">වට්ටම් වර්ගය</span></label><select id="vendorCouponType" class="form-input"><option value="percentage">Percentage (%) / <span class="si-label">ප්‍රතිශතය</span></option><option value="fixed">Flat Amount (Rs.) / <span class="si-label">ස්ථිර මුදල</span></option></select></div>
+        <div class="form-group"><label>Discount Value / <span class="si-label">වට්ටම් අගය</span></label><input type="number" id="vendorCouponValue" placeholder="0" class="form-input" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Start Date / ආරම්භක දිනය</label><input type="date" id="vendorCouponStartDate" class="form-input" /></div>
-        <div class="form-group"><label>End Date / අවසන් දිනය</label><input type="date" id="vendorCouponEndDate" class="form-input" /></div>
+        <div class="form-group"><label>Start Date / <span class="si-label">ආරම්භක දිනය</span></label><input type="date" id="vendorCouponStartDate" class="form-input" /></div>
+        <div class="form-group"><label>End Date / <span class="si-label">අවසන් දිනය</span></label><input type="date" id="vendorCouponEndDate" class="form-input" /></div>
       </div>
-      <div class="form-group"><label>Usage Limit (leave blank for unlimited) / භාවිත සීමාව (නොමැති නම් හිස් තබන්න)</label><input type="number" id="vendorCouponMaxUses" placeholder="Unlimited / සීමාවක් නැත" class="form-input" /></div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-        <button class="btn-outline-vendor" type="button" onclick="closeModal()">Cancel / අවලංගු</button>
-        <button class="btn-vendor" id="vendorSaveCouponBtn" type="button" onclick="submitVendorCoupon(event)">Create Coupon / කූපනය සාදන්න</button>
+      <div class="form-group"><label>Usage Limit (leave blank for unlimited) / <span class="si-label">භාවිත සීමාව (නොමැති නම් හිස් තබන්න)</span></label><input type="number" id="vendorCouponMaxUses" placeholder="Unlimited / සීමාවක් නැත" class="form-input" /></div>
+      <div class="modal-footer">
+        <button class="btn-outline-vendor" type="button" onclick="closeModal()">Cancel / <span class="si-label">අවලංගු</span></button>
+        <button class="btn-vendor" type="button" id="vendorSaveCouponBtn" onclick="submitVendorCoupon(event)">Create Coupon / <span class="si-label">කූපනය සාදන්න</span></button>
       </div>
     `
   }
@@ -1381,7 +1376,7 @@ const MODALS = {
 function showModal(type) {
   const cfg = MODALS[type];
   if (!cfg) return;
-  document.getElementById('modalTitle').textContent = cfg.title;
+  document.getElementById('modalTitle').innerHTML = cfg.title;
   document.getElementById('modalContent').innerHTML = cfg.html;
   document.getElementById('modalBackdrop').classList.add('open');
 }
@@ -2279,5 +2274,105 @@ async function uploadDoc(type) {
     showToast('An error occurred during upload', 'error');
   } finally {
     fileInput.value = ''; // Reset input
+  }
+}
+
+// ── SUPPORT: RAISE A TICKET ──────────────────────────────────────────────────
+async function submitSupportTicket() {
+  const subjectEl     = document.getElementById('ticketSubject');
+  const categoryEl    = document.getElementById('ticketCategory');
+  const descriptionEl = document.getElementById('ticketDescription');
+  const feedbackEl    = document.getElementById('ticketFeedback');
+  const btn           = document.getElementById('ticketSubmitBtn');
+
+  const subject     = (subjectEl?.value || '').trim();
+  const category    = (categoryEl?.value || '').trim();
+  const description = (descriptionEl?.value || '').trim();
+
+  // Inline feedback helper
+  function showFeedback(msg, isError = false) {
+    if (!feedbackEl) return;
+    feedbackEl.textContent = msg;
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = isError ? '#ff6b6b' : '#50C878';
+  }
+
+  // Validation
+  if (!subject) {
+    showFeedback('⚠️ Please enter a subject.', true);
+    subjectEl?.focus();
+    return;
+  }
+  if (description.length < 10) {
+    showFeedback('⚠️ Please describe your issue in at least 10 characters.', true);
+    descriptionEl?.focus();
+    return;
+  }
+
+  // Get vendor name/email from the dashboard session data
+  const sessionUser   = dashboardData.sessionUser   || {};
+  const activeVendor  = dashboardData.activeVendor  || {};
+  const vendorName    = sessionUser.full_name  || activeVendor.vendor_name  || 'Vendor';
+  const vendorEmail   = sessionUser.email      || activeVendor.email        || activeVendor.business_email || '';
+
+  if (!vendorEmail) {
+    showFeedback('⚠️ Could not read your account email. Please refresh and try again.', true);
+    return;
+  }
+
+  // Combine fields into a single message string
+  const fullMessage = `[${category}] ${subject}\n\n${description}`;
+
+  // Disable button while submitting
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    // Fetch a fresh CSRF token
+    let csrfToken = null;
+    try {
+      const csrfRes = await fetch('../api/csrf_token.php');
+      const csrfJson = await csrfRes.json();
+      csrfToken = csrfJson?.data?.token || null;
+    } catch (_) { /* ignore */ }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
+    const res  = await fetch('../api/contact_submit.php', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        name:        vendorName,
+        email:       vendorEmail,
+        role:        'vendor',
+        message:     fullMessage,
+        source_page: '/vendor/vendorpanel.html',
+        csrf_token:  csrfToken || ''
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showFeedback('✅ Ticket submitted! Our support team will reply to your email shortly.');
+      showToast('Support ticket submitted successfully!', 'success');
+      // Clear form
+      if (subjectEl)     subjectEl.value = '';
+      if (descriptionEl) descriptionEl.value = '';
+      if (categoryEl)    categoryEl.selectedIndex = 0;
+    } else {
+      const errMsg = data.errors?.[0]?.message || data.message || 'Submission failed. Please try again.';
+      showFeedback('❌ ' + errMsg, true);
+      showToast(errMsg, 'error');
+    }
+  } catch (err) {
+    console.error('Ticket submission error:', err);
+    showFeedback('❌ Network error. Please check your connection and try again.', true);
+    showToast('Network error submitting ticket.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Ticket / <span class="si-label">ටිකට් යවන්න</span>';
+    }
   }
 }

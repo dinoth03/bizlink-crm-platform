@@ -1034,3 +1034,19 @@ button{cursor:pointer;font-family:var(--font-b);border:none;background:none;}
   .compose-toolbar{gap:0;}
   .ch-btn{width:30px;height:30px;}
 }
+/* AI Message special styling */
+.msg-row.ai-msg .msg-bubble {
+  background: rgba(33, 150, 243, 0.06) !important;
+  border: 1px solid rgba(33, 150, 243, 0.2) !important;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+}
+
+.msg-row.ai-msg .msg-sender-name {
+  color: #42a5f5 !important;
+  font-weight: 700 !important;
+}
+
+.msg-row.ai-msg .msg-avatar {
+  background: #2196F3 !important;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+}

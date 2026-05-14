@@ -43,7 +43,7 @@ define('SMTP_PORT', (int)mailSetting('SMTP_PORT', '587'));
 define('SMTP_USERNAME', mailSetting('SMTP_USERNAME', ''));
 define('SMTP_PASSWORD', mailSetting('SMTP_PASSWORD', ''));
 define('SMTP_ENCRYPTION', mailSetting('SMTP_ENCRYPTION', 'tls')); // 'tls' or 'ssl'
-define('PHPMAILER_SRC_PATH', mailSetting('PHPMAILER_SRC_PATH', __DIR__ . '/phpmailer/src'));
+define('PHPMAILER_SRC_PATH', mailSetting('PHPMAILER_SRC_PATH', __DIR__ . '/../vendor/phpmailer/phpmailer/src'));
 
 /**
  * Send email via configured mail driver.
@@ -70,13 +70,25 @@ function sendMail(string $to, string $subject, string $htmlBody, ?string $textBo
     $driver = strtolower(trim(MAIL_DRIVER));
     
     if ($driver === 'smtp') {
-        return sendViaSmtpWithOptionalPHPMailer($to, $subject, $htmlBody, $textBody, $logId);
+        $result = sendViaSmtpWithOptionalPHPMailer($to, $subject, $htmlBody, $textBody, $logId);
+
+        if (!$result['success'] && PHP_SAPI !== 'cli') {
+            $bridgeResult = sendViaCliPhpBridge($to, $subject, $htmlBody, $textBody, $logId);
+            if ($bridgeResult['success']) {
+                return $bridgeResult;
+            }
+        }
+
+        return $result;
     } elseif ($driver === 'dev') {
-        return sendViaDevMode($to, $subject, $htmlBody, $textBody, $logId);
+        $result = sendViaDevMode($to, $subject, $htmlBody, $textBody, $logId);
     } else {
         // Default to PHP mail() function
-        return sendViaPhpMail($to, $subject, $htmlBody, $textBody, $logId);
+        $result = sendViaPhpMail($to, $subject, $htmlBody, $textBody, $logId);
     }
+    
+    file_put_contents(__DIR__ . '/mail_debug.log', date('Y-m-d H:i:s') . " - To: $to - Driver: $driver - Success: " . ($result['success'] ? 'true' : 'false') . " - Msg: " . ($result['message'] ?? '') . " - Details: " . ($result['details'] ?? '') . "\n", FILE_APPEND);
+    return $result;
 }
 
 function sendViaSmtpWithOptionalPHPMailer(string $to, string $subject, string $htmlBody, ?string $textBody, string $logId): array {
@@ -97,6 +109,14 @@ function sendViaSmtpWithOptionalPHPMailer(string $to, string $subject, string $h
                 $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
             }
 
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
+
             $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
             $mail->addAddress($to);
             $mail->Subject = $subject;
@@ -112,7 +132,17 @@ function sendViaSmtpWithOptionalPHPMailer(string $to, string $subject, string $h
                 'logId' => $logId
             ];
         } catch (Throwable $e) {
-            error_log("[Mail Log ID: {$logId}] PHPMailer send failed for {$to}: " . $e->getMessage());
+            $errorMessage = $e->getMessage();
+            error_log("[Mail Log ID: {$logId}] PHPMailer send failed for {$to}: " . $errorMessage);
+            // If PHPMailer failed, we might still want to try the fallback or return the error
+            if (strpos($errorMessage, 'SMTP connect() failed') !== false) {
+                $errorMessage = "SMTP connection failed. Check your host and port settings.";
+            } elseif (strpos($errorMessage, 'Authentication failed') !== false) {
+                $errorMessage = "SMTP Authentication failed. Check your username and password.";
+            }
+            
+            // Store the error message to potentially return it if fallback also fails
+            $GLOBALS['LAST_MAIL_ERROR'] = $errorMessage;
         }
     }
 
@@ -122,6 +152,14 @@ function sendViaSmtpWithOptionalPHPMailer(string $to, string $subject, string $h
 function loadPHPMailerClasses(): bool {
     if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
         return true;
+    }
+
+    $composerAutoload = __DIR__ . '/../vendor/autoload.php';
+    if (is_file($composerAutoload)) {
+        require_once $composerAutoload;
+        if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
+            return true;
+        }
     }
 
     $required = [
@@ -141,6 +179,85 @@ function loadPHPMailerClasses(): bool {
     }
 
     return class_exists('\\PHPMailer\\PHPMailer\\PHPMailer');
+}
+
+function sendViaCliPhpBridge(string $to, string $subject, string $htmlBody, ?string $textBody, string $logId): array {
+    $phpBinary = getenv('PHP_CLI_BINARY');
+    if ($phpBinary === false || trim($phpBinary) === '') {
+        // Try common XAMPP/WAMP paths on Windows
+        $commonPaths = [
+            'C:\\xampp\\php\\php.exe',
+            'C:\\wamp64\\bin\\php\\php8.2.0\\php.exe',
+            'C:\\wamp64\\bin\\php\\php8.1.0\\php.exe',
+            'C:\\wamp\\bin\\php\\php.exe',
+            'php' // Try system path
+        ];
+        foreach ($commonPaths as $path) {
+            if ($path === 'php' || is_file($path)) {
+                $phpBinary = $path;
+                break;
+            }
+        }
+    }
+
+    if (empty($phpBinary)) {
+        $phpBinary = 'php'; // Fallback to system path
+    }
+
+    $workerScript = __DIR__ . '/mail_cli_worker.php';
+    if (!is_file($phpBinary) || !is_file($workerScript)) {
+        error_log("[Mail Log ID: {$logId}] CLI bridge unavailable: missing PHP binary or worker script");
+        return [
+            'success' => false,
+            'message' => 'Failed to send email. CLI bridge unavailable.',
+            'logId' => $logId
+        ];
+    }
+
+    $payloadFile = tempnam(sys_get_temp_dir(), 'bizlink_mail_');
+    if ($payloadFile === false) {
+        error_log("[Mail Log ID: {$logId}] CLI bridge unavailable: could not create temp file");
+        return [
+            'success' => false,
+            'message' => 'Failed to send email. Could not create temporary file.',
+            'logId' => $logId
+        ];
+    }
+
+    $payload = [
+        'to' => $to,
+        'subject' => $subject,
+        'htmlBody' => $htmlBody,
+        'textBody' => $textBody,
+    ];
+
+    file_put_contents($payloadFile, json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+    $command = escapeshellarg($phpBinary) . ' ' . escapeshellarg($workerScript) . ' ' . escapeshellarg($payloadFile);
+    $output = [];
+    $exitCode = 0;
+    exec($command . ' 2>&1', $output, $exitCode);
+
+    @unlink($payloadFile);
+
+    $response = json_decode(implode("\n", $output), true);
+    if (is_array($response) && !empty($response['success'])) {
+        error_log("[Mail Log ID: {$logId}] Email sent via CLI bridge to {$to}: {$subject}");
+        $response['logId'] = $logId;
+        return $response;
+    }
+
+    $cliMessage = is_array($response) && isset($response['message']) ? $response['message'] : implode("\n", $output);
+    error_log("[Mail Log ID: {$logId}] CLI bridge failed for {$to}: {$cliMessage}");
+
+    $finalMessage = 'Failed to send email. ' . ($GLOBALS['LAST_MAIL_ERROR'] ?? 'Please check SMTP settings.');
+
+    return [
+        'success' => false,
+        'message' => $finalMessage,
+        'logId' => $logId,
+        'details' => $cliMessage
+    ];
 }
 
 /**
@@ -282,9 +399,13 @@ function sendViaSMTP(string $to, string $subject, string $htmlBody, ?string $tex
         ];
     } catch (Throwable $e) {
         error_log("[Mail Log ID: {$logId}] SMTP send failed for {$to}: " . $e->getMessage());
+        $errorMessage = $e->getMessage();
+        if (strpos($errorMessage, 'Authentication rejected') !== false || strpos($errorMessage, 'AUTH LOGIN command rejected') !== false) {
+             $errorMessage = "SMTP Authentication failed. Please check your App Password.";
+        }
         return [
             'success' => false,
-            'message' => 'Failed to send email. Please try again later.',
+            'message' => 'Failed to send email. ' . $errorMessage,
             'logId' => $logId
         ];
     }

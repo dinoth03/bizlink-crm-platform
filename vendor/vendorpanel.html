@@ -20,43 +20,43 @@
       <span class="logo-icon">⬡</span>
       <span class="logo-text">Biz<strong>Link</strong></span>
     </a>
-    <div class="sidebar-role-badge">Vendor / විකුණුම්කරු</div>
+    <div class="sidebar-role-badge">Vendor / <span class="si-label">විකුණුම්කරු</span></div>
   </div>
 
   <nav class="sidebar-nav">
     <a href="#" class="nav-item active" data-page="dashboard" onclick="navigate(event,this,'dashboard')">
-      <span class="nav-icon">📊</span><span class="nav-label">Dashboard / පාලන පුවරුව</span>
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard / <span class="si-label">පාලන පුවරුව</span></span>
     </a>
     <a href="#" class="nav-item" data-page="products" onclick="navigate(event,this,'products')">
-      <span class="nav-icon">📦</span><span class="nav-label">Products / නිෂ්පාදන</span>
+      <span class="nav-icon">📦</span><span class="nav-label">Products / <span class="si-label">නිෂ්පාදන</span></span>
     </a>
     <a href="#" class="nav-item" data-page="orders" onclick="navigate(event,this,'orders')">
-      <span class="nav-icon">🛒</span><span class="nav-label">Orders / ඇණවුම්</span>
+      <span class="nav-icon">🛒</span><span class="nav-label">Orders / <span class="si-label">ඇණවුම්</span></span>
       <span class="nav-badge">5</span>
     </a>
     <a href="#" class="nav-item" data-page="customers" onclick="navigate(event,this,'customers')">
-      <span class="nav-icon">👥</span><span class="nav-label">Customers / පාරිභෝගිකයන්</span>
+      <span class="nav-icon">👥</span><span class="nav-label">Customers / <span class="si-label">පාරිභෝගිකයන්</span></span>
     </a>
     <a href="#" class="nav-item" data-page="promotions" onclick="navigate(event,this,'promotions')">
-      <span class="nav-icon">🎟</span><span class="nav-label">Promotions / ප්‍රවර්ධන</span>
+      <span class="nav-icon">🎟</span><span class="nav-label">Promotions / <span class="si-label">ප්‍රවර්ධන</span></span>
     </a>
     <a href="#" class="nav-item" data-page="analytics" onclick="navigate(event,this,'analytics')">
-      <span class="nav-icon">📈</span><span class="nav-label">Analytics / විශ්ලේෂණ</span>
+      <span class="nav-icon">📈</span><span class="nav-label">Analytics / <span class="si-label">විශ්ලේෂණ</span></span>
     </a>
     <a href="#" class="nav-item" data-page="payments" onclick="navigate(event,this,'payments')">
-      <span class="nav-icon">💳</span><span class="nav-label">Payments / ගෙවීම්</span>
+      <span class="nav-icon">💳</span><span class="nav-label">Payments / <span class="si-label">ගෙවීම්</span></span>
     </a>
     <a href="#" class="nav-item" data-page="reviews" onclick="navigate(event,this,'reviews')">
-      <span class="nav-icon">⭐</span><span class="nav-label">Reviews / විමර්ශන</span>
+      <span class="nav-icon">⭐</span><span class="nav-label">Reviews / <span class="si-label">විමර්ශන</span></span>
     </a>
     <a href="#" class="nav-item" data-page="settings" onclick="navigate(event,this,'settings')">
-      <span class="nav-icon">⚙️</span><span class="nav-label">Settings / සැකසුම්</span>
+      <span class="nav-icon">⚙️</span><span class="nav-label">Settings / <span class="si-label">සැකසුම්</span></span>
     </a>
     <a href="#" class="nav-item" data-page="verification" onclick="navigate(event,this,'verification')">
-      <span class="nav-icon">🛡️</span><span class="nav-label">Verification / සත්‍යාපනය</span>
+      <span class="nav-icon">🛡️</span><span class="nav-label">Verification / <span class="si-label">සත්‍යාපනය</span></span>
     </a>
     <a href="#" class="nav-item" data-page="support" onclick="navigate(event,this,'support')">
-      <span class="nav-icon">🛡</span><span class="nav-label">Support / සහාය</span>
+      <span class="nav-icon">🛡</span><span class="nav-label">Support / <span class="si-label">සහාය</span></span>
     </a>
   </nav>
 
@@ -64,9 +64,9 @@
     <div class="profile-avatar">V</div>
     <div class="profile-info">
       <div class="profile-name">Vendor</div>
-      <div class="profile-role">Verified Vendor / සත්‍යාපිත විකුණුම්කරු ✅</div>
+      <div class="profile-role">Verified Vendor / <span class="si-label">සත්‍යාපිත විකුණුම්කරු</span> ✅</div>
       <div class="profile-role" id="vendorProfileEmail">-</div>
-      <div id="vendorPremiumBadge" style="margin-top:6px;display:none;font-weight:700;color:#ffd54a;">💎 Premium Active / ප්‍රීමියම් සක්‍රීයයි</div>
+      <div id="vendorPremiumBadge" style="margin-top:6px;display:none;font-weight:700;color:#ffd54a;">💎 Premium Active / <span class="si-label" style="color:#ffd54a;">ප්‍රීමියම් සක්‍රීයයි</span></div>
     </div>
   </div>
 </aside>
@@ -93,14 +93,14 @@
         </button>
         <div class="notif-panel" id="notifPanel">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
-            <div class="notif-title" style="margin-bottom:0;">Notifications / දැනුම්දීම්</div>
-            <button type="button" aria-label="Mark all notifications as read" onclick="markVendorNotificationsRead()" style="background:none;border:none;color:var(--vendor-color);font-weight:700;cursor:pointer;padding:0;">Mark all read / සියල්ල කියවා සලකන්න</button>
+            <div class="notif-title" style="margin-bottom:0;">Notifications / <span class="si-label">දැනුම්දීම්</span></div>
+            <button type="button" aria-label="Mark all notifications as read" onclick="markVendorNotificationsRead()" style="background:none;border:none;color:var(--vendor-color);font-weight:700;cursor:pointer;padding:0;">Mark all read / <span class="si-label" style="color:var(--vendor-color);">සියල්ල කියවා සලකන්න</span></button>
           </div>
           <div id="vendorNotifList"></div>
         </div>
       </div>
-      <a href="../pages/index.html" class="btn-ghost-sm">← Home / මුල් පිටුව</a>
-      <button class="btn-ghost-sm" onclick="vendorLogout()">Sign Out / පිටවෙන්න</button>
+      <a href="../pages/index.html" class="btn-ghost-sm">← Home / <span class="si-label">මුල් පිටුව</span></a>
+      <button class="btn-ghost-sm" onclick="vendorLogout()">Sign Out / <span class="si-label">පිටවෙන්න</span></button>
     </div>
   </header>
 
@@ -112,12 +112,12 @@
 
       <div class="welcome-banner">
         <div class="welcome-text">
-          <div class="section-label">VENDOR PORTAL / විකුණුම්කරු පුවරුව</div>
-          <h1 class="welcome-title">Welcome back, <span class="vendor-text">Vendor</span> 👋 / නැවතත් සාදරයෙන් පිළිගනිමු</h1>
-          <p class="welcome-sub">Tuesday, 24 February 2026 · Colombo, Western Province / 2026 පෙබරවාරි 24 · කොළඹ, බස්නාහිර පළාත</p>
+          <div class="section-label">VENDOR PORTAL / <span class="si-label">විකුණුම්කරු පුවරුව</span></div>
+          <h1 class="welcome-title">Welcome back, <span class="vendor-text">Vendor</span> 👋 / <span class="si-label">නැවතත් සාදරයෙන් පිළිගනිමු</span></h1>
+          <p class="welcome-sub">Tuesday, 24 February 2026 · Colombo, Western Province / <span class="si-label">2026 පෙබරවාරි 24 · කොළඹ, බස්නාහිර පළාත</span></p>
         </div>
           <div class="welcome-badge-wrap">
-          <span class="badge-dot"></span> 🇱🇰 &nbsp;Sri Lanka Seller / ශ්‍රී ලංකා විකුණුම්කරු
+          <span class="badge-dot"></span> 🇱🇰 &nbsp;Sri Lanka Seller / <span class="si-label">ශ්‍රී ලංකා විකුණුම්කරු</span>
         </div>
       </div>
 
@@ -128,43 +128,43 @@
             <span class="stat-icon-wrap" style="--c:var(--vendor-color)">📊</span>
             <span class="stat-change up">+18% ↑</span>
           </div>
-          <div class="stat-label">Today's Sales / අද විකුණුම්</div>
+          <div class="stat-label">Today's Sales / <span class="si-label">අද විකුණුම්</span></div>
           <div class="stat-value" id="s1">Rs. 0</div>
-          <div class="stat-foot">vs yesterday / ඊයේට සාපේක්ෂව</div>
+          <div class="stat-foot">vs yesterday / <span class="si-label">ඊයේට සාපේක්ෂව</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-icon-wrap" style="--c:#4f8cff">📦</span>
             <span class="stat-change up">+24 ↑</span>
           </div>
-          <div class="stat-label">Total Orders / මුළු ඇණවුම්</div>
+          <div class="stat-label">Total Orders / <span class="si-label">මුළු ඇණවුම්</span></div>
           <div class="stat-value" id="s2">0</div>
-          <div class="stat-foot">This week / මෙම සතිය</div>
+          <div class="stat-foot">This week / <span class="si-label">මෙම සතිය</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-icon-wrap" style="--c:#FF8C00">🚚</span>
             <span class="stat-change warn">⚠ Attention</span>
           </div>
-          <div class="stat-label">Pending Orders / අපේක්ෂිත ඇණවුම්</div>
+          <div class="stat-label">Pending Orders / <span class="si-label">අපේක්ෂිත ඇණවුම්</span></div>
           <div class="stat-value" id="s3">0</div>
-          <div class="stat-foot">Needs action / ක්‍රියාමාර්ග අවශ්‍යයි</div>
+          <div class="stat-foot">Needs action / <span class="si-label">ක්‍රියාමාර්ග අවශ්‍යයි</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-icon-wrap" style="--c:var(--vendor-color)">💰</span>
             <span class="stat-change up">+32% ↑</span>
           </div>
-          <div class="stat-label">Total Earnings / මුළු ආදායම</div>
+          <div class="stat-label">Total Earnings / <span class="si-label">මුළු ආදායම</span></div>
           <div class="stat-value" id="s4">Rs. 0</div>
-          <div class="stat-foot">This month / මෙම මාසය</div>
+          <div class="stat-foot">This month / <span class="si-label">මෙම මාසය</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-icon-wrap" style="--c:#FFD700">⭐</span>
             <span class="stat-change up">Excellent</span>
           </div>
-          <div class="stat-label">Customer Rating / පාරිභෝගික ශ්‍රේණිගත කිරීම</div>
+          <div class="stat-label">Customer Rating / <span class="si-label">පාරිභෝගික ශ්‍රේණිගත කිරීම</span></div>
           <div class="stat-value" id="vendorRatingValue">0.0 / 5</div>
           <div class="stat-stars" id="vendorRatingStars">☆☆☆☆☆</div>
         </div>
@@ -173,9 +173,9 @@
             <span class="stat-icon-wrap" style="--c:var(--vendor-color)">📈</span>
             <span class="stat-change up">Best month</span>
           </div>
-          <div class="stat-label">Monthly Revenue / මාසික ආදායම</div>
+          <div class="stat-label">Monthly Revenue / <span class="si-label">මාසික ආදායම</span></div>
           <div class="stat-value" id="s5">Rs. 0</div>
-          <div class="stat-foot" id="monthlyRevenueMonthLabel">Current month / වත්මන් මාසය</div>
+          <div class="stat-foot" id="monthlyRevenueMonthLabel">Current month / <span class="si-label">වත්මන් මාසය</span></div>
         </div>
       </div>
 
@@ -184,24 +184,24 @@
         <div class="glass-card chart-wide">
           <div class="card-header">
             <div class="sales-head">
-              <span class="card-title">Sales Overview — Last 7 Days / පසුගිය දින 7 හි විකුණුම්</span>
-              <span class="sales-range-hint" id="salesRangeHint">Showing weekly trend / සතිපතා ප්‍රවණතාව</span>
+              <span class="card-title">Sales Overview — Last 7 Days / <span class="si-label">පසුගිය දින 7 හි විකුණුම්</span></span>
+              <span class="sales-range-hint" id="salesRangeHint">Showing weekly trend / <span class="si-label">සතිපතා ප්‍රවණතාව</span></span>
             </div>
             <div class="chart-tabs" aria-label="Sales chart range">
-              <button class="ctab active" type="button" aria-pressed="true">Week / සතිය</button>
-              <button class="ctab" type="button" aria-pressed="false">Month / මාසය</button>
+              <button class="ctab active" type="button" aria-pressed="true">Week / <span class="si-label">සතිය</span></button>
+              <button class="ctab" type="button" aria-pressed="false">Month / <span class="si-label">මාසය</span></button>
             </div>
           </div>
           <canvas id="salesChart" height="110"></canvas>
         </div>
         <div class="glass-card">
-          <div class="card-header"><span class="card-title">Order Status / ඇණවුම් තත්ත්වය</span></div>
+          <div class="card-header"><span class="card-title">Order Status / <span class="si-label">ඇණවුම් තත්ත්වය</span></span></div>
           <canvas id="donutChart" height="150"></canvas>
           <div class="donut-legend">
-            <div class="dl-item"><span class="dl-dot" style="background:var(--vendor-color)"></span>Delivered / බෙදාහැරූ <span id="donutDeliveredPct">0%</span></div>
-            <div class="dl-item"><span class="dl-dot" style="background:#FF8C00"></span>Pending / රැඳී ඇති <span id="donutPendingPct">0%</span></div>
-            <div class="dl-item"><span class="dl-dot" style="background:#ff6b6b"></span>Cancelled / අවලංගු <span id="donutCancelledPct">0%</span></div>
-            <div class="dl-item"><span class="dl-dot" style="background:#4f8cff"></span>Processing / සැකසෙමින් <span id="donutProcessingPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:var(--vendor-color)"></span>Delivered / <span class="si-label">බෙදාහැරූ</span> <span id="donutDeliveredPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#FF8C00"></span>Pending / <span class="si-label">රැඳී ඇති</span> <span id="donutPendingPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#ff6b6b"></span>Cancelled / <span class="si-label">අවලංගු</span> <span id="donutCancelledPct">0%</span></div>
+            <div class="dl-item"><span class="dl-dot" style="background:#4f8cff"></span>Processing / <span class="si-label">සැකසෙමින්</span> <span id="donutProcessingPct">0%</span></div>
           </div>
         </div>
       </div>
@@ -209,8 +209,8 @@
       <!-- RECENT ORDERS -->
       <div class="glass-card">
         <div class="card-header">
-          <span class="card-title">Recent Orders / මෑත ඇණවුම්</span>
-          <button class="btn-ghost-sm" onclick="goToPage('orders')">View All → / සියල්ල බලන්න</button>
+          <span class="card-title">Recent Orders / <span class="si-label">මෑත ඇණවුම්</span></span>
+          <button class="btn-ghost-sm" onclick="goToPage('orders')">View All → / <span class="si-label">සියල්ල බලන්න</span></button>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -225,10 +225,10 @@
     <section class="page" id="page-products">
       <div class="page-header">
         <div>
-          <div class="section-label">INVENTORY / ඉන්වෙන්ටරි</div>
-          <h2 class="page-h2">Product Management / නිෂ්පාදන කළමනාකරණය</h2>
+          <div class="section-label">INVENTORY / <span class="si-label">ඉන්වෙන්ටරි</span></div>
+          <h2 class="page-h2">Product Management / <span class="si-label">නිෂ්පාදන කළමනාකරණය</span></h2>
         </div>
-        <button class="btn-vendor" onclick="showModal('addProduct')">+ Add Product / නිෂ්පාදන එක් කරන්න</button>
+        <button class="btn-vendor" onclick="showModal('addProduct')">+ Add Product / <span class="si-label">නිෂ්පාදන එක් කරන්න</span></button>
       </div>
       <div class="filter-row">
         <input class="search-input" type="text" placeholder="Search products… / නිෂ්පාදන සොයන්න…" id="productSearchInput" oninput="loadVendorProducts(1)" />
@@ -236,14 +236,14 @@
 
       <div class="glass-card" style="margin-top:1.5rem">
         <div class="card-header">
-          <span class="card-title">📦 Your Products / ඔබගේ නිෂ්පාදන</span>
-          <div style="font-size:0.85rem;color:var(--text-muted);" id="productCount">0 products / නිෂ්පාදන 0ක්</div>
+          <span class="card-title">📦 Your Products / <span class="si-label">ඔබගේ නිෂ්පාදන</span></span>
+          <div style="font-size:0.85rem;color:var(--text-muted);" id="productCount">0 products / <span class="si-label">නිෂ්පාදන 0ක්</span></div>
         </div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Product Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
             <tbody id="productsTableBody">
-              <tr style="text-align:center;"><td colspan="7" style="padding:2rem;color:var(--text-muted);">Loading products... / නිෂ්පාදන පූරණය වෙමින්...</td></tr>
+              <tr style="text-align:center;"><td colspan="7" style="padding:2rem;color:var(--text-muted);">Loading products... / <span class="si-label">නිෂ්පාදන පූරණය වෙමින්...</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -255,23 +255,23 @@
     <section class="page" id="page-orders">
       <div class="page-header">
         <div>
-          <div class="section-label">FULFILMENT / සැපයුම්</div>
-          <h2 class="page-h2">Order Management / ඇණවුම් කළමනාකරණය</h2>
+          <div class="section-label">FULFILMENT / <span class="si-label">සැපයුම්</span></div>
+          <h2 class="page-h2">Order Management / <span class="si-label">ඇණවුම් කළමනාකරණය</span></h2>
         </div>
       </div>
       <div class="otab-row">
-        <button class="otab active" onclick="filterVendorOrders('all',this)">All / සියල්ල</button>
-        <button class="otab" onclick="filterVendorOrders('pending',this)">Pending / රැඳී ඇති</button>
-        <button class="otab" onclick="filterVendorOrders('processing',this)">Processing / සැකසෙමින්</button>
-        <button class="otab" onclick="filterVendorOrders('shipped',this)">Shipped / යැවූ</button>
-        <button class="otab" onclick="filterVendorOrders('delivered',this)">Delivered / බෙදාහැරූ</button>
+        <button class="otab active" onclick="filterVendorOrders('all',this)">All / <span class="si-label">සියල්ල</span></button>
+        <button class="otab" onclick="filterVendorOrders('pending',this)">Pending / <span class="si-label">රැඳී ඇති</span></button>
+        <button class="otab" onclick="filterVendorOrders('processing',this)">Processing / <span class="si-label">සැකසෙමින්</span></button>
+        <button class="otab" onclick="filterVendorOrders('shipped',this)">Shipped / <span class="si-label">යැවූ</span></button>
+        <button class="otab" onclick="filterVendorOrders('delivered',this)">Delivered / <span class="si-label">බෙදාහැරූ</span></button>
       </div>
       <div class="glass-card" style="padding:0">
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
             <tbody id="ordersTableBody">
-              <tr style="text-align:center;"><td colspan="8" style="padding:2rem;color:var(--text-muted);">Loading orders... / ඇණවුම් පූරණය වෙමින්...</td></tr>
+              <tr style="text-align:center;"><td colspan="8" style="padding:2rem;color:var(--text-muted);">Loading orders... / <span class="si-label">ඇණවුම් පූරණය වෙමින්...</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -282,26 +282,26 @@
     <section class="page" id="page-customers">
       <div class="page-header">
         <div>
-          <div class="section-label">CRM / පාරිභෝගික කළමනාකරණය</div>
-          <h2 class="page-h2">Customer Management / පාරිභෝගික කළමනාකරණය</h2>
+          <div class="section-label">CRM / <span class="si-label">පාරිභෝගික කළමනාකරණය</span></div>
+          <h2 class="page-h2">Customer Management / <span class="si-label">පාරිභෝගික කළමනාකරණය</span></h2>
         </div>
-        <button class="btn-vendor">+ Add Customer / පාරිභෝගික එක් කරන්න</button>
+        <button class="btn-vendor">+ Add Customer / <span class="si-label">පාරිභෝගික එක් කරන්න</span></button>
       </div>
       <div class="stats-grid" style="margin-bottom:1.5rem">
-        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">👥</span></div><div class="stat-label">Total Customers / මුළු පාරිභෝගිකයන්</div><div class="stat-value">2,841</div></div>
-        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FFD700">👑</span></div><div class="stat-label">VIP Customers / VIP පාරිභෝගිකයන්</div><div class="stat-value">142</div></div>
-        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#4f8cff">🔄</span></div><div class="stat-label">Repeat Buyers / නැවත මිලදී ගන්නෝ</div><div class="stat-value">1,204</div></div>
-        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FF8C00">🆕</span></div><div class="stat-label">New This Month / මෙම මාසයේ නවයන්</div><div class="stat-value">328</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">👥</span></div><div class="stat-label">Total Customers / <span class="si-label">මුළු පාරිභෝගිකයන්</span></div><div class="stat-value">2,841</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FFD700">👑</span></div><div class="stat-label">VIP Customers / <span class="si-label">VIP පාරිභෝගිකයන්</span></div><div class="stat-value">142</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#4f8cff">🔄</span></div><div class="stat-label">Repeat Buyers / <span class="si-label">නැවත මිලදී ගන්නෝ</span></div><div class="stat-value">1,204</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FF8C00">🆕</span></div><div class="stat-label">New This Month / <span class="si-label">මෙම මාසයේ නවයන්</span></div><div class="stat-value">328</div></div>
       </div>
       <div class="filter-row">
         <input class="search-input" type="text" placeholder="Search customers… / පාරිභෝගිකයන් සොයන්න…" />
-        <select class="filter-select"><option value="">All Tags / සියලු ටැග්</option><option>VIP</option><option>Frequent Buyer</option><option>New</option></select>
-        <select class="filter-select"><option value="">All Districts / සියලු දිස්ත්‍රික්ක</option><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
+        <select class="filter-select"><option value="">All Tags / <span class="si-label">සියලු ටැග්</span></option><option>VIP</option><option>Frequent Buyer</option><option>New</option></select>
+        <select class="filter-select"><option value="">All Districts / <span class="si-label">සියලු දිස්ත්‍රික්ක</span></option><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
       </div>
       <div class="customers-grid" id="customersGrid"></div>
 
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">Customer Outreach / පාරිභෝගික සම්බන්ධතා</span></div>
+        <div class="card-header"><span class="card-title">Customer Outreach / <span class="si-label">පාරිභෝගික සම්බන්ධතා</span></span></div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Customer</th><th>Email</th><th>Spend</th><th>Last Order</th><th>Segment</th><th>Action</th></tr></thead>
@@ -319,50 +319,50 @@
     <section class="page" id="page-promotions">
       <div class="page-header">
         <div>
-          <div class="section-label">MARKETING / ප්‍රවර්ධන</div>
-          <h2 class="page-h2">Promotions & Discounts / ප්‍රවර්ධන හා වට්ටම්</h2>
+          <div class="section-label">MARKETING / <span class="si-label">ප්‍රවර්ධන</span></div>
+          <h2 class="page-h2">Promotions & Discounts / <span class="si-label">ප්‍රවර්ධන හා වට්ටම්</span></h2>
         </div>
-        <button class="btn-vendor" onclick="showModal('addCoupon')">+ Create Coupon / කූපනය සාදන්න</button>
+        <button class="btn-vendor" onclick="showModal('addCoupon')">+ Create Coupon / <span class="si-label">කූපනය සාදන්න</span></button>
       </div>
       <div class="promos-grid">
         <div class="promo-card promo-active">
           <div class="promo-badge-tag">FLASH SALE 🔥</div>
           <div class="promo-code">AVURUDU25</div>
-          <div class="promo-detail">25% off all items · Expires 13 Apr 2026 / සියලු අයිතම සඳහා 25% වට්ටමක්</div>
-          <div class="promo-used">Used: 284 times / භාවිතා කළ වාර 284</div>
+          <div class="promo-detail">25% off all items · Expires 13 Apr 2026 / <span class="si-label">සියලු අයිතම සඳහා 25% වට්ටමක්</span></div>
+          <div class="promo-used">Used: 284 times / <span class="si-label">භාවිත කළ වාර 284</span></div>
           <div class="promo-actions"><button class="btn-sm-vendor">Edit</button><button class="btn-sm-danger">Delete</button></div>
         </div>
         <div class="promo-card">
           <div class="promo-badge-tag">FLAT DISCOUNT</div>
           <div class="promo-code">WELCOME100</div>
-          <div class="promo-detail">Rs. 100 off for new customers / නව පාරිභෝගිකයින් සඳහා රු.100 වට්ටමක්</div>
-          <div class="promo-used">Used: 1,024 times / භාවිතා කළ වාර 1,024</div>
+          <div class="promo-detail">Rs. 100 off for new customers / <span class="si-label">නව පාරිභෝගිකයින් සඳහා රු.100 වට්ටමක්</span></div>
+          <div class="promo-used">Used: 1,024 times / <span class="si-label">භාවිත කළ වාර 1,024</span></div>
           <div class="promo-actions"><button class="btn-sm-vendor">Edit</button><button class="btn-sm-danger">Delete</button></div>
         </div>
         <div class="promo-card promo-add" onclick="showModal('addCoupon')">
           <div class="promo-add-icon">+</div>
-          <div>Create New Promo / නව ප්‍රවර්ධනයක් සාදන්න</div>
+          <div>Create New Promo / <span class="si-label">නව ප්‍රවර්ධනයක් සාදන්න</span></div>
         </div>
       </div>
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">🎉 Flash Sale Countdown — Sinhala New Year / සිංහල අලුත් අවුරුදු ගණන් කිරීම</span></div>
+        <div class="card-header"><span class="card-title">🎉 Flash Sale Countdown — Sinhala New Year / <span class="si-label">සිංහල අලුත් අවුරුදු ගණන් කිරීම</span></span></div>
         <div class="flash-info">
-          <div class="flash-row"><span class="flash-lbl">Next Sale / ඊළඟ විකිණීම</span><span>Sinhala New Year Sale — April 13, 2026 / සිංහල අලුත් අවුරුදු විකිණීම</span></div>
-          <div class="flash-row"><span class="flash-lbl">Countdown / ගණන් කිරීම</span><span class="countdown-val" id="countdown">Loading… / පූරණය වෙමින්…</span></div>
+          <div class="flash-row"><span class="flash-lbl">Next Sale / <span class="si-label">ඊළඟ විකිණීම</span></span><span>Sinhala New Year Sale — April 13, 2026 / <span class="si-label">සිංහල අලුත් අවුරුදු විකිණීම</span></span></div>
+          <div class="flash-row"><span class="flash-lbl">Countdown / <span class="si-label">ගණන් කිරීම</span></span><span class="countdown-val" id="countdown">Loading… / <span class="si-label">පූරණය වෙමින්…</span></span></div>
         </div>
       </div>
 
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">Create Promotion / ප්‍රවර්ධනයක් සාදන්න</span></div>
+        <div class="card-header"><span class="card-title">Create Promotion / <span class="si-label">ප්‍රවර්ධනයක් සාදන්න</span></span></div>
         <div class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
-          <div class="form-group"><label>Campaign Title / ප්‍රචාරක නාමය</label><input type="text" class="form-input" placeholder="Avurudu Flash Sale / අවුරුදු විශේෂ වට්ටම්" /></div>
-          <div class="form-group"><label>Discount Type / වට්ටම් වර්ගය</label><select class="form-input"><option>Percentage / ප්‍රතිශතය</option><option>Flat Amount / ස්ථිර මුදල</option></select></div>
-          <div class="form-group"><label>Discount Value / වට්ටම් අගය</label><input type="number" class="form-input" placeholder="25" /></div>
-          <div class="form-group"><label>Target Category / ඉලක්ක කාණ්ඩය</label><select class="form-input"><option>All Products / සියලු නිෂ්පාදන</option><option>Tea</option><option>Fashion</option><option>Health</option></select></div>
-          <div class="form-group"><label>Start Date / ආරම්භක දිනය</label><input type="date" class="form-input" /></div>
-          <div class="form-group"><label>End Date / අවසන් දිනය</label><input type="date" class="form-input" /></div>
+          <div class="form-group"><label>Campaign Title / <span class="si-label">ප්‍රචාරක නාමය</span></label><input type="text" class="form-input" placeholder="Avurudu Flash Sale / අවුරුදු විශේෂ වට්ටම්" /></div>
+          <div class="form-group"><label>Discount Type / <span class="si-label">වට්ටම් වර්ගය</span></label><select class="form-input"><option>Percentage / <span class="si-label">ප්‍රතිශතය</span></option><option>Flat Amount / <span class="si-label">ස්ථිර මුදල</span></option></select></div>
+          <div class="form-group"><label>Discount Value / <span class="si-label">වට්ටම් අගය</span></label><input type="number" class="form-input" placeholder="25" /></div>
+          <div class="form-group"><label>Target Category / <span class="si-label">ඉලක්ක කාණ්ඩය</span></label><select class="form-input"><option>All Products / <span class="si-label">සියලු නිෂ්පාදන</span></option><option>Tea</option><option>Fashion</option><option>Health</option></select></div>
+          <div class="form-group"><label>Start Date / <span class="si-label">ආරම්භක දිනය</span></label><input type="date" class="form-input" /></div>
+          <div class="form-group"><label>End Date / <span class="si-label">අවසන් දිනය</span></label><input type="date" class="form-input" /></div>
         </div>
-        <button class="btn-vendor" style="margin-top:10px;">Save Campaign / සුරකින්න</button>
+        <button class="btn-vendor" style="margin-top:10px;">Save Campaign / <span class="si-label">සුරකින්න</span></button>
       </div>
     </section>
 
@@ -370,23 +370,23 @@
     <section class="page" id="page-analytics">
       <div class="page-header">
         <div>
-          <div class="section-label">INSIGHTS / අවබෝධතා</div>
-          <h2 class="page-h2">Analytics & Reports / විශ්ලේෂණ සහ වාර්තා</h2>
+          <div class="section-label">INSIGHTS / <span class="si-label">අවබෝධතා</span></div>
+          <h2 class="page-h2">Analytics & Reports / <span class="si-label">විශ්ලේෂණ සහ වාර්තා</span></h2>
         </div>
-        <button class="btn-outline-vendor">📥 Download CSV / CSV බාගන්න</button>
+        <button class="btn-outline-vendor">📥 Download CSV / <span class="si-label">CSV බාගන්න</span></button>
       </div>
       <div class="charts-row">
         <div class="glass-card chart-wide">
-          <div class="card-header"><span class="card-title">Monthly Revenue 2026 / 2026 මාසික ආදායම</span></div>
+          <div class="card-header"><span class="card-title">Monthly Revenue 2026 / <span class="si-label">2026 මාසික ආදායම</span></span></div>
           <canvas id="monthlyChart" height="110"></canvas>
         </div>
         <div class="glass-card">
-          <div class="card-header"><span class="card-title">Sales by District / දිස්ත්‍රික්ක අනුව විකුණුම්</span></div>
+          <div class="card-header"><span class="card-title">Sales by District / <span class="si-label">දිස්ත්‍රික්ක අනුව විකුණුම්</span></span></div>
           <canvas id="districtChart" height="150"></canvas>
         </div>
       </div>
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">🏆 Best Selling Products / වැඩිම අලෙවි වූ නිෂ්පාදන</span></div>
+        <div class="card-header"><span class="card-title">🏆 Best Selling Products / <span class="si-label">වැඩිම අලෙවි වූ නිෂ්පාදන</span></span></div>
         <div id="bestSellersList" class="best-sellers-list"></div>
       </div>
     </section>
@@ -395,10 +395,10 @@
     <section class="page" id="page-payments">
       <div class="page-header">
         <div>
-          <div class="section-label">FINANCE / මූල්‍ය</div>
-          <h2 class="page-h2">Payments & Earnings / ගෙවීම් හා ආදායම්</h2>
+          <div class="section-label">FINANCE / <span class="si-label">මූල්‍ය</span></div>
+          <h2 class="page-h2">Payments & Earnings / <span class="si-label">ගෙවීම් හා ආදායම්</span></h2>
         </div>
-        <button class="btn-vendor">💵 Request Withdrawal / මුදල් ඉල්ලාගන්න</button>
+        <button class="btn-vendor">💵 Request Withdrawal / <span class="si-label">මුදල් ඉල්ලාගන්න</span></button>
       </div>
       <div class="stats-grid" style="margin-bottom:1.5rem">
         <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:var(--vendor-color)">💰</span></div><div class="stat-label">Total Earnings</div><div class="stat-value">Rs. 0</div></div>
@@ -407,7 +407,7 @@
         <div class="stat-card"><div class="stat-top"><span class="stat-icon-wrap" style="--c:#FF8C00">🏦</span></div><div class="stat-label">Commission Rate</div><div class="stat-value">8%</div></div>
       </div>
       <div class="glass-card">
-        <div class="card-header"><span class="card-title">Transaction History / ගනුදෙනු ඉතිහාසය</span></div>
+        <div class="card-header"><span class="card-title">Transaction History / <span class="si-label">ගනුදෙනු ඉතිහාසය</span></span></div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Txn ID</th><th>Type</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead>
@@ -417,7 +417,7 @@
       </div>
 
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">Commission & Payout History / කොමිස් හා ගෙවීම් ඉතිහාසය</span></div>
+        <div class="card-header"><span class="card-title">Commission & Payout History / <span class="si-label">කොමිස් හා ගෙවීම් ඉතිහාසය</span></span></div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Period</th><th>Gross Sales</th><th>Commission</th><th>Net Earnings</th><th>Payout Status</th><th>Action</th></tr></thead>
@@ -430,12 +430,12 @@
         </div>
       </div>
       <div class="payout-section">
-        <h3 class="payout-title">Payout Methods / ගෙවීම් ක්‍රම</h3>
+        <h3 class="payout-title">Payout Methods / <span class="si-label">ගෙවීම් ක්‍රම</span></h3>
         <div class="payout-grid">
-          <div class="payout-card payout-active">🏦 Bank Transfer / බැංකු හුවමාරුව<br><small>Sampath Bank — ****4892</small><span class="payout-default">Default / පෙරනිමි</span></div>
+          <div class="payout-card payout-active">🏦 Bank Transfer / <span class="si-label">බැංකු හුවමාරුව</span><br><small>Sampath Bank — ****4892</small><span class="payout-default">Default / <span class="si-label">පෙරනිමි</span></span></div>
           <div class="payout-card">📱 eZ Cash<br><small>+94 77 *** 1234</small></div>
           <div class="payout-card">📱 mCash<br><small>Not linked / සම්බන්ධ කර නැත</small></div>
-          <div class="payout-card payout-add">+ Add Method / ක්‍රමයක් එක් කරන්න</div>
+          <div class="payout-card payout-add">+ Add Method / <span class="si-label">ක්‍රමයක් එක් කරන්න</span></div>
         </div>
       </div>
     </section>
@@ -444,14 +444,14 @@
     <section class="page" id="page-reviews">
       <div class="page-header">
         <div>
-          <div class="section-label">REPUTATION / කීර්තිය</div>
-          <h2 class="page-h2">Reviews & Ratings / විමර්ශන හා ශ්‍රේණිගත කිරීම්</h2>
+          <div class="section-label">REPUTATION / <span class="si-label">කීර්තිය</span></div>
+          <h2 class="page-h2">Reviews & Ratings / <span class="si-label">විමර්ශන හා ශ්‍රේණිගත කිරීම්</span></h2>
         </div>
       </div>
       <div class="rating-panel glass-card">
         <div class="rating-big">4.8</div>
         <div class="rating-stars">★★★★★</div>
-        <div class="rating-count">Based on 1,284 reviews / විමර්ශන 1,284ක් මත පදනම්ව</div>
+        <div class="rating-count">Based on 1,284 reviews / <span class="si-label">විමර්ශන 1,284ක් මත පදනම්ව</span></div>
         <div class="rating-bars">
           <div class="rbar"><span>5★</span><div class="rbar-track"><div class="rbar-fill" style="width:72%;background:var(--vendor-color)"></div></div><span>72%</span></div>
           <div class="rbar"><span>4★</span><div class="rbar-track"><div class="rbar-fill" style="width:18%;background:#4f8cff"></div></div><span>18%</span></div>
@@ -463,7 +463,7 @@
       <div class="reviews-list" id="reviewsList"></div>
 
       <div class="glass-card" style="margin-top:1.5rem">
-        <div class="card-header"><span class="card-title">Review Management / විමර්ශන කළමනාකරණය</span></div>
+        <div class="card-header"><span class="card-title">Review Management / <span class="si-label">විමර්ශන කළමනාකරණය</span></span></div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr><th>Customer</th><th>Product/Vendor</th><th>Rating</th><th>Review</th><th>Date</th><th>Action</th></tr></thead>
@@ -481,48 +481,48 @@
     <section class="page" id="page-settings">
       <div class="page-header">
         <div>
-          <div class="section-label">ACCOUNT / ගිණුම</div>
-          <h2 class="page-h2">Vendor Settings / විකුණුම්කරු සැකසුම්</h2>
+          <div class="section-label">ACCOUNT / <span class="si-label">ගිණුම</span></div>
+          <h2 class="page-h2">Vendor Settings / <span class="si-label">විකුණුම්කරු සැකසුම්</span></h2>
         </div>
       </div>
       <div class="settings-grid">
         <div class="glass-card settings-col">
-          <h3 class="settings-heading">Business Profile / ව්‍යාපාර පැතිකඩ</h3>
-             <div class="form-group"><label>Logo URL / ලාංඡන URL</label><input type="url" id="settingsLogoUrl" value="https://example.com/logo.png" class="form-input" /></div>
-             <div class="form-group"><label>Banner URL / බැනර් URL</label><input type="url" id="settingsBannerUrl" value="https://example.com/banner.jpg" class="form-input" /></div>
-             <div class="form-group"><label>Business Name / ව්‍යාපාර නාමය</label><input type="text" id="settingsBusinessName" value="" class="form-input" /></div>
-             <div class="form-group"><label>Owner Name / හිමිකරුගේ නම</label><input type="text" id="settingsOwnerName" value="" class="form-input" /></div>
-             <div class="form-group"><label>Contact Number / සම්බන්ධතා අංකය</label><input type="text" id="settingsContactNumber" value="+94 77 123 4567" class="form-input" /></div>
-             <div class="form-group"><label>Email / ඊමේල්</label><input type="email" id="settingsEmail" value="" class="form-input" /></div>
-          <div class="form-group"><label>Store Address / වෙළඳසැල් ලිපිනය</label><input type="text" value="No. 42, Galle Road, Colombo 03" class="form-input" /></div>
-          <div class="form-group"><label>Store URL / වෙළඳසැල් URL</label><input type="text" value="https://bizlink.lk/store/vendor-name" class="form-input" /></div>
-          <div class="form-group"><label>District / දිස්ත්‍රික්කය</label>
+          <h3 class="settings-heading">Business Profile / <span class="si-label">ව්‍යාපාර පැතිකඩ</span></h3>
+             <div class="form-group"><label>Logo URL / <span class="si-label">ලාංඡන URL</span></label><input type="url" id="settingsLogoUrl" value="https://example.com/logo.png" class="form-input" /></div>
+             <div class="form-group"><label>Banner URL / <span class="si-label">බැනර් URL</span></label><input type="url" id="settingsBannerUrl" value="https://example.com/banner.jpg" class="form-input" /></div>
+             <div class="form-group"><label>Business Name / <span class="si-label">ව්‍යාපාර නාමය</span></label><input type="text" id="settingsBusinessName" value="" class="form-input" /></div>
+             <div class="form-group"><label>Owner Name / <span class="si-label">හිමිකරුගේ නම</span></label><input type="text" id="settingsOwnerName" value="" class="form-input" /></div>
+             <div class="form-group"><label>Contact Number / <span class="si-label">සම්බන්ධතා අංකය</span></label><input type="text" id="settingsContactNumber" value="+94 77 123 4567" class="form-input" /></div>
+             <div class="form-group"><label>Email / <span class="si-label">ඊමේල්</span></label><input type="email" id="settingsEmail" value="" class="form-input" /></div>
+          <div class="form-group"><label>Store Address / <span class="si-label">වෙළඳසැල් ලිපිනය</span></label><input type="text" value="No. 42, Galle Road, Colombo 03" class="form-input" /></div>
+          <div class="form-group"><label>Store URL / <span class="si-label">වෙළඳසැල් URL</span></label><input type="text" value="https://bizlink.lk/store/vendor-name" class="form-input" /></div>
+          <div class="form-group"><label>District / <span class="si-label">දිස්ත්‍රික්කය</span></label>
             <select class="form-input"><option>Colombo</option><option>Gampaha</option><option>Kandy</option><option>Galle</option><option>Matara</option><option>Jaffna</option></select>
           </div>
-          <div class="form-group"><label>Business Reg. No. / ව්‍යාපාර ලියාපදිංචි අංකය</label><input type="text" value="BR/2021/001234" class="form-input" /></div>
-          <button class="btn-vendor" style="margin-top:1rem;width:100%">Save Profile / පැතිකඩ සුරකින්න</button>
+          <div class="form-group"><label>Business Reg. No. / <span class="si-label">ව්‍යාපාර ලියාපදිංචි අංකය</span></label><input type="text" value="BR/2021/001234" class="form-input" /></div>
+          <button class="btn-vendor" style="margin-top:1rem;width:100%">Save Profile / <span class="si-label">පැතිකඩ සුරකින්න</span></button>
         </div>
         <div class="glass-card settings-col">
-          <h3 class="settings-heading">Security / ආරක්ෂාව</h3>
-          <div class="form-group"><label>Current Password / වත්මන් මුරපදය</label><input type="password" placeholder="••••••••" class="form-input" /></div>
-          <div class="form-group"><label>New Password / නව මුරපදය</label><input type="password" placeholder="••••••••" class="form-input" /></div>
-          <div class="form-group"><label>Confirm Password / මුරපදය තහවුරු කරන්න</label><input type="password" placeholder="••••••••" class="form-input" /></div>
-          <button class="btn-vendor" style="width:100%">Change Password / මුරපදය වෙනස් කරන්න</button>
+          <h3 class="settings-heading">Security / <span class="si-label">ආරක්ෂාව</span></h3>
+          <div class="form-group"><label>Current Password / <span class="si-label">වත්මන් මුරපදය</span></label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <div class="form-group"><label>New Password / <span class="si-label">නව මුරපදය</span></label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <div class="form-group"><label>Confirm Password / <span class="si-label">මුරපදය තහවුරු කරන්න</span></label><input type="password" placeholder="••••••••" class="form-input" /></div>
+          <button class="btn-vendor" style="width:100%">Change Password / <span class="si-label">මුරපදය වෙනස් කරන්න</span></button>
 
-          <div class="toggle-row" style="margin-top:1.5rem"><span>Two-Factor Authentication / දෙපියවර සත්‍යාපනය</span>
+          <div class="toggle-row" style="margin-top:1.5rem"><span>Two-Factor Authentication / <span class="si-label">දෙපියවර සත්‍යාපනය</span></span>
             <label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label>
           </div>
 
-          <h3 class="settings-heading" style="margin-top:1.5rem">Notifications / දැනුම්දීම්</h3>
-          <div class="toggle-row"><span>New Orders / නව ඇණවුම්</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
-          <div class="toggle-row"><span>Low Stock Alerts / අඩු තොග දැනුම්දීම්</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
-          <div class="toggle-row"><span>Payment Received / ගෙවීම් ලැබුණි</span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
-          <div class="toggle-row"><span>Review Posted / විමර්ශනය පළ විය</span><label class="toggle-sw"><input type="checkbox" /><span class="toggle-track"></span></label></div>
+          <h3 class="settings-heading" style="margin-top:1.5rem">Notifications / <span class="si-label">දැනුම්දීම්</span></h3>
+          <div class="toggle-row"><span>New Orders / <span class="si-label">නව ඇණවුම්</span></span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Low Stock Alerts / <span class="si-label">අඩු තොග දැනුම්දීම්</span></span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Payment Received / <span class="si-label">ගෙවීම් ලැබුණි</span></span><label class="toggle-sw"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><span>Review Posted / <span class="si-label">විමර්ශනය පළ විය</span></span><label class="toggle-sw"><input type="checkbox" /><span class="toggle-track"></span></label></div>
 
-          <h3 class="settings-heading" style="margin-top:1.5rem">Bank Details / බැංකු තොරතුරු</h3>
-          <div class="form-group"><label>Bank Name / බැංකු නාමය</label><input type="text" value="Sampath Bank" class="form-input" /></div>
-          <div class="form-group"><label>Account Holder / ගිණුම් හිමිකරු</label><input type="text" value="BizLink Traders (Pvt) Ltd" class="form-input" /></div>
-          <div class="form-group"><label>Account Number / ගිණුම් අංකය</label><input type="text" value="**** 4892" class="form-input" /></div>
+          <h3 class="settings-heading" style="margin-top:1.5rem">Bank Details / <span class="si-label">බැංකු තොරතුරු</span></h3>
+          <div class="form-group"><label>Bank Name / <span class="si-label">බැංකු නාමය</span></label><input type="text" value="Sampath Bank" class="form-input" /></div>
+          <div class="form-group"><label>Account Holder / <span class="si-label">ගිණුම් හිමිකරු</span></label><input type="text" value="BizLink Traders (Pvt) Ltd" class="form-input" /></div>
+          <div class="form-group"><label>Account Number / <span class="si-label">ගිණුම් අංකය</span></label><input type="text" value="**** 4892" class="form-input" /></div>
         </div>
       </div>
     </section>
@@ -531,48 +531,49 @@
     <section class="page" id="page-support">
       <div class="page-header">
         <div>
-          <div class="section-label">HELP CENTER / උදව් මධ්‍යස්ථානය</div>
-          <h2 class="page-h2">Help & Support / උදව් හා සහාය</h2>
+          <div class="section-label">HELP CENTER / <span class="si-label">උදව් මධ්‍යස්ථානය</span></div>
+          <h2 class="page-h2">Help & Support / <span class="si-label">උදව් හා සහාය</span></h2>
         </div>
       </div>
       <div class="support-grid">
         <div class="glass-card">
-          <div class="support-hdr" onclick="toggleFaq(this)">❓ Frequently Asked Questions / නිතර අසන ප්‍රශ්න <span class="faq-arrow">›</span></div>
+          <div class="support-hdr" onclick="toggleFaq(this)">❓ Frequently Asked Questions / <span class="si-label">නිතර අසන ප්‍රශ්න</span> <span class="faq-arrow">›</span></div>
           <div class="support-body">
-            <div class="faq-item"><strong>How do I add a product? / නිෂ්පාදනයක් එක් කරන්නේ කෙසේද?</strong><p>Go to Products → Add Product. Fill in details and click Save. / Products → Add Product වෙත ගොස් විස්තර පුරවා Save ඔබන්න.</p></div>
-            <div class="faq-item"><strong>How are payouts processed? / ගෙවීම් සකසන්නේ කෙසේද?</strong><p>Payouts are processed every Monday via Bank Transfer or eZ Cash. / සෑම සඳුදාම බැංකු හුවමාරු හෝ eZ Cash මඟින් ගෙවීම් සකස් කෙරේ.</p></div>
-            <div class="faq-item"><strong>What is the platform commission? / වේදිකා කොමිස් අනුපාතය කුමක්ද?</strong><p>8% commission + 5% platform fee on each sale. / එක් විකිණීමකට 8% කොමිස් + 5% වේදිකා ගාස්තුව.</p></div>
+            <div class="faq-item"><strong>How do I add a product? / <span class="si-label">නිෂ්පාදනයක් එක් කරන්නේ කෙසේද?</span></strong><p>Go to Products → Add Product. Fill in details and click Save. / <span class="si-label">Products → Add Product වෙත ගොස් විස්තර පුරවා Save ඔබන්න.</span></p></div>
+            <div class="faq-item"><strong>How are payouts processed? / <span class="si-label">ගෙවීම් සකසන්නේ කෙසේද?</span></strong><p>Payouts are processed every Monday via Bank Transfer or eZ Cash. / <span class="si-label">සෑම සඳුදාම බැංකු හුවමාරු හෝ eZ Cash මඟින් ගෙවීම් සකස් කෙරේ.</span></p></div>
+            <div class="faq-item"><strong>What is the platform commission? / <span class="si-label">වේදිකා කොමිස් අනුපාතය කුමක්ද?</span></strong><p>8% commission + 5% platform fee on each sale. / <span class="si-label">එක් විකිණීමකට 8% කොමිස් + 5% වේදිකා ගාස්තුව.</span></p></div>
           </div>
         </div>
         <div class="glass-card">
-          <div class="support-hdr open-hdr">🎫 Raise a Ticket / ටිකට් එකක් ඉදිරිපත් කරන්න</div>
+          <div class="support-hdr open-hdr">🎫 Raise a Ticket / <span class="si-label">ටිකට් එකක් ඉදිරිපත් කරන්න</span></div>
           <div class="support-body open-body">
-            <div class="form-group"><label>Subject / මාතෘකාව</label><input type="text" placeholder="Issue subject… / ගැටළුවේ මාතෘකාව…" class="form-input" /></div>
-            <div class="form-group"><label>Category / වර්ගය</label><select class="form-input"><option>Payment Issue / ගෙවීම් ගැටලුව</option><option>Order Problem / ඇණවුම් ගැටලුව</option><option>Technical Bug / තාක්ෂණික දෝෂය</option><option>Account Issue / ගිණුම් ගැටලුව</option></select></div>
-            <div class="form-group"><label>Description / විස්තරය</label><textarea class="form-input" rows="4" placeholder="Describe your issue… / ඔබගේ ගැටලුව විස්තර කරන්න…"></textarea></div>
-            <button class="btn-vendor">Submit Ticket / ටිකට් යවන්න</button>
+            <div class="form-group"><label>Subject / <span class="si-label">මාතෘකාව</span></label><input id="ticketSubject" type="text" placeholder="Issue subject… / ගැටළුවේ මාතෘකාව…" class="form-input" /></div>
+            <div class="form-group"><label>Category / <span class="si-label">වර්ගය</span></label><select id="ticketCategory" class="form-input"><option value="Payment Issue">Payment Issue / <span class="si-label">ගෙවීම් ගැටලුව</span></option><option value="Order Problem">Order Problem / <span class="si-label">ඇණවුම් ගැටලුව</span></option><option value="Technical Bug">Technical Bug / <span class="si-label">තාක්ෂණික දෝෂය</span></option><option value="Account Issue">Account Issue / <span class="si-label">ගිණුම් ගැටලුව</span></option></select></div>
+            <div class="form-group"><label>Description / <span class="si-label">විස්තරය</span></label><textarea id="ticketDescription" class="form-input" rows="4" placeholder="Describe your issue… / ඔබගේ ගැටලුව විස්තර කරන්න…"></textarea></div>
+            <div id="ticketFeedback" style="margin-bottom:10px;font-size:0.85rem;display:none;"></div>
+            <button id="ticketSubmitBtn" class="btn-vendor" onclick="submitSupportTicket()">Submit Ticket / <span class="si-label">ටිකට් යවන්න</span></button>
           </div>
         </div>
         <div class="glass-card">
-          <div class="support-hdr open-hdr">💬 Live Chat / සජීවී කතාබහ</div>
+          <div class="support-hdr open-hdr">💬 Live Chat / <span class="si-label">සජීවී කතාබහ</span></div>
           <div class="support-body open-body">
-            <div class="chat-status"><span class="online-dot"></span> Support Online · Avg reply 2 min / සහාය සබැඳි · සාමාන්‍ය පිළිතුරු කාලය මිනි 2</div>
+            <div class="chat-status"><span class="online-dot"></span> Support Online · Avg reply 2 min / <span class="si-label">සහාය සබැඳි · සාමාන්‍ය පිළිතුරු කාලය මිනි 2</span></div>
             <div class="chat-msgs" id="chatMessages">
-              <div class="chat-bubble bot">👋 Hello! How can we help you today? / ආයුබෝවන්! අපි අද ඔබට උදව් කරන්නේ කෙසේද?</div>
+              <div class="chat-bubble bot">👋 Hello! How can we help you today? / <span class="si-label">ආයුබෝවන්! අපි අද ඔබට උදව් කරන්නේ කෙසේද?</span></div>
             </div>
             <div class="chat-input-row">
               <input type="text" id="chatInput" placeholder="Type your message… / ඔබගේ පණිවිඩය ලියන්න…" class="form-input" onkeydown="if(event.key==='Enter') sendChat()" />
-              <button class="btn-vendor btn-sm-pad" onclick="sendChat()">Send / යවන්න</button>
+              <button class="btn-vendor btn-sm-pad" onclick="sendChat()">Send / <span class="si-label">යවන්න</span></button>
             </div>
           </div>
         </div>
         <div class="glass-card">
-          <div class="support-hdr open-hdr">📞 Contact Admin / පරිපාලනය අමතන්න</div>
+          <div class="support-hdr open-hdr">📞 Contact Admin / <span class="si-label">පරිපාලනය අමතන්න</span></div>
           <div class="support-body open-body">
             <div class="contact-row">📧 support@bizlink.lk</div>
             <div class="contact-row">📞 +94 11 234 5678</div>
             <div class="contact-row">📱 WhatsApp: +94 77 987 6543</div>
-            <div class="contact-row">🕘 Mon–Sat · 9am–6pm / සඳුදා–සෙනසුරාදා · පෙ.ව. 9 – ප.ව. 6</div>
+            <div class="contact-row">Mon–Sat · 9am–6pm / <span class="si-label">සඳුදා–සෙනසුරාදා · පෙ.ව. 9 – ප.ව. 6</span></div>
           </div>
         </div>
       </div>
@@ -582,18 +583,18 @@
     <section class="page" id="page-verification">
       <div class="page-header">
         <div>
-          <div class="section-label">TRUST & SAFETY / විශ්වාසය හා ආරක්ෂාව</div>
-          <h2 class="page-h2">Business Verification (KYC) / ව්‍යාපාර සත්‍යාපනය (KYC)</h2>
+          <div class="section-label">TRUST & SAFETY / <span class="si-label">විශ්වාසය හා ආරක්ෂාව</span></div>
+          <h2 class="page-h2">Business Verification (KYC) / <span class="si-label">ව්‍යාපාර සත්‍යාපනය (KYC)</span></h2>
         </div>
       </div>
 
       <div class="glass-card" style="margin-bottom: 1.5rem;">
           <div class="verification-status-banner" id="kycStatusBanner">
               <div class="vs-info">
-                    <h3 id="kycStatusTitle">Verification Required / සත්‍යාපනය අවශ්‍යයි</h3>
-                    <p id="kycStatusDesc">Please upload the mandatory documents to verify your business and unlock all features. / ඔබගේ ව්‍යාපාරය සත්‍යාපනය කර සියලු විශේෂාංග ලබාගැනීමට අවශ්‍ය ලියවිලි උඩුගත කරන්න.</p>
+                    <h3 id="kycStatusTitle">Verification Required / <span class="si-label">සත්‍යාපනය අවශ්‍යයි</span></h3>
+                    <p id="kycStatusDesc">Please upload the mandatory documents to verify your business and unlock all features. / <span class="si-label">ඔබගේ ව්‍යාපාරය සත්‍යාපනය කර සියලු විශේෂාංග ලබාගැනීමට අවශ්‍ය ලියවිලි උඩුගත කරන්න.</span></p>
               </div>
-                  <div class="vs-badge" id="kycStatusBadge">Pending / රැඳී ඇත</div>
+                  <div class="vs-badge" id="kycStatusBadge">Pending / <span class="si-label">රැඳී ඇත</span></div>
           </div>
       </div>
 
@@ -601,12 +602,12 @@
           <!-- Business License -->
           <div class="glass-card doc-card">
               <div class="doc-icon">📋</div>
-              <h3>Business License / ව්‍යාපාර බලපත්‍රය</h3>
-              <p>Upload a clear copy of your business registration certificate. / ව්‍යාපාර ලියාපදිංචි සහතිකයේ පැහැදිලි පිටපතක් උඩුගත කරන්න.</p>
-              <div class="doc-status" id="status-business_license">Not Uploaded / උඩුගත කර නැත</div>
+              <h3>Business License / <span class="si-label">ව්‍යාපාර බලපත්‍රය</span></h3>
+              <p>Upload a clear copy of your business registration certificate. / <span class="si-label">ව්‍යාපාර ලියාපදිංචි සහතිකයේ පැහැදිලි පිටපතක් උඩුගත කරන්න.</span></p>
+              <div class="doc-status" id="status-business_license">Not Uploaded / <span class="si-label">උඩුගත කර නැත</span></div>
               <div class="doc-action">
                   <input type="file" id="file-business_license" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('business_license')">
-                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-business_license').click()">Upload Document / ලියවිල්ල උඩුගත කරන්න</button>
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-business_license').click()">Upload Document / <span class="si-label">ලියවිල්ල උඩුගත කරන්න</span></button>
               </div>
               <div class="rejection-msg hidden" id="reject-business_license"></div>
           </div>
@@ -614,12 +615,12 @@
           <!-- Tax Certificate -->
           <div class="glass-card doc-card">
               <div class="doc-icon">🧾</div>
-              <h3>Tax Certificate / බදු සහතිකය</h3>
-              <p>Upload your TIN (Tax Identification Number) registration document. / ඔබගේ TIN ලියාපදිංචි ලියවිල්ල උඩුගත කරන්න.</p>
-              <div class="doc-status" id="status-tax_certificate">Not Uploaded / උඩුගත කර නැත</div>
+              <h3>Tax Certificate / <span class="si-label">බදු සහතිකය</span></h3>
+              <p>Upload your TIN (Tax Identification Number) registration document. / <span class="si-label">ඔබගේ TIN ලියාපදිංචි ලියවිල්ල උඩුගත කරන්න.</span></p>
+              <div class="doc-status" id="status-tax_certificate">Not Uploaded / <span class="si-label">උඩුගත කර නැත</span></div>
               <div class="doc-action">
                   <input type="file" id="file-tax_certificate" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('tax_certificate')">
-                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-tax_certificate').click()">Upload Document / ලියවිල්ල උඩුගත කරන්න</button>
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-tax_certificate').click()">Upload Document / <span class="si-label">ලියවිල්ල උඩුගත කරන්න</span></button>
               </div>
               <div class="rejection-msg hidden" id="reject-tax_certificate"></div>
           </div>
@@ -627,24 +628,24 @@
           <!-- Identity Proof -->
           <div class="glass-card doc-card">
               <div class="doc-icon">🆔</div>
-              <h3>Identity Proof / හැඳුනුම් ලියවිල්ල</h3>
-              <p>Upload a copy of the business owner's NIC or Passport. / ව්‍යාපාර හිමිකරුගේ ජාතික හැඳුනුම්පත හෝ ගමන් බලපත්‍රයේ පිටපතක් උඩුගත කරන්න.</p>
-              <div class="doc-status" id="status-identity_proof">Not Uploaded / උඩුගත කර නැත</div>
+              <h3>Identity Proof / <span class="si-label">හැඳුනුම් ලියවිල්ල</span></h3>
+              <p>Upload a copy of the business owner's NIC or Passport. / <span class="si-label">ව්‍යාපාර හිමිකරුගේ ජාතික හැඳුනුම්පත හෝ ගමන් බලපත්‍රයේ පිටපතක් උඩුගත කරන්න.</span></p>
+              <div class="doc-status" id="status-identity_proof">Not Uploaded / <span class="si-label">උඩුගත කර නැත</span></div>
               <div class="doc-action">
                   <input type="file" id="file-identity_proof" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDoc('identity_proof')">
-                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-identity_proof').click()">Upload Document / ලියවිල්ල උඩුගත කරන්න</button>
+                  <button class="btn-vendor btn-sm" onclick="document.getElementById('file-identity_proof').click()">Upload Document / <span class="si-label">ලියවිල්ල උඩුගත කරන්න</span></button>
               </div>
               <div class="rejection-msg hidden" id="reject-identity_proof"></div>
           </div>
       </div>
 
       <div class="glass-card" style="margin-top: 1.5rem;">
-            <div class="card-header"><span class="card-title">Verification Guidelines / සත්‍යාපන මාර්ගෝපදේශ</span></div>
+            <div class="card-header"><span class="card-title">Verification Guidelines / <span class="si-label">සත්‍යාපන මාර්ගෝපදේශ</span></span></div>
           <ul class="guidelines-list">
-              <li>Documents must be clearly legible and not expired. / ලියවිලි පැහැදිලිව කියවිය හැකිව සහ කල් ඉකුත් වී නොතිබිය යුතුය.</li>
-              <li>Files must be in PDF, JPG, or PNG format. / ගොනු PDF, JPG, හෝ PNG ආකාරයේ විය යුතුය.</li>
-              <li>Maximum file size is 10MB per document. / එක් ලියවිල්ලකට උපරිම ප්‍රමාණය 10MB වේ.</li>
-              <li>Verification usually takes 1-3 business days. / සත්‍යාපනය සාමාන්‍යයෙන් වැඩකරන දින 1-3 ක් ගනී.</li>
+              <li>Documents must be clearly legible and not expired. / <span class="si-label">ලියවිලි පැහැදිලිව කියවිය හැකිව සහ කල් ඉකුත් වී නොතිබිය යුතුය.</span></li>
+              <li>Files must be in PDF, JPG, or PNG format. / <span class="si-label">ගොනු PDF, JPG, හෝ PNG ආකාරයේ විය යුතුය.</span></li>
+              <li>Maximum file size is 10MB per document. / <span class="si-label">එක් ලියවිල්ලකට උපරිම ප්‍රමාණය 10MB වේ.</span></li>
+              <li>Verification usually takes 1-3 business days. / <span class="si-label">සත්‍යාපනය සාමාන්‍යයෙන් වැඩකරන දින 1-3 ක් ගනී.</span></li>
           </ul>
       </div>
     </section>
@@ -656,7 +657,7 @@
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-hdr">
-      <span id="modalTitle">Modal</span>
+      <span id="modalTitle">Modal / <span class="si-label">මොඩලය</span></span>
       <button onclick="closeModal()" class="modal-close">✕</button>
     </div>
     <div id="modalContent"></div>

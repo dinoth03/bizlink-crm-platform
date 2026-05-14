@@ -81,10 +81,22 @@ ul { list-style: none; }
 /* Sinhala Language Labels */
 .sinhala-label {
   font-family: 'Noto Sans Sinhala', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.58rem;
   color: var(--text-secondary);
   display: block;
   margin-top: 2px;
+  opacity: 0.9;
+}
+.si-label {
+  font-family: 'Noto Sans Sinhala', sans-serif;
+  font-size: 0.58rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  font-weight: 400;
+  margin-left: 8px;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
 }
 
 /* Scroll */
