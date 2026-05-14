@@ -108,32 +108,40 @@ const CHAT_ALL_ROLES = ['customer', 'vendor', 'admin', 'bot'];
 function mergeVendorContacts(vendors = []) {
   if (!Array.isArray(vendors) || vendors.length === 0) return;
 
+  // Map existing contacts by userId and also by name for static matching
   const byUserId = new Map();
+  const byName = new Map();
+  
   CONTACTS.forEach((contact, index) => {
     const uid = Number(contact?.userId || 0);
     if (uid > 0) {
       byUserId.set(uid, index);
     }
+    if (contact.name) {
+      byName.set(contact.name.toLowerCase(), index);
+    }
   });
 
   vendors.forEach((vendor) => {
     const uid = Number(vendor?.userId || 0);
-    if (uid <= 0) return;
-
-    if (byUserId.has(uid)) {
+    const nameKey = String(vendor.name || '').toLowerCase();
+    
+    if (uid > 0 && byUserId.has(uid)) {
       const idx = byUserId.get(uid);
-      const existing = CONTACTS[idx];
-      CONTACTS[idx] = {
-        ...existing,
-        ...vendor,
-        conversationId: existing.conversationId || vendor.conversationId || null,
-        hasConversation: Boolean(existing.hasConversation || vendor.hasConversation),
-      };
+      CONTACTS[idx] = { ...CONTACTS[idx], ...vendor };
       return;
+    }
+    
+    // If name matches a static contact, replace it with the real DB vendor
+    if (byName.has(nameKey)) {
+      const idx = byName.get(nameKey);
+      if (!CONTACTS[idx].userId) { // Only replace if it's a static contact (no userId)
+         CONTACTS[idx] = { ...vendor };
+         return;
+      }
     }
 
     CONTACTS.push(vendor);
-    byUserId.set(uid, CONTACTS.length - 1);
   });
 }
 
@@ -1336,7 +1344,7 @@ function renderContactGrid(contacts) {
   const grid = document.getElementById('contactGrid');
   if (!grid) return;
   if (contacts.length === 0) {
-    grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--t3);font-size:.82rem;">No vendor or admin contacts found</div>`;
+    grid.innerHTML = `<div style="padding:30px;text-align:center;color:var(--t3);font-size:.82rem;">No contacts found in this category.</div>`;
     return;
   }
   grid.innerHTML = contacts.map(c => `
@@ -1344,8 +1352,12 @@ function renderContactGrid(contacts) {
       <div class="citem-avatar" style="background:${c.color}">${c.initials}</div>
       <div class="citem-info">
         <strong>${c.name}</strong>
-        <span>${c.company !== '—' ? c.company : c.email}</span>
-        <small style="display:block;color:var(--t3);margin-top:3px;line-height:1.35;">${c.province !== '—' ? c.province : 'Province unavailable'} · ${c.phone !== '—' ? c.phone : c.email}</small>
+        <span>${c.company && c.company !== '—' ? c.company : c.email}</span>
+        <small style="display:block;color:var(--t3);margin-top:3px;line-height:1.35;">
+          ${c.province && c.province !== '—' ? c.province : ''} 
+          ${c.phone && c.phone !== '—' ? ` · ${c.phone}` : ''}
+          ${(!c.province || c.province === '—') && (!c.phone || c.phone === '—') ? 'Contact info unavailable' : ''}
+        </small>
       </div>
       <span class="citem-role role-${c.role}">${capitalize(c.role)}</span>
     </div>`).join('');
@@ -1355,6 +1367,10 @@ function renderContactGrid(contacts) {
 async function openNewChat(roleFilter = null) {
   document.getElementById('modalBackdrop').classList.remove('hidden');
   document.getElementById('contactSearch').value = '';
+
+  // Show a loading state in the grid
+  const grid = document.getElementById('contactGrid');
+  if (grid) grid.innerHTML = `<div style="padding:40px;text-align:center;color:var(--t3);"><div class="spinner"></div><p style="margin-top:10px;">Loading directory...</p></div>`;
 
   await ensureVendorDirectoryLoaded('');
 
@@ -1378,13 +1394,18 @@ function startNewChat(contactId) {
     return;
   }
 
-  if (!ME_USER_ID || !contact || !contact.userId) {
+  if (isGuestMode || !ME_USER_ID || !contact || !contact.userId) {
     closeNewChat();
+    
+    if (isGuestMode) {
+      showToast('Please sign in to start a real conversation with vendors.', 'info');
+    }
+
     const fallbackContact = getContact(contactId);
     const newConv = {
       id: 'conv_' + Date.now(), contactId,
       pinned:false, muted:false, unread:0,
-      messages:[{ id:'m1', type:'system', text:`Conversation with ${fallbackContact.name} started`, time:getCurrentTime(), date:'Today' }],
+      messages:[{ id:'m1', type:'system', text:`Conversation with ${fallbackContact.name} started (Local Mode)`, time:getCurrentTime(), date:'Today' }],
       quickReplies:['Hello! How can I help you?','Thank you for contacting us!'],
     };
     CONVERSATIONS.unshift(newConv);

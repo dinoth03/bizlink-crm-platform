@@ -330,6 +330,15 @@ button { cursor: pointer; font-family: var(--font-body); }
   box-shadow: 0 4px 18px var(--customer-glow);
 }
 
+.admin-only-note {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  margin-top: 10px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
 /*FORM FIELDS*/
 .auth-form { display: flex; flex-direction: column; gap: 18px; }
 .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -620,6 +629,51 @@ button { cursor: pointer; font-family: var(--font-body); }
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
+.login-action-row {
+  display: flex;
+  gap: 12px;
+}
+.login-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text-1);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.25s;
+}
+.login-action-btn:hover:not(:disabled) {
+  border-color: var(--border-hov);
+  background: var(--card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.login-action-notify {
+  color: var(--customer-color);
+}
+.login-action-admin {
+  color: #7ea8ff;
+}
+.login-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.login-action-note {
+  font-size: 0.76rem;
+  color: var(--text-3);
+  margin-top: -4px;
+  text-align: center;
+}
+
 /* ---- Switch Hint ---- */
 .switch-hint { font-size: 0.84rem; color: var(--text-3); text-align: center; }
 .switch-hint a { color: var(--vendor-color); font-weight: 600; cursor: pointer; }
@@ -842,6 +896,7 @@ button { cursor: pointer; font-family: var(--font-body); }
   .checkbox-multi-group.two-col { grid-template-columns: 1fr; }
   .role-cards-row { flex-direction: column; }
   .social-auth-row { flex-direction: column; }
+  .login-action-row { flex-direction: column; }
   .form-panel { padding: 24px 16px; }
   .tab-switcher { max-width: 100%; }
   .step-line { min-width: 18px; }

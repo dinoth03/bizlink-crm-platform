@@ -3,9 +3,8 @@ require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
 
-requireAuth(['customer', 'vendor', 'admin']);
-
-$currentUser = getCurrentUser();
+// requireAuth(['customer', 'vendor', 'admin']); // Allow guests to view the directory
+$currentUser = getCurrentUser(); // This might return null for guests
 $currentUserId = (int)($currentUser['user_id'] ?? 0);
 $search = isset($_GET['search']) ? sanitizeString((string)$_GET['search'], 120) : '';
 

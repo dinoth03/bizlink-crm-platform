@@ -215,7 +215,7 @@ function onPageActivate(page) {
   if (page === 'analytics')  { initAnalyticsCharts(); renderBestSellers(); }
   if (page === 'payments')   { renderTransactions(); }
   if (page === 'reviews')    { renderReviews(); }
-  if (page === 'promotions') { startCountdown(); }
+  if (page === 'promotions') { startCountdown(); loadVendorCoupons(); }
   if (page === 'verification') { loadVerificationStatus(); }
 }
 
@@ -883,7 +883,7 @@ function updateVendorIdentity(activeVendor) {
     searchInput.readOnly = true;
   }
   if (supportGreeting) {
-    supportGreeting.textContent = `👋 Hello ${firstName}! How can we help you today?`;
+    supportGreeting.textContent = `👋 Hello ${firstName}! How can we help you today? / ආයුබෝවන් ${firstName}! අපි අද ඔබට උදව් කරන්නේ කෙසේද?`;
   }
 }
 
@@ -891,9 +891,9 @@ async function loadVendorDashboardData() {
   const recentOrdersBody = document.getElementById('recentOrdersBody');
   const ordersTableBody = document.getElementById('ordersTableBody');
   const productsGrid = document.getElementById('productsGrid');
-  renderWidgetState(recentOrdersBody, 'Loading recent orders...', 'loading');
-  renderWidgetState(ordersTableBody, 'Loading order list...', 'loading');
-  renderWidgetState(productsGrid, 'Loading products...', 'loading');
+  renderWidgetState(recentOrdersBody, 'Loading recent orders... / මෑත ඇණවුම් පූරණය වෙමින්...', 'loading');
+  renderWidgetState(ordersTableBody, 'Loading order list... / ඇණවුම් ලැයිස්තුව පූරණය වෙමින්...', 'loading');
+  renderWidgetState(productsGrid, 'Loading products... / නිෂ්පාදන පූරණය වෙමින්...', 'loading');
 
   try {
     if (typeof authMe !== 'function') {
@@ -970,7 +970,7 @@ function renderRecentOrders() {
   if (!tbody || tbody.children.length) return;
 
   if (!dashboardData.orders.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No recent orders available.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No recent orders available. / මෑත ඇණවුම් නොමැත.</td></tr>';
     return;
   }
 
@@ -1298,7 +1298,7 @@ function renderReviews() {
           </div>
         </div>
         <div class="review-text">"${r.text}"</div>
-        <button class="review-reply">💬 Reply to Review</button>
+        <button class="review-reply">💬 Reply to Review / විමර්ශනයට පිළිතුරු දෙන්න</button>
       </div>
     </div>
   `).join('');
@@ -1310,7 +1310,7 @@ function renderReviews() {
   const ratingBig = document.querySelector('#page-reviews .rating-big');
   const ratingCount = document.querySelector('#page-reviews .rating-count');
   if (ratingBig) ratingBig.textContent = averageRating;
-  if (ratingCount) ratingCount.textContent = `Based on ${totalReviews.toLocaleString()} reviews`;
+  if (ratingCount) ratingCount.textContent = `Based on ${totalReviews.toLocaleString()} reviews / විමර්ශන ${totalReviews.toLocaleString()}ක් මත පදනම්ව`;
 }
 
 
@@ -1318,10 +1318,10 @@ function renderReviews() {
 
 const MODALS = {
   addProduct: {
-    title: '📦 Add New Product',
+    title: '📦 Add New Product / නව නිෂ්පාදනය එක් කරන්න',
     html: `
-      <div class="form-group"><label>Product Name</label><input id="vendorProductName" type="text" placeholder="e.g. Ceylon Green Tea 250g" class="form-input" /></div>
-      <div class="form-group"><label>Category</label>
+      <div class="form-group"><label>Product Name / නිෂ්පාදන නාමය</label><input id="vendorProductName" type="text" placeholder="e.g. Ceylon Green Tea 250g / උදා. සීලෝන් හරිත තේ 250g" class="form-input" /></div>
+      <div class="form-group"><label>Category / කාණ්ඩය</label>
         <select id="vendorProductCategory" class="form-input">
           <option value="grocery">Grocery</option>
           <option value="fashion">Fashion</option>
@@ -1336,44 +1336,43 @@ const MODALS = {
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Price (Rs.)</label><input id="vendorProductPrice" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" /></div>
-        <div class="form-group"><label>Discount (%)</label><input id="vendorProductDiscount" type="number" min="0" max="100" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>Price (Rs.) / මිල</label><input id="vendorProductPrice" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" /></div>
+        <div class="form-group"><label>Discount (%) / වට්ටම (%)</label><input id="vendorProductDiscount" type="number" min="0" max="100" placeholder="0" class="form-input" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Stock Quantity</label><input id="vendorProductStock" type="number" min="0" placeholder="0" class="form-input" /></div>
-        <div class="form-group"><label>SKU Code</label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009" class="form-input" /></div>
+        <div class="form-group"><label>Stock Quantity / තොග ප්‍රමාණය</label><input id="vendorProductStock" type="number" min="0" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>SKU Code / SKU කේතය</label><input id="vendorProductSku" type="text" placeholder="e.g. TEA-009 / උදා. TEA-009" class="form-input" /></div>
       </div>
-      <div class="form-group"><label>Product Description</label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description…"></textarea></div>
+      <div class="form-group"><label>Product Description / නිෂ්පාදන විස්තරය</label><textarea id="vendorProductDescription" class="form-input" rows="3" placeholder="Product description… / නිෂ්පාදන විස්තරය…"></textarea></div>
       <div class="form-group">
-        <label>Product Image from Computer</label>
+        <label>Product Image from Computer / පරිගණකයෙන් රූපයක්</label>
         <input id="vendorProductImageFile" type="file" accept="image/*" class="form-input" />
-        <small style="display:block;color:var(--text-muted);margin-top:6px;">Choose an image from your computer. You can also paste an image URL below as a fallback.</small>
+        <small style="display:block;color:var(--text-muted);margin-top:6px;">Choose an image from your computer. You can also paste an image URL below as a fallback. / ඔබගේ පරිගණකයෙන් රූපයක් තෝරන්න. අවශ්‍ය නම් පහත URL එකද භාවිත කළ හැක.</small>
       </div>
-      <div class="form-group"><label>Product Image URL</label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
-      <div class="form-group"><label>Status</label><select id="vendorProductStatus" class="form-input"><option value="active">Active</option><option value="draft">Draft</option></select></div>
+      <div class="form-group"><label>Product Image URL / රූප URL</label><input id="vendorProductImage" type="url" placeholder="https://…" class="form-input" /></div>
+      <div class="form-group"><label>Status / තත්ත්වය</label><select id="vendorProductStatus" class="form-input"><option value="active">Active / සක්‍රීය</option><option value="draft">Draft / කෙටුම්පත</option></select></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-        <button class="btn-outline-vendor" onclick="closeModal()">Cancel</button>
-        <button class="btn-vendor" id="vendorSaveProductBtn" onclick="submitVendorProduct(event)">Save Product</button>
+        <button class="btn-outline-vendor" onclick="closeModal()">Cancel / අවලංගු</button>
+        <button class="btn-vendor" id="vendorSaveProductBtn" onclick="submitVendorProduct(event)">Save Product / නිෂ්පාදනය සුරකින්න</button>
       </div>
     `
   },
   addCoupon: {
-    title: '🎟 Create Coupon Code',
+    title: '🎟 Create Coupon Code / කූපනයක් සාදන්න',
     html: `
-      <div class="form-group"><label>Coupon Code</label><input type="text" placeholder="e.g. POSON20" class="form-input" style="text-transform:uppercase;letter-spacing:3px;font-family:'Playfair Display',serif" /></div>
+      <div class="form-group"><label>Coupon Code / කූපන කේතය</label><input type="text" id="vendorCouponCode" placeholder="e.g. POSON20 / උදා. POSON20" class="form-input" style="text-transform:uppercase;letter-spacing:3px;font-family:'Playfair Display',serif" /></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Discount Type</label><select class="form-input"><option>Percentage (%)</option><option>Flat Amount (Rs.)</option></select></div>
-        <div class="form-group"><label>Discount Value</label><input type="number" placeholder="0" class="form-input" /></div>
+        <div class="form-group"><label>Discount Type / වට්ටම් වර්ගය</label><select id="vendorCouponType" class="form-input"><option value="percentage">Percentage (%) / ප්‍රතිශතය</option><option value="fixed">Flat Amount (Rs.) / ස්ථිර මුදල</option></select></div>
+        <div class="form-group"><label>Discount Value / වට්ටම් අගය</label><input type="number" id="vendorCouponValue" placeholder="0" class="form-input" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Start Date</label><input type="date" class="form-input" /></div>
-        <div class="form-group"><label>End Date</label><input type="date" class="form-input" /></div>
+        <div class="form-group"><label>Start Date / ආරම්භක දිනය</label><input type="date" id="vendorCouponStartDate" class="form-input" /></div>
+        <div class="form-group"><label>End Date / අවසන් දිනය</label><input type="date" id="vendorCouponEndDate" class="form-input" /></div>
       </div>
-      <div class="form-group"><label>Apply To</label><select class="form-input"><option>All Products</option><option>Selected Products</option><option>Selected Category</option></select></div>
-      <div class="form-group"><label>Usage Limit</label><input type="number" placeholder="Unlimited" class="form-input" /></div>
+      <div class="form-group"><label>Usage Limit (leave blank for unlimited) / භාවිත සීමාව (නොමැති නම් හිස් තබන්න)</label><input type="number" id="vendorCouponMaxUses" placeholder="Unlimited / සීමාවක් නැත" class="form-input" /></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-        <button class="btn-outline-vendor" onclick="closeModal()">Cancel</button>
-        <button class="btn-vendor" onclick="closeModal()">Create Coupon</button>
+        <button class="btn-outline-vendor" type="button" onclick="closeModal()">Cancel / අවලංගු</button>
+        <button class="btn-vendor" id="vendorSaveCouponBtn" type="button" onclick="submitVendorCoupon(event)">Create Coupon / කූපනය සාදන්න</button>
       </div>
     `
   }
@@ -1594,32 +1593,24 @@ async function loadVendorProducts(page = 1) {
     const searchQuery = document.getElementById('productSearchInput')?.value || '';
     currentProductFilter = searchQuery;
 
-    const params = new URLSearchParams({
+    if (typeof getProducts !== 'function') {
+      throw new Error('Product API helper is not available.');
+    }
+
+    const data = await getProducts({
       page: page,
       limit: 20,
-      search: searchQuery
+      search: searchQuery,
+      own_only: 1
     });
 
-    const response = await fetch(`../api/vendor_get_products.php?${params}`, {
-      method: 'GET',
-      credentials: 'include'
-    });
+    const products = Array.isArray(data?.products) ? data.products : [];
+    const pagination = data?.pagination || { page, limit: 20, total: products.length, pages: products.length ? 1 : 0 };
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (!data.success) {
-      showToast(data.message || 'Failed to load products', 'error');
-      return;
-    }
-
-    displayVendorProducts(data.data.products, data.data.pagination);
+    displayVendorProducts(products, pagination);
   } catch (error) {
     console.error('Error loading products:', error);
-    showToast('Error loading products', 'error');
+    displayVendorProducts([], { page: currentProductPage, limit: 20, total: 0, pages: 0 });
   }
 }
 
@@ -1630,7 +1621,17 @@ function displayVendorProducts(products, pagination) {
   if (!tbody) return;
 
   if (products.length === 0) {
-    tbody.innerHTML = `<tr style="text-align:center;"><td colspan="7" style="padding:2rem;color:var(--text-muted);">No products yet. <button class="btn-vendor" onclick="showModal('addProduct')" style="background:none;border:none;color:var(--vendor-color);text-decoration:underline;cursor:pointer;">Add one now</button></td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="padding:2.5rem;">
+          <div class="product-empty-state">
+            <div class="product-empty-icon">📦</div>
+            <div class="product-empty-title">No products yet</div>
+            <div class="product-empty-text">Add your first product to start showing it here.</div>
+            <button class="btn-vendor product-empty-action" type="button" onclick="showModal('addProduct')">+ Add Product</button>
+          </div>
+        </td>
+      </tr>`;
     countEl.textContent = '0 products';
     return;
   }
@@ -1644,8 +1645,8 @@ function displayVendorProducts(products, pagination) {
       <td><span class="badge ${p.is_active ? 'b-delivered' : 'b-pending'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
       <td>${new Date(p.created_at).toLocaleDateString()}</td>
       <td>
-        <button class="action-btn" onclick="editProduct(${p.product_id})">Edit</button>
-        <button class="action-btn" style="color:#ff6b6b;" onclick="deleteProduct(${p.product_id}, '${escapeHtml(p.product_name)}')">Delete</button>
+        <button class="action-btn" onclick="editProduct(${p.product_id})">Edit / සංස්කරණය</button>
+        <button class="action-btn" style="color:#ff6b6b;" onclick="deleteProduct(${p.product_id}, '${escapeHtml(p.product_name)}')">Delete / මකන්න</button>
       </td>
     </tr>
   `).join('');
@@ -1789,6 +1790,159 @@ async function deleteProduct(productId, productName) {
   }
 }
 
+/* ============ PROMOTIONS/COUPONS ============ */
+let vendorCouponsCache = [];
+let currentCouponPage = 1;
+
+async function submitVendorCoupon(event) {
+  if (event && event.preventDefault) event.preventDefault();
+
+  const saveBtn = document.getElementById('vendorSaveCouponBtn');
+  const payload = {
+    coupon_code: String(document.getElementById('vendorCouponCode')?.value || '').trim().toUpperCase(),
+    discount_type: String(document.getElementById('vendorCouponType')?.value || 'percentage').trim(),
+    discount_value: Number(document.getElementById('vendorCouponValue')?.value || 0),
+    valid_from: String(document.getElementById('vendorCouponStartDate')?.value || '').trim(),
+    valid_until: String(document.getElementById('vendorCouponEndDate')?.value || '').trim(),
+    max_uses: String(document.getElementById('vendorCouponMaxUses')?.value || '').trim()
+  };
+
+  if (!payload.coupon_code || !payload.discount_value || !payload.valid_from || !payload.valid_until) {
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }
+
+  if (payload.discount_type === 'percentage' && (payload.discount_value <= 0 || payload.discount_value > 100)) {
+    showToast('Percentage discount must be between 0-100', 'error');
+    return;
+  }
+
+  if (new Date(payload.valid_from) >= new Date(payload.valid_until)) {
+    showToast('End date must be after start date', 'error');
+    return;
+  }
+
+  if (payload.max_uses && (isNaN(payload.max_uses) || payload.max_uses < 1)) {
+    showToast('Usage limit must be a positive number', 'error');
+    return;
+  }
+
+  // Convert empty max_uses to null
+  if (!payload.max_uses) {
+    delete payload.max_uses;
+  } else {
+    payload.max_uses = parseInt(payload.max_uses);
+  }
+
+  if (saveBtn) saveBtn.disabled = true;
+  try {
+    const response = await apiRequest('create_coupon.php', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }, true);
+
+    if (response && response.success) {
+      showToast('Coupon created successfully!', 'success');
+      closeModal();
+      await loadVendorCoupons();
+    } else {
+      showToast(response?.error?.message || 'Failed to create coupon', 'error');
+    }
+  } catch (error) {
+    console.error('Error creating coupon:', error);
+    showToast('Error creating coupon', 'error');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+async function loadVendorCoupons() {
+  try {
+    const response = await apiRequest('get_coupons.php?page=1&per_page=100', {
+      method: 'GET'
+    }, true);
+
+    if (response && response.success && response.data && response.data.coupons) {
+      vendorCouponsCache = response.data.coupons;
+      renderCoupons();
+    } else {
+      console.warn('Failed to load coupons:', response);
+      vendorCouponsCache = [];
+      renderCoupons();
+    }
+  } catch (error) {
+    console.error('Error loading coupons:', error);
+    vendorCouponsCache = [];
+    renderCoupons();
+  }
+}
+
+function renderCoupons() {
+  const promosGrid = document.querySelector('.promos-grid');
+  if (!promosGrid) return;
+
+  // Build HTML for existing coupons
+  let html = '';
+  for (const coupon of vendorCouponsCache) {
+    const discountLabel = coupon.discount_type === 'percentage' 
+      ? `${coupon.discount_value}% off` 
+      : `Rs. ${coupon.discount_value} off`;
+    const expiryDate = new Date(coupon.valid_until).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const isExpired = coupon.is_expired;
+    const badgeClass = isExpired ? '' : 'promo-active';
+    const badgeText = isExpired ? 'EXPIRED ⏰' : 'ACTIVE ✨';
+
+    html += `
+      <div class="promo-card ${badgeClass}">
+        <div class="promo-badge-tag">${badgeText}</div>
+        <div class="promo-code">${coupon.coupon_code}</div>
+        <div class="promo-detail">${discountLabel} · Expires ${expiryDate}</div>
+        <div class="promo-used">Used: ${coupon.current_uses} times</div>
+        <div class="promo-actions">
+          <button class="btn-sm-vendor" onclick="editVendorCoupon(${coupon.coupon_id})">Edit / සංස්කරණය</button>
+          <button class="btn-sm-danger" onclick="deleteVendorCoupon(${coupon.coupon_id})">Delete / මකන්න</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Add the "Create New Promo" button
+  html += `
+    <div class="promo-card promo-add" onclick="showModal('addCoupon')">
+      <div class="promo-add-icon">+</div>
+      <div>Create New Promo</div>
+    </div>
+  `;
+
+  promosGrid.innerHTML = html;
+}
+
+async function deleteVendorCoupon(couponId) {
+  if (!confirm('Are you sure you want to delete this coupon?')) return;
+
+  try {
+    const response = await apiRequest('delete_coupon.php', {
+      method: 'POST',
+      body: JSON.stringify({ coupon_id: couponId })
+    }, true);
+
+    if (response && response.success) {
+      showToast('Coupon deleted successfully', 'success');
+      await loadVendorCoupons();
+    } else {
+      showToast(response?.error?.message || 'Failed to delete coupon', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting coupon:', error);
+    showToast('Error deleting coupon', 'error');
+  }
+}
+
+async function editVendorCoupon(couponId) {
+  // TODO: Implement coupon editing
+  showToast('Coupon editing coming soon', 'info');
+}
+
 /* ============ ORDER MANAGEMENT ============ */
 let vendorOrdersCache = [];
 let currentOrderFilter = 'all';
@@ -1865,7 +2019,7 @@ function displayVendorOrders(orders) {
         <td><span class="badge ${statusColor}">${statusLabel}</span></td>
         <td>${new Date(o.order_date).toLocaleDateString()}</td>
         <td>
-          <button class="action-btn" onclick="showOrderDetails(${o.order_id})">View</button>
+          <button class="action-btn" onclick="showOrderDetails(${o.order_id})">View / බලන්න</button>
           ${o.status !== 'delivered' && o.status !== 'cancelled' ? `<button class="action-btn" onclick="updateOrderStatusModal(${o.order_id}, '${o.status}')">Update</button>` : ''}
         </td>
       </tr>

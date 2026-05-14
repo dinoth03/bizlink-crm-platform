@@ -56,6 +56,7 @@ if (!empty($_FILES['product_image']) && is_array($_FILES['product_image'])) {
         $originalName = (string)($uploadedFile['name'] ?? 'product-image');
         $fileSize = (int)($uploadedFile['size'] ?? 0);
         $fileType = (string)($uploadedFile['type'] ?? '');
+        $originalExtension = strtolower((string)pathinfo($originalName, PATHINFO_EXTENSION));
 
         if ($fileSize > 5 * 1024 * 1024) {
             apiError('VALIDATION_ERROR', 'Product image must be 5MB or smaller.', 422, [
@@ -64,6 +65,7 @@ if (!empty($_FILES['product_image']) && is_array($_FILES['product_image'])) {
         }
 
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $detectedMime = null;
         if (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -76,6 +78,11 @@ if (!empty($_FILES['product_image']) && is_array($_FILES['product_image'])) {
         if (!in_array($mimeType, $allowedMimeTypes, true)) {
             apiError('VALIDATION_ERROR', 'Please upload a JPG, PNG, GIF, or WEBP image.', 422, [
                 ['field' => 'product_image', 'message' => 'Unsupported image type.']
+            ]);
+        }
+        if (!in_array($originalExtension, $allowedExtensions, true)) {
+            apiError('VALIDATION_ERROR', 'File extension is not allowed.', 422, [
+                ['field' => 'product_image', 'message' => 'Only .jpg, .jpeg, .png, .gif, .webp files are allowed.']
             ]);
         }
 
@@ -107,6 +114,15 @@ if (!empty($_FILES['product_image']) && is_array($_FILES['product_image'])) {
 
 if ($imageUrl !== '' && !preg_match('#^(https?://|\.\./|/|\./)#i', $imageUrl)) {
     $imageUrl = '../' . ltrim($imageUrl, '/');
+}
+
+if ($imageUrl !== '') {
+    $dangerousPath = preg_match('/\.(php[0-9]?|phtml|phar|exe|bat|cmd|sh)(\?|$)/i', $imageUrl) === 1;
+    if ($dangerousPath) {
+        apiError('VALIDATION_ERROR', 'Image path contains a forbidden file type.', 422, [
+            ['field' => 'primary_image_url', 'message' => 'Executable/script file types are not allowed.']
+        ]);
+    }
 }
 
 $errors = [];

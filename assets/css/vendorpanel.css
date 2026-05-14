@@ -32,13 +32,13 @@
   --font-display:   'Playfair Display', serif;
   --font-body:      'DM Sans', sans-serif;
 
-  --sidebar-w:      248px;
+  --sidebar-w:      clamp(260px, 22vw, 300px);
   --topbar-h:       64px;
 }
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 20px; scroll-behavior: smooth; overflow: hidden; }
+html { font-size: 18px; scroll-behavior: smooth; overflow: hidden; }
 body {
   font-family: var(--font-body);
   background: var(--bg-dark);
@@ -78,6 +78,15 @@ ul { list-style: none; }
   margin-bottom: 6px;
 }
 
+/* Sinhala Language Labels */
+.sinhala-label {
+  font-family: 'Noto Sans Sinhala', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 2px;
+}
+
 /* Scroll */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -112,8 +121,10 @@ ul { list-style: none; }
 .sidebar-logo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 22px 20px 18px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  padding: 22px 18px 18px;
   border-bottom: 1px solid var(--border);
 }
 .logo {
@@ -140,6 +151,8 @@ ul { list-style: none; }
   padding: 3px 10px;
   border-radius: 30px;
   box-shadow: 0 4px 14px rgba(80,200,120,0.35);
+  max-width: 100%;
+  line-height: 1.25;
 }
 
 /* Nav */
@@ -150,9 +163,9 @@ ul { list-style: none; }
 }
 .nav-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 10px 20px;
+  padding: 11px 18px;
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
@@ -192,8 +205,14 @@ ul { list-style: none; }
   font-size: 1.05rem;
   transition: transform 0.25s ease;
   flex-shrink: 0;
+  margin-top: 1px;
 }
-.nav-label { white-space: nowrap; }
+.nav-label {
+  white-space: normal;
+  line-height: 1.2;
+  min-width: 0;
+  flex: 1;
+}
 .nav-badge {
   margin-left: auto;
   background: var(--vendor-gradient);
@@ -232,6 +251,7 @@ ul { list-style: none; }
 }
 .profile-name { font-size: 0.82rem; font-weight: 600; }
 .profile-role { font-size: 0.7rem; color: var(--vendor-color); }
+.profile-info { min-width: 0; }
 
 /* MAIN CONTENT */
 .main-content {
@@ -260,6 +280,12 @@ ul { list-style: none; }
   z-index: 100;
 }
 .topbar-left { display: flex; align-items: center; gap: 16px; }
+.page-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Hamburger — same style as home.css */
 .menu-toggle {
   display: none;
@@ -284,7 +310,7 @@ ul { list-style: none; }
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-right { display: flex; align-items: center; gap: 16px; justify-content: flex-end; flex-wrap: wrap; }
 
 /* Search — matches home's .btn-ghost style */
 .search-bar {
@@ -1391,6 +1417,36 @@ ul { list-style: none; }
   background: rgba(80,200,120,0.08);
 }
 
+.product-empty-state {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px dashed rgba(80,200,120,0.35);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(80,200,120,0.06), rgba(255,255,255,0.02));
+  padding: 24px;
+}
+.product-empty-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+.product-empty-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.product-empty-text {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+.product-empty-action {
+  margin-top: 6px;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -1406,6 +1462,8 @@ textarea:focus-visible,
   .charts-row { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
   .support-grid  { grid-template-columns: 1fr; }
+  .sidebar { width: 255px; }
+  .main-content { margin-left: 255px; }
 }
 
 @media (max-width: 840px) {
@@ -1494,7 +1552,7 @@ textarea:focus-visible,
   .topbar-right > a, .topbar-right > button { display: none; }
   .notif-wrap { order: -1; }
   .nav-label { display: none; }
-  .nav-item { justify-content: center; padding: 8px; }
+  .nav-item { justify-content: center; align-items: center; padding: 8px; }
   .nav-badge { position: absolute; top: 0; right: 0; font-size: 0.6rem; }
 }
 

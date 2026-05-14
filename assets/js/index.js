@@ -62,6 +62,32 @@ function selectLoginRole(role, el) {
       resendLink.style.pointerEvents = isAdmin ? 'auto' : 'none';
     }
   }
+
+  const adminMessageBtn = document.getElementById('loginAdminMessageBtn');
+  if (adminMessageBtn) {
+    adminMessageBtn.disabled = !isAdmin;
+    adminMessageBtn.title = isAdmin ? 'Open admin message' : 'Select Admin role to use this button';
+  }
+}
+
+function openLoginNotifications(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(() => {
+      if (typeof showToast === 'function') showToast('Notification permission updated', 'info');
+    });
+    return;
+  }
+  if (typeof showToast === 'function') showToast('Notifications are ready', 'info');
+}
+
+function openAdminMessageFromLogin(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  if (state.loginRole !== 'admin') {
+    if (typeof showToast === 'function') showToast('Select Admin role to message CRM platform admins only', 'warn');
+    return;
+  }
+  window.location.href = 'chat.html?chatRole=admin';
 }
 
 /*SIGNUP – ROLE BIG CARDS*/

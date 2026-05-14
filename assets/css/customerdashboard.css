@@ -1,6 +1,6 @@
 /*  GLOBAL / VARIABLES (matching home.css, customer #FF8C00)  */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { font-size: 20px; }
+    html { font-size: 16px; }
     body {
       font-family: 'DM Sans', sans-serif;
       background: #050a1a; color: #f0f4ff;
@@ -61,6 +61,7 @@
       padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 500;
       color: var(--text-secondary); transition: all 0.3s;
     }
+    .nav-links a { white-space: normal; line-height: 1.1; }
     .nav-links a:hover, .nav-links a.active { color: white; background: rgba(255,140,0,0.15); }
     .nav-cta { display: flex; gap: 12px; align-items: center; }
     .btn-customer {
@@ -91,6 +92,13 @@
     .welcome h1 { font-size: 2.2rem; font-family: var(--font-display); }
     .welcome p { color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
     .sinhala-greeting { font-family: var(--font-sinhala); color: var(--customer); }
+    .sinhala-label {
+      font-family: var(--font-sinhala);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 2px;
+    }
     .date-badge {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 40px; padding: 8px 18px; font-size: 0.9rem;
@@ -351,8 +359,47 @@
     .footer {
       background: #030711; border-top: 1px solid var(--border); padding: 60px 0 30px;
     }
-
-    a:focus-visible,
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 50px;
+      margin-bottom: 40px;
+      align-items: start;
+    }
+    .footer-grid > div {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-grid h4 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+      color: var(--text-primary);
+    }
+    .footer-grid a {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .footer-grid a:hover {
+      color: var(--customer);
+      text-decoration: none;
+    }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }a:focus-visible,
     button:focus-visible,
     .toggle-switch:focus-visible,
     .customer-notif-item[role="button"]:focus-visible {
@@ -363,9 +410,7 @@
 
     /* responsive */
     @media (max-width: 900px) {
-    /* responsive */
-    @media (max-width: 900px) {
-      html { font-size: 18px; }
+      html { font-size: 16px; }
       .nav-links, .nav-cta { display: none; }
       .hamburger { display: flex; }
       .nav-links.open,
@@ -468,3 +513,7 @@
       table { font-size: 0.85rem; }
       table th, table td { padding: 8px 6px; }
     }
+
+
+
+

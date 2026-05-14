@@ -83,6 +83,33 @@ $readSelfStmt->bind_param('ii', $messageId, $senderId);
 $readSelfStmt->execute();
 $readSelfStmt->close();
 
+// Best-effort receiver notification for near real-time UX.
+$notifTitle = 'New message received';
+$notifMessage = 'You have a new message in your conversation.';
+$notifType = 'chat';
+$entityType = 'conversation';
+$priority = 'normal';
+$actionUrl = '/pages/chat.html?conversation_id=' . $conversationId;
+$notifStmt = $conn->prepare(
+    'INSERT INTO notifications (user_id, notification_type, title, message, related_entity_type, related_entity_id, priority, action_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+);
+if ($notifStmt) {
+    $notifStmt->bind_param(
+        'issssiss',
+        $receiverId,
+        $notifType,
+        $notifTitle,
+        $notifMessage,
+        $entityType,
+        $conversationId,
+        $priority,
+        $actionUrl
+    );
+    $notifStmt->execute();
+    $notifStmt->close();
+}
+
 apiSuccess([
         'message_id' => $messageId,
         'conversation_id' => $conversationId,

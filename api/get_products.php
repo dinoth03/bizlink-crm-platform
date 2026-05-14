@@ -28,6 +28,17 @@ $isAuthenticated = isLoggedIn();
 $userRole = isLoggedIn() ? getUserRole() : null;
 $userId = isLoggedIn() ? getCurrentUser()['user_id'] : null;
 
+if (isset($_GET['page']) && !preg_match('/^\d+$/', (string)$_GET['page'])) {
+    apiError('VALIDATION_ERROR', 'page must be a positive integer.', 422, [
+        ['field' => 'page', 'message' => 'page must be numeric.']
+    ]);
+}
+if (isset($_GET['per_page']) && !preg_match('/^\d+$/', (string)$_GET['per_page'])) {
+    apiError('VALIDATION_ERROR', 'per_page must be a positive integer.', 422, [
+        ['field' => 'per_page', 'message' => 'per_page must be numeric.']
+    ]);
+}
+
 $pagination = getPaginationParams($_GET, 24, 100);
 $filters = [
     'category' => isset($_GET['category']) ? sanitizeString((string)$_GET['category'], 100) : '',
