@@ -41,6 +41,9 @@ jobs:
       - name: Install PHP test dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
+      - name: Regenerate Composer autoload
+        run: composer dump-autoload -o
+
       - name: Run PHPUnit unit tests
         run: composer run test:unit
 

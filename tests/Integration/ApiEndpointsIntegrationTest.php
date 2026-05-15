@@ -77,7 +77,8 @@ final class ApiEndpointsIntegrationTest extends TestCase
     {
         [$statusCode, $body] = $this->request('GET', '/api/get_products.php?page=1&per_page=5');
 
-        self::assertContains($statusCode, [200, 500]);
+        // Expect a successful JSON envelope from the products endpoint
+        self::assertSame(200, $statusCode, 'Expected HTTP 200 from get_products endpoint.');
 
         $decoded = json_decode($body, true);
         self::assertIsArray($decoded, 'Expected JSON response body from get_products endpoint.');

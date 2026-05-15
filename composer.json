@@ -8,6 +8,12 @@
   "require-dev": {
     "phpunit/phpunit": "^10.5"
   },
+  "autoload": {
+    "files": [
+      "api/auth_token_utils.php",
+      "api/api_helpers.php"
+    ]
+  },
   "scripts": {
     "test": "@php vendor/bin/phpunit --configuration phpunit.xml",
     "test:unit": "@php vendor/bin/phpunit --configuration phpunit.xml --testsuite Unit",
