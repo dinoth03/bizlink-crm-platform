@@ -31,10 +31,9 @@ function loadEnvFile($filePath = null) {
             $value = trim($value, '\'"');
 
             // Set to environment
-            if (!getenv($key)) {
-                putenv("{$key}={$value}");
-                $_ENV[$key] = $value;
-            }
+            putenv("{$key}={$value}");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
     }
 
