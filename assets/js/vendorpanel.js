@@ -217,7 +217,16 @@ function onPageActivate(page) {
   if (page === 'reviews')    { renderReviews(); }
   if (page === 'promotions') { startCountdown(); loadVendorCoupons(); }
   if (page === 'verification') { loadVerificationStatus(); }
+  if (page === 'messages') { loadVendorConversations(); }
 }
+
+// VENDOR CHAT SYSTEM STATE
+let vendorChatState = {
+  conversations: [],
+  activeConversation: null,
+  pollingInterval: null,
+  lastChecked: new Date().toISOString()
+};
 
 async function vendorLogout() {
   try {
@@ -1072,6 +1081,7 @@ function getCustomerCardData() {
         tag,
         purchases,
         totalSpent,
+        userId: customer.user_id,
         initials: name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'CU',
         photo: CUSTOMER_PHOTOS[index % CUSTOMER_PHOTOS.length],
         color: AVATAR_COLORS[index % AVATAR_COLORS.length]
@@ -1106,6 +1116,7 @@ function renderCustomers() {
           <div class="cust-location">📍 ${c.district}</div>
           <span class="cust-tag ${tagClass}">${tagLabel}</span>
           <div class="cust-meta">${c.purchases} purchase${c.purchases !== 1 ? 's' : ''} · Rs. ${Math.round(c.totalSpent || 0).toLocaleString()} spent</div>
+          <button class="btn-sm-vendor" style="margin-top:10px" onclick="startCustomerChat('${c.userId}')">💬 Message</button>
         </div>
       </div>
     `;
@@ -2376,3 +2387,288 @@ async function submitSupportTicket() {
     }
   }
 }
+
+/* ============ VENDOR CHAT SYSTEM ============ */
+
+async function loadVendorConversations() {
+    const list = document.getElementById('vendorConvList');
+    if (!list) return;
+
+    try {
+        const response = await fetch('../api/chat_data.php');
+        const payload = await response.json();
+
+        if (payload.success) {
+            const contacts = payload.contacts || [];
+            vendorChatState.conversations = (payload.conversations || []).map(conv => {
+                const contact = contacts.find(ct => ct.id === conv.contactId);
+                return {
+                    ...conv,
+                    contactName: contact ? contact.name : 'Unknown'
+                };
+            });
+            renderVendorConvList();
+            updateMessageBadge();
+        }
+    } catch (error) {
+        console.error('Failed to load vendor conversations:', error);
+    }
+}
+
+function renderVendorConvList(filter = '') {
+    const list = document.getElementById('vendorConvList');
+    if (!list) return;
+
+    let convs = vendorChatState.conversations;
+    if (filter) {
+        convs = convs.filter(c => {
+            const contact = c.contactName || '';
+            return contact.toLowerCase().includes(filter.toLowerCase());
+        });
+    }
+
+    if (convs.length === 0) {
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.85rem;">No conversations found.</div>';
+        return;
+    }
+
+    list.innerHTML = convs.map(c => {
+        const lastMsg = c.messages && c.messages.length > 0 ? c.messages[c.messages.length - 1] : { text: 'No messages yet', time: '' };
+        const isActive = vendorChatState.activeConversation && vendorChatState.activeConversation.id === c.id;
+        const contactName = c.contactName || 'Customer';
+        const initials = contactName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+        return `
+            <div class="conv-item ${isActive ? 'active' : ''}" onclick="openVendorConversation('${c.id}')">
+                <div class="conv-avi">${initials}</div>
+                <div class="conv-info">
+                    <div class="conv-name-row">
+                        <span class="conv-name">${contactName}</span>
+                        <span class="conv-time">${lastMsg.time}</span>
+                    </div>
+                    <div class="conv-preview">${lastMsg.text}</div>
+                    ${c.unread > 0 ? `<span class="nav-badge" style="margin-top:5px;position:static;">${c.unread}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function openVendorConversation(convId) {
+    const conv = vendorChatState.conversations.find(c => c.id === convId);
+    if (!conv) return;
+
+    vendorChatState.activeConversation = conv;
+    conv.unread = 0;
+
+    document.getElementById('vendorChatEmpty').style.display = 'none';
+    document.getElementById('vendorChatWindow').style.display = 'flex';
+
+    const contactName = conv.contactName || 'Customer';
+    document.getElementById('activeChatName').textContent = contactName;
+    document.getElementById('activeChatAvi').textContent = contactName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+    renderVendorMessages();
+    renderVendorConvList();
+    updateMessageBadge();
+
+    // Scroll to bottom
+    const msgArea = document.getElementById('vendorChatMessages');
+    setTimeout(() => { msgArea.scrollTop = msgArea.scrollHeight; }, 50);
+}
+
+function renderVendorMessages() {
+    const area = document.getElementById('vendorChatMessages');
+    if (!area || !vendorChatState.activeConversation) return;
+
+    const conv = vendorChatState.activeConversation;
+    area.innerHTML = conv.messages.map(m => {
+        const isMe = m.from === 'me';
+        return `
+            <div class="msg-row ${isMe ? 'outgoing' : 'incoming'}">
+                <div class="msg-bubble">${m.text}</div>
+                <div class="msg-meta">
+                    <span class="msg-time">${m.time}</span>
+                    ${isMe ? '<span class="msg-status">✓✓</span>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    area.scrollTop = area.scrollHeight;
+}
+
+async function sendVendorReply() {
+    const input = document.getElementById('vendorChatMessageInput');
+    const text = input.value.trim();
+    if (!text || !vendorChatState.activeConversation) return;
+
+    const conv = vendorChatState.activeConversation;
+    const dbConvId = conv.conversationId;
+
+    try {
+        const response = await fetch('../api/chat_send_message.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                conversation_id: dbConvId,
+                message_content: text
+            })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            const newMsg = {
+                id: 'm' + result.data.message_id,
+                from: 'me',
+                text: text,
+                time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+                date: 'Today'
+            };
+            conv.messages.push(newMsg);
+            renderVendorMessages();
+            input.value = '';
+            renderVendorConvList();
+        }
+    } catch (error) {
+        console.error('Failed to send reply:', error);
+    }
+}
+
+function filterVendorConversations(q) {
+    renderVendorConvList(q);
+}
+
+function updateMessageBadge() {
+    const unreadTotal = vendorChatState.conversations.reduce((sum, c) => sum + (c.unread || 0), 0);
+    const badge = document.querySelector('.msg-badge');
+    if (badge) {
+        badge.textContent = unreadTotal;
+        badge.style.display = unreadTotal > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// REAL-TIME NOTIFICATION POLLING
+function startChatPolling() {
+    if (vendorChatState.pollingInterval) return;
+    
+    vendorChatState.pollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch('../api/chat_data.php');
+            const payload = await response.json();
+
+            if (payload.success) {
+                const contacts = payload.contacts || [];
+                const newConvs = (payload.conversations || []).map(conv => {
+                    const contact = contacts.find(ct => ct.id === conv.contactId);
+                    return {
+                        ...conv,
+                        contactName: contact ? contact.name : 'Unknown'
+                    };
+                });
+                
+                // Check for new messages in existing conversations
+                newConvs.forEach(newC => {
+                    const oldC = vendorChatState.conversations.find(c => c.id === newC.id);
+                    if (oldC) {
+                        if (newC.messages.length > oldC.messages.length) {
+                            const latestMsg = newC.messages[newC.messages.length - 1];
+                            if (latestMsg.from !== 'me') {
+                                showChatPopup(newC, latestMsg);
+                            }
+                            
+                            // Update active conversation if it matches
+                            if (vendorChatState.activeConversation && vendorChatState.activeConversation.id === newC.id) {
+                                vendorChatState.activeConversation.messages = newC.messages;
+                                renderVendorMessages();
+                            }
+                        }
+                    } else {
+                        // Entirely new conversation
+                        const latestMsg = newC.messages[newC.messages.length - 1];
+                        if (latestMsg && latestMsg.from !== 'me') {
+                            showChatPopup(newC, latestMsg);
+                        }
+                    }
+                });
+
+                vendorChatState.conversations = newConvs;
+                if (document.getElementById('page-messages').classList.contains('active')) {
+                    renderVendorConvList(document.getElementById('vendorChatSearch').value);
+                }
+                updateMessageBadge();
+            }
+        } catch (e) {
+            console.warn('Chat polling failed', e);
+        }
+    }, 5000); // Poll every 5 seconds
+}
+
+function showChatPopup(conv, msg) {
+    // Don't show if already on messages page and viewing this conversation
+    if (document.getElementById('page-messages').classList.contains('active') && 
+        vendorChatState.activeConversation && vendorChatState.activeConversation.id === conv.id) {
+        return;
+    }
+
+    const contactName = conv.contactName || 'Customer';
+    const initials = contactName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    
+    // Remove existing popup if any
+    const oldPopup = document.querySelector('.chat-popup');
+    if (oldPopup) oldPopup.remove();
+
+    const popup = document.createElement('div');
+    popup.className = 'chat-popup';
+    popup.innerHTML = `
+        <div class="popup-avi">${initials}</div>
+        <div class="popup-content">
+            <div class="popup-title">New Message from ${contactName}</div>
+            <div class="popup-msg">${msg.text}</div>
+            <div class="popup-actions">
+                <button class="btn-popup btn-popup-reply" onclick="goToMessages('${conv.id}')">Reply</button>
+                <button class="btn-popup btn-popup-close" onclick="this.parentElement.parentElement.parentElement.remove()">Dismiss</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => { if (popup.parentElement) popup.remove(); }, 10000);
+}
+
+function goToMessages(convId) {
+    const popup = document.querySelector('.chat-popup');
+    if (popup) popup.remove();
+    
+    goToPage('messages');
+    setTimeout(() => {
+        openVendorConversation(convId);
+    }, 100);
+}
+
+// Start polling on load
+window.addEventListener('load', () => {
+    startChatPolling();
+});
+
+async function startCustomerChat(userId) {
+    try {
+        const response = await fetch('../api/chat_start_conversation.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_user_id: userId })
+        });
+        const result = await response.json();
+        if (result.success) {
+            goToPage('messages');
+            // Refresh conversations and open the new one
+            await loadVendorConversations();
+            openVendorConversation(result.data.conversation_key);
+        } else {
+            window.alert('Failed to start chat: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error starting chat:', error);
+    }
+}
+

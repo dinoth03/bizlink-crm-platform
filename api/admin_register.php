@@ -141,7 +141,7 @@ try {
     $role = 'admin';
     $accountStatus = 'pending_verification';
 
-    $createUserStmt->bind_param('sssss', $hashedPassword, $email, $fullName, $role, $accountStatus);
+    $createUserStmt->bind_param('sssss', $email, $hashedPassword, $fullName, $role, $accountStatus);
     $createUserStmt->execute();
     $newUserId = $createUserStmt->insert_id;
     $createUserStmt->close();

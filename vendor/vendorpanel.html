@@ -27,6 +27,10 @@
     <a href="#" class="nav-item active" data-page="dashboard" onclick="navigate(event,this,'dashboard')">
       <span class="nav-icon">📊</span><span class="nav-label">Dashboard / <span class="si-label">පාලන පුවරුව</span></span>
     </a>
+    <a href="#" class="nav-item" data-page="messages" onclick="navigate(event,this,'messages')">
+      <span class="nav-icon">💬</span><span class="nav-label">Messages / <span class="si-label">පණිවිඩ</span></span>
+      <span class="nav-badge msg-badge" style="display:none;">0</span>
+    </a>
     <a href="#" class="nav-item" data-page="products" onclick="navigate(event,this,'products')">
       <span class="nav-icon">📦</span><span class="nav-label">Products / <span class="si-label">නිෂ්පාදන</span></span>
     </a>
@@ -217,6 +221,54 @@
             <thead><tr><th>Order ID</th><th>Customer</th><th>District</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
             <tbody id="recentOrdersBody"></tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MESSAGES ===== -->
+    <section class="page" id="page-messages">
+      <div class="page-header">
+        <div>
+          <div class="section-label">COMMUNICATION / <span class="si-label">සන්නිවේදනය</span></div>
+          <h2 class="page-h2">Customer Messages / <span class="si-label">පාරිභෝගික පණිවිඩ</span></h2>
+        </div>
+      </div>
+
+      <div class="chat-container glass-card" style="display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 220px);padding:0;overflow:hidden;">
+        <!-- Left: Conversation List -->
+        <div class="chat-sidebar" style="border-right:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;">
+          <div class="chat-sidebar-search" style="padding:15px;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <input type="text" placeholder="Search conversations..." id="vendorChatSearch" class="form-input" style="font-size:0.85rem;" oninput="filterVendorConversations(this.value)" />
+          </div>
+          <div id="vendorConvList" style="flex:1;overflow-y:auto;">
+            <!-- Conversations injected by JS -->
+            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.85rem;">Loading conversations...</div>
+          </div>
+        </div>
+
+        <!-- Right: Active Chat Area -->
+        <div class="chat-area" style="display:flex;flex-direction:column;position:relative;">
+          <div id="vendorChatEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:15px;">
+            <div style="font-size:3rem;opacity:0.3;">💬</div>
+            <p>Select a conversation to start chatting / <span class="si-label">සංවාදයක් තෝරන්න</span></p>
+          </div>
+
+          <div id="vendorChatWindow" style="flex:1;display:none;flex-direction:column;overflow:hidden;">
+            <div class="chat-header" id="vendorChatHeader" style="padding:15px 20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px;">
+              <div class="chat-avi" id="activeChatAvi" style="width:40px;height:40px;border-radius:50%;background:var(--vendor-color);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;">C</div>
+              <div>
+                <div class="chat-name" id="activeChatName" style="font-weight:600;font-size:1rem;">Customer Name</div>
+                <div class="chat-status" id="activeChatStatus" style="font-size:0.75rem;color:var(--vendor-color);">Online</div>
+              </div>
+            </div>
+            <div class="chat-messages" id="vendorChatMessages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:15px;">
+              <!-- Messages injected by JS -->
+            </div>
+            <div class="chat-input-row" style="padding:15px 20px;border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:10px;align-items:center;">
+              <input type="text" id="vendorChatMessageInput" placeholder="Type your message..." class="form-input" style="flex:1;" onkeydown="if(event.key==='Enter') sendVendorReply()" />
+              <button class="btn-vendor" onclick="sendVendorReply()">Send / <span class="si-label">යවන්න</span></button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
