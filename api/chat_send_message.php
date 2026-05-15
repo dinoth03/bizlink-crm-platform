@@ -86,7 +86,7 @@ $readSelfStmt->close();
 // Best-effort receiver notification for near real-time UX.
 $notifTitle = 'New message received';
 $notifMessage = 'You have a new message in your conversation.';
-$notifType = 'chat';
+$notifType = 'message';
 $entityType = 'conversation';
 $priority = 'normal';
 $actionUrl = '/pages/chat.html?conversation_id=' . $conversationId;

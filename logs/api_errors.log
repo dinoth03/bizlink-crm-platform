@@ -155,3 +155,13 @@ Stack trace:
 [14-May-2026 20:21:40 Europe/Berlin] Attempting connection to localhost:3306
 [14-May-2026 20:21:40 Europe/Berlin] Database connection successful!
 [14-May-2026 20:21:40 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[15-May-2026 07:51:28 Europe/Berlin] === API REQUEST STARTED at 2026-05-15 07:51:28 from unknown ===
+[15-May-2026 07:51:28 Europe/Berlin] DB_CONFIG: Host=localhost, User=root, Database=bizlink_crm, Port=3306
+[15-May-2026 07:51:28 Europe/Berlin] Attempting connection to localhost:3306
+[15-May-2026 07:51:28 Europe/Berlin] Database connection successful!
+[15-May-2026 07:51:28 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in F:\Plymouth\3rd year\final year project\bizlink-crm-platform\api\config.php on line 151
+[15-May-2026 07:51:28 Europe/Berlin] Google AI API Call - HTTP Code: 404, Response: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and 
+[15-May-2026 07:51:28 Europe/Berlin] Google AI API Error: "models\/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."

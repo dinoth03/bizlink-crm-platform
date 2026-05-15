@@ -12,7 +12,7 @@ class GoogleGenerativeAIHelper {
 
     public function __construct() {
         $this->apiKey = getenv('GOOGLE_GENERATIVE_AI_API_KEY');
-        $this->model = getenv('GOOGLE_AI_MODEL') ?: 'gemini-pro';
+        $this->model = getenv('GOOGLE_AI_MODEL') ?: 'gemini-1.5-flash';
 
         if (!$this->apiKey) {
             throw new Exception('GOOGLE_GENERATIVE_AI_API_KEY not configured in environment variables');

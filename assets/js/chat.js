@@ -799,59 +799,57 @@ async function sendAIMessage(text, conv) {
   // Get conversation DB ID for API call
   const dbConversationId = conversationDbId(conv.id);
 
-  if (ME_USER_ID) {
-    // Use API to get AI response
-    try {
-      const response = await fetch('../api/chat_ai_bot_response.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`
-        },
-        body: JSON.stringify({
-          conversation_id: dbConversationId,
-          message_content: text
-        })
-      });
+  // Use API to get AI response
+  try {
+    const response = await fetch('../api/chat_ai_bot_response.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify({
+        conversation_id: dbConversationId,
+        message_content: text,
+        history: isGuestMode ? conv.messages.slice(-6) : []
+      })
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (typingInd) typingInd.classList.add('hidden');
-
-      if (data.success) {
-        // Sync conversation ID if it was a new one
-        if (data.data.conversation_id && conv.id === 'ai-conv') {
-          const realConvId = 'conv' + data.data.conversation_id;
-          conv.id = realConvId;
-          state.activeConvId = realConvId;
-        }
-
-        const aiMsg = {
-          id: 'msg_' + Date.now(),
-          from: 'ai-bot',
-          text: data.data.message_content,
-          time: getCurrentTime(),
-          date: 'Today',
-          status: 'read',
-          isAI: true,
-        };
-        conv.messages.push(aiMsg);
-        appendMessage(aiMsg, conv);
-        scrollBottom(true);
-        renderConvoList();
-      } else {
-        showToast('AI: ' + (data.error || 'Unable to respond'), 'warn');
-      }
-    } catch (err) {
-      if (typingInd) typingInd.classList.add('hidden');
-      console.error('AI API Error:', err);
-      // Fallback to local AI response
-      simulateAIReply(conv, contact);
-    }
-  } else {
-    // Fallback: Simulate AI response
     if (typingInd) typingInd.classList.add('hidden');
-    setTimeout(() => simulateAIReply(conv, contact), 800 + Math.random() * 1200);
+
+    if (data.success) {
+      // Sync conversation ID if it was a new one
+      if (data.data.conversation_id && (conv.id === 'ai-conv' || conv.id.startsWith('ai-'))) {
+        const realConvId = data.data.conversation_id > 0 ? 'conv' + data.data.conversation_id : conv.id;
+        if (realConvId !== conv.id) {
+            conv.id = realConvId;
+            state.activeConvId = realConvId;
+        }
+      }
+
+      const aiMsg = {
+        id: 'msg_' + Date.now(),
+        from: 'ai-bot',
+        text: data.data.message_content,
+        time: getCurrentTime(),
+        date: 'Today',
+        status: 'read',
+        isAI: true,
+      };
+      conv.messages.push(aiMsg);
+      appendMessage(aiMsg, conv);
+      scrollBottom(true);
+      renderConvoList();
+    } else {
+      showToast('AI: ' + (data.error || 'Unable to respond'), 'warn');
+      if (isGuestMode) simulateAIReply(conv, contact);
+    }
+  } catch (err) {
+    if (typingInd) typingInd.classList.add('hidden');
+    console.error('AI API Error:', err);
+    // Fallback to local AI response
+    simulateAIReply(conv, contact);
   }
 }
 
@@ -1471,15 +1469,7 @@ async function startAIChat() {
     return;
   }
 
-  // If no API is available, use the default AI conversation
-  if (!ME_USER_ID || isGuestMode) {
-    closeNewChat();
-    state.activeConvId = 'ai-conv';
-    openConversation('ai-conv');
-    return;
-  }
-
-  // Try to start AI chat via API
+  // Try to start AI chat via API (even for guests)
   try {
     const response = await fetch('../api/chat_start_conversation.php', {
       method: 'POST',

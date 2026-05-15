@@ -9,8 +9,9 @@ require 'config.php';
 require_once 'api_helpers.php';
 require_once 'google_generative_ai_helper.php';
 
-// Require authentication
-requireAuth();
+// Authentication is optional for AI bot
+$isLoggedIn = isLoggedIn();
+$userId = $isLoggedIn ? getCurrentUser()['user_id'] : null;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
@@ -24,14 +25,14 @@ if (!GoogleGenerativeAIHelper::isConfigured()) {
 $input = json_decode(file_get_contents('php://input'), true);
 $conversationId = (int)($input['conversation_id'] ?? 0);
 $userMessage = trim((string)($input['message_content'] ?? ''));
-$userId = getCurrentUser()['user_id'];
+$providedHistory = $input['history'] ?? [];
 
 if ($userMessage === '') {
     apiError('VALIDATION_ERROR', 'Message content is required.', 422);
 }
 
-// If no conversation_id provided, find or create one for the AI Bot
-if ($conversationId <= 0) {
+// If no conversation_id provided and logged in, find or create one for the AI Bot
+if ($conversationId <= 0 && $isLoggedIn) {
     $aiBotUserId = getOrCreateAIBotUser($conn);
     
     $checkSql = "
@@ -81,48 +82,59 @@ if ($conversationId <= 0) {
     }
 }
 
-// Verify user is participant in this conversation
-$participantSql = "SELECT 1 FROM conversation_participants WHERE conversation_id = ? AND user_id = ? AND is_active = 1 LIMIT 1";
-$participantStmt = $conn->prepare($participantSql);
-if (!$participantStmt) {
-    apiError('DB_ERROR', 'Failed to prepare statement.', 500);
+// Verify user is participant in this conversation (only if logged in)
+if ($isLoggedIn && $conversationId > 0) {
+    $participantSql = "SELECT 1 FROM conversation_participants WHERE conversation_id = ? AND user_id = ? AND is_active = 1 LIMIT 1";
+    $participantStmt = $conn->prepare($participantSql);
+    if (!$participantStmt) {
+        apiError('DB_ERROR', 'Failed to prepare statement.', 500);
+    }
+
+    $participantStmt->bind_param('ii', $conversationId, $userId);
+    $participantStmt->execute();
+    if ($participantStmt->get_result()->num_rows === 0) {
+        apiError('FORBIDDEN', 'You are not a participant in this conversation.', 403);
+    }
+    $participantStmt->close();
 }
 
-$participantStmt->bind_param('ii', $conversationId, $userId);
-$participantStmt->execute();
-if ($participantStmt->get_result()->num_rows === 0) {
-    apiError('FORBIDDEN', 'You are not a participant in this conversation.', 403);
-}
-$participantStmt->close();
-
-// Get conversation history for context (last 5 messages)
-$historySql = "
-SELECT sender_id, message_content 
-FROM messages 
-WHERE conversation_id = ? 
-ORDER BY created_at DESC 
-LIMIT 5
-";
-$historyStmt = $conn->prepare($historySql);
-if (!$historyStmt) {
-    apiError('DB_ERROR', 'Failed to prepare statement.', 500);
-}
-
-$historyStmt->bind_param('i', $conversationId);
-$historyStmt->execute();
-$historyResult = $historyStmt->get_result();
-
+// Get conversation history for context
 $conversationHistory = [];
-while ($row = $historyResult->fetch_assoc()) {
-    $conversationHistory[] = [
-        'role' => $row['sender_id'] == $userId ? 'user' : 'model',
-        'content' => $row['message_content'],
-    ];
-}
-$historyStmt->close();
 
-// Reverse to get chronological order
-$conversationHistory = array_reverse($conversationHistory);
+if ($isLoggedIn && $conversationId > 0) {
+    // Get from database (last 5 messages)
+    $historySql = "
+    SELECT sender_id, message_content 
+    FROM messages 
+    WHERE conversation_id = ? 
+    ORDER BY created_at DESC 
+    LIMIT 5
+    ";
+    $historyStmt = $conn->prepare($historySql);
+    if ($historyStmt) {
+        $historyStmt->bind_param('i', $conversationId);
+        $historyStmt->execute();
+        $historyResult = $historyStmt->get_result();
+
+        while ($row = $historyResult->fetch_assoc()) {
+            $conversationHistory[] = [
+                'role' => $row['sender_id'] == $userId ? 'user' : 'model',
+                'content' => $row['message_content'],
+            ];
+        }
+        $historyStmt->close();
+    }
+    // Reverse to get chronological order
+    $conversationHistory = array_reverse($conversationHistory);
+} else if (!empty($providedHistory)) {
+    // Use history provided by frontend for guests
+    foreach (array_slice($providedHistory, -6) as $msg) {
+        $conversationHistory[] = [
+            'role' => (isset($msg['from']) && $msg['from'] === 'me') ? 'user' : 'model',
+            'content' => $msg['text'] ?? $msg['content'] ?? ''
+        ];
+    }
+}
 
 // Fetch real-time database context based on user message
 $databaseContext = fetchDatabaseContext($conn, $userMessage, $userId);
@@ -137,45 +149,45 @@ try {
         apiError('AI_ERROR', 'Failed to generate AI response: ' . $aiResponse['error'], 500);
     }
 
-    // Get AI Bot user ID (create if not exists)
-    $aiBotUserId = getOrCreateAIBotUser($conn);
+    // Store the AI response in the database only if logged in
+    $messageId = 0;
+    if ($isLoggedIn && $conversationId > 0) {
+        // Get AI Bot user ID (create if not exists)
+        $aiBotUserId = getOrCreateAIBotUser($conn);
 
-    // Store the AI response in the database
-    $insertSql = "
-    INSERT INTO messages (conversation_id, sender_id, receiver_id, message_content, message_type, is_read, created_at)
-    VALUES (?, ?, ?, ?, 'ai', 0, NOW())
-    ";
-    $insertStmt = $conn->prepare($insertSql);
-    if (!$insertStmt) {
-        apiError('DB_ERROR', 'Failed to prepare insert statement.', 500);
-    }
+        // Store the AI response in the database
+        $insertSql = "
+        INSERT INTO messages (conversation_id, sender_id, receiver_id, message_content, message_type, is_read, created_at)
+        VALUES (?, ?, ?, ?, 'ai', 0, NOW())
+        ";
+        $insertStmt = $conn->prepare($insertSql);
+        if ($insertStmt) {
+            $insertStmt->bind_param('iiis', $conversationId, $aiBotUserId, $userId, $aiResponse['response']);
+            if ($insertStmt->execute()) {
+                $messageId = $insertStmt->insert_id;
+            }
+            $insertStmt->close();
+        }
 
-    $insertStmt->bind_param('iiis', $conversationId, $aiBotUserId, $userId, $aiResponse['response']);
-    if (!$insertStmt->execute()) {
-        error_log("Failed to insert AI message: " . $insertStmt->error);
-        apiError('DB_ERROR', 'Failed to store AI response in database.', 500);
-    }
-
-    $messageId = $insertStmt->insert_id;
-    $insertStmt->close();
-
-    // Update last message timestamp
-    $touchStmt = $conn->prepare('UPDATE conversations SET last_message_date = NOW() WHERE conversation_id = ?');
-    if ($touchStmt) {
-        $touchStmt->bind_param('i', $conversationId);
-        $touchStmt->execute();
-        $touchStmt->close();
+        // Update last message timestamp
+        $touchStmt = $conn->prepare('UPDATE conversations SET last_message_date = NOW() WHERE conversation_id = ?');
+        if ($touchStmt) {
+            $touchStmt->bind_param('i', $conversationId);
+            $touchStmt->execute();
+            $touchStmt->close();
+        }
     }
 
     apiSuccess([
         'message_id' => $messageId,
         'conversation_id' => $conversationId,
-        'sender_id' => $aiBotUserId,
+        'sender_id' => $aiBotUserId ?? 999,
         'receiver_id' => $userId,
         'message_content' => $aiResponse['response'],
         'message_type' => 'ai',
         'created_at' => date('Y-m-d H:i:s'),
         'model' => $aiResponse['model'] ?? 'gemini-pro',
+        'is_guest' => !$isLoggedIn
     ], 'AI Response generated successfully.', 'AI_RESPONSE_SENT', 201);
 
 } catch (Exception $e) {
@@ -278,7 +290,7 @@ function fetchDatabaseContext($conn, $message, $userId) {
     if ($needsOrders) {
         $orderSql = "SELECT order_id, order_number, total_amount, order_status, payment_status, created_at FROM orders WHERE customer_id = ? ORDER BY created_at DESC LIMIT 3";
         $stmt = $conn->prepare($orderSql);
-        if ($stmt) {
+        if ($stmt && $userId) {
             $stmt->bind_param('i', $userId);
             $stmt->execute();
             $res = $stmt->get_result();

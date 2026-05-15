@@ -3,16 +3,46 @@ require 'auth_middleware.php';
 require 'config.php';
 require_once 'api_helpers.php';
 
-requireAuth(['customer', 'vendor', 'admin']);
+$input = json_decode(file_get_contents('php://input'), true);
+$targetUserId = (int)($input['target_user_id'] ?? $input['receiver_id'] ?? 0);
+
+// Check if target is AI Bot (usually 999 or has role 'bot')
+$isBotTarget = false;
+if ($targetUserId > 0) {
+    $botCheck = $conn->prepare('SELECT role FROM users WHERE user_id = ? LIMIT 1');
+    if ($botCheck) {
+        $botCheck->bind_param('i', $targetUserId);
+        $botCheck->execute();
+        $botUser = $botCheck->get_result()->fetch_assoc();
+        if ($botUser && $botUser['role'] === 'bot') {
+            $isBotTarget = true;
+        }
+        $botCheck->close();
+    }
+}
+
+if (!$isBotTarget) {
+    requireAuth(['customer', 'vendor', 'admin']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     apiError('METHOD_NOT_ALLOWED', 'Method not allowed. Use POST.', 405);
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$current = getCurrentUser();
+$current = isLoggedIn() ? getCurrentUser() : ['user_id' => 0, 'full_name' => 'Guest User', 'role' => 'guest'];
 $currentUserId = (int)($current['user_id'] ?? 0);
-$targetUserId = (int)($input['target_user_id'] ?? $input['receiver_id'] ?? 0);
+
+if ($isBotTarget && $currentUserId <= 0) {
+    // Virtual success for guests talking to bot
+    apiSuccess([
+        'conversation_id' => 0,
+        'conversation_key' => 'ai-conv',
+        'created' => true,
+        'target_user_id' => $targetUserId,
+        'target_role' => 'bot',
+        'is_guest' => true
+    ], 'Guest AI conversation initialized.', 'CHAT_CONVERSATION_CREATED', 201);
+}
 
 if ($currentUserId <= 0 || $targetUserId <= 0 || $targetUserId === $currentUserId) {
     apiError('VALIDATION_ERROR', 'A valid target_user_id is required.', 422);
